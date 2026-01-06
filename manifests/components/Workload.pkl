@@ -1,4 +1,5 @@
 import "@k8s/api/apps/v1/Deployment.pkl"
+import "@k8s/api/apps/v1/StatefulSet.pkl"
 import "@k8s/api/core/v1/PodSpec.pkl"
 import "@k8s/api/core/v1/ServiceAccount.pkl"
 import "@k8s/api/rbac/v1/PolicyRule.pkl"
@@ -9,10 +10,41 @@ import "@k8s/K8sResource.pkl"
 name: String
 namespace: String = "default"
 spec: PodSpec
-type: "Deployment" = "Deployment"
+type: "Deployment" | "StatefulSet" = "Deployment"
 useServiceAccount: Boolean = false
 
 local moduleThis = this
+
+statefulSet: StatefulSet = new StatefulSet {
+  metadata {
+    name = moduleThis.name
+    namespace = moduleThis.namespace
+    labels {
+      ["app"] = moduleThis.name
+    }
+  }
+  spec {
+    selector {
+      matchLabels {
+        ["app"] = moduleThis.name
+      }
+    }
+    serviceName = moduleThis.name
+    template {
+      metadata {
+        labels {
+          ["app"] = moduleThis.name
+        }
+      }
+      spec = (moduleThis.spec) {
+        automountServiceAccountToken = useServiceAccount
+        when (useServiceAccount) {
+          serviceAccountName = moduleThis.name
+        }
+      }
+    }
+  }
+}
 
 deployment: Deployment = new Deployment {
   metadata {
@@ -60,9 +92,14 @@ serviceAccount: ServiceAccount = new ServiceAccount {
 }
 
 resources: Listing<K8sResource> = new {
-  serviceAccount
+  when (useServiceAccount) {
+    serviceAccount
+  }
   when (type == "Deployment") {
     moduleThis.deployment
+  }
+  when (type == "StatefulSet") {
+    moduleThis.statefulSet
   }
   for (roleDefinition in policies) {
     new Role {

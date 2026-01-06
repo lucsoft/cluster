@@ -1,8 +1,10 @@
 import "@k8s/K8sResource.pkl"
 
 import "./apps/MinecraftServer.pkl"
+import "./apps/Satisfactory.pkl"
 
 resources: Listing<K8sResource> = new {
+  ...Satisfactory.resources
   ...MinecraftServer.resources
 }
 

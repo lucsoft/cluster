@@ -1,0 +1,135 @@
+import "@k8s/api/core/v1/Namespace.pkl"
+import "@k8s/api/core/v1/PersistentVolumeClaim.pkl"
+
+import "../components/Workload.pkl"
+
+resources {
+  new Namespace {
+    metadata {
+      name = "satisfactory"
+      labels {
+        ["pod-security.kubernetes.io/enforce"] = "privileged"
+      }
+    }
+  }
+  ...new Workload {
+    type = "StatefulSet"
+    name = "satisfactory"
+    namespace = "satisfactory"
+    spec {
+      containers {
+        new {
+          name = "satisfactory-server"
+          image = "wolveix/satisfactory-server:latest"
+          ports {
+            new {
+              name = "api"
+              containerPort = 7777
+              hostPort = 7777
+              protocol = "TCP"
+            }
+            new {
+              name = "game"
+              containerPort = 7777
+              hostPort = 7777
+              protocol = "UDP"
+            }
+            new {
+              name = "messaging"
+              containerPort = 8888
+              hostPort = 8888
+              protocol = "TCP"
+            }
+          }
+          env {
+            new {
+              name = "DEBUG"
+              value = "false"
+            }
+            new {
+              name = "MAXPLAYERS"
+              value = "8"
+            }
+            new {
+              name = "PGID"
+              value = "1000"
+            }
+            new {
+              name = "PUID"
+              value = "1000"
+            }
+            new {
+              name = "SKIPUPDATE"
+              value = "false"
+            }
+            new {
+              name = "STEAMBETA"
+              value = "false"
+            }
+          }
+          volumeMounts {
+            new {
+              name = "satisfactory-config"
+              mountPath = "/config"
+            }
+            new {
+              name = "satisfactory-data"
+              mountPath = "/config/gamefiles"
+            }
+          }
+          livenessProbe {
+            exec {
+              command {
+                "/bin/sh"
+                "-c"
+                "/home/steam/healthcheck.sh"
+              }
+            }
+            initialDelaySeconds = 300
+            failureThreshold = 4
+            successThreshold = 1
+            periodSeconds = 30
+          }
+        }
+      }
+    }
+    statefulSet {
+      spec {
+        volumeClaimTemplates {
+          new {
+            metadata {
+              name = "satisfactory-config"
+              namespace = "satisfactory"
+            }
+            spec {
+              accessModes {
+                "ReadWriteOnce"
+              }
+              resources {
+                requests {
+                  ["storage"] = "1Gi"
+                }
+              }
+            }
+          }
+          new {
+            metadata {
+              name = "satisfactory-data"
+              namespace = "satisfactory"
+            }
+            spec {
+              accessModes {
+                "ReadWriteOnce"
+              }
+              resources {
+                requests {
+                  ["storage"] = "20Gi"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }.resources
+}

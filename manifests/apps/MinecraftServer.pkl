@@ -35,6 +35,7 @@ local mcServers: Listing<McServer> = new {
     eula = true
     type = "FABRIC"
     modrinthProjects {
+      "fabric-api:0.138.3+1.21.10"
       "create-fly:1.21.10-6.0.8-4"
       "distanthorizons:2.3.6-b-1.21.10"
     }
