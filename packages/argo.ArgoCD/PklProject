@@ -1,0 +1,13 @@
+amends "../basePklProject.pkl"
+
+import "../versions.pkl"
+
+dependencies {
+  ["k8s"] {
+    uri = "package://pkg.pkl-lang.org/pkl-k8s/k8s@\(versions.pklK8sVersion)"
+  }
+}
+
+package {
+  version = "0.1.0"
+}

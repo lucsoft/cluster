@@ -197,7 +197,7 @@ class Helm {
   /// Version is the Helm version to use for templating ("3")
   version: String?
 
-  valuesObject: Object?
+  valuesObject: Dynamic?
 }
 
 /// HelmFileParameter is a file parameter that's passed to helm template during manifest generation
@@ -261,7 +261,7 @@ class Kustomize {
 
 class Replica {
   /// Number of replicas
-  count: Int|String
+  count: Int | String
 
   /// Name of Deployment or StatefulSet
   name: String

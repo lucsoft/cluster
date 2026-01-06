@@ -3,8 +3,7 @@ import "@k8s/api/core/v1/PersistentVolumeClaim.pkl"
 import "@k8s/api/core/v1/PodSpec.pkl"
 import "@k8s/api/core/v1/Service.pkl"
 import "@k8s/K8sResource.pkl"
-
-import "../components/Workload.pkl"
+import "@Workload/Workload.pkl"
 
 eula: Boolean
 

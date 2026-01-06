@@ -3,9 +3,9 @@
   "resolvedDependencies": {
     "package://pkg.pkl-lang.org/pkl-k8s/k8s@1": {
       "type": "remote",
-      "uri": "projectpackage://pkg.pkl-lang.org/pkl-k8s/k8s@1.1.1",
+      "uri": "projectpackage://pkg.pkl-lang.org/pkl-k8s/k8s@1.3.0",
       "checksums": {
-        "sha256": "8c3d369d9533312c41b57cd2405484fc3430716a9fa1ec1caa0745f2fd876612"
+        "sha256": "1d948c9fc41e188fcd18ebb656b5d9ddc5f377cb16158bb421be7752bb913926"
       }
     }
   }

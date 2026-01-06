@@ -1,5 +1,4 @@
-import "../components/App.pkl" as App
-import "../crds/Application.pkl"
+import "@ArgoCD/App.pkl"
 
 app = new App {
   name = "infra-cert-manager"

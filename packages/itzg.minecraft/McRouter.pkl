@@ -2,8 +2,7 @@ module itzg.docker.McRouter
 
 import "@k8s/api/core/v1/PodSpec.pkl"
 import "@k8s/K8sResource.pkl"
-
-import "../components/Workload.pkl"
+import "@Workload/Workload.pkl"
 
 servers: Mapping<String, String> = new {}
 

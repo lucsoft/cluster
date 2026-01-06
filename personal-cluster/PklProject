@@ -1,0 +1,11 @@
+amends "pkl:Project"
+import "../packages//versions.pkl"
+
+dependencies {
+  ["k8s"] {
+    uri = "package://pkg.pkl-lang.org/pkl-k8s/k8s@\(versions.pklK8sVersion)"
+  }
+  ["Workload"] = import("../packages/lucsoft.k8s.Workload/PklProject")
+  ["itzg.minecraft"] = import("../packages/itzg.minecraft/PklProject")
+  ["ArgoCD"] = import("../packages/argo.ArgoCD/PklProject")
+}

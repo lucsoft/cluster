@@ -4,9 +4,9 @@ import "@k8s/api/core/v1/ConfigMap.pkl"
 import "@k8s/api/core/v1/PersistentVolumeClaim.pkl"
 import "@k8s/api/core/v1/PodSpec.pkl"
 import "@k8s/K8sResource.pkl"
+import "@Workload/Workload.pkl"
 
-import "../components/Velocity.pkl"
-import "../components/Workload.pkl"
+import "./Velocity.pkl"
 
 type: "BUNGEECORD" | "WATERFALL" | "VELOCITY" | "CUSTOM" = "VELOCITY"
 memory: String = "512M"

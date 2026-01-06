@@ -2,9 +2,9 @@
 /// <https://raw.githubusercontent.com/argoproj/argo-cd/v2.7.2/manifests/install.yaml>.
 module io.argoproj.v1alpha1.ApplicationSet
 
-extends "package://pkg.pkl-lang.org/pkl-k8s/k8s@1.0.1#/K8sResource.pkl"
+extends "@k8s/K8sResource.pkl"
 
-import "package://pkg.pkl-lang.org/pkl-k8s/k8s@1.0.1#/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
 
 fixed apiVersion: "argoproj.io/v1alpha1"
 
@@ -252,7 +252,7 @@ class Kustomize {
 }
 
 class Replica {
-  count: Int|String
+  count: Int | String
 
   name: String
 }
@@ -588,7 +588,7 @@ class RollingSync {
 class Step {
   matchExpressions: Listing<MatchExpression>?
 
-  maxUpdate: (Int|String)?
+  maxUpdate: (Int | String)?
 }
 
 class MatchExpression {

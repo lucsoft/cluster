@@ -1,7 +1,6 @@
 import "@k8s/api/core/v1/Namespace.pkl"
 import "@k8s/api/core/v1/PersistentVolumeClaim.pkl"
-
-import "../components/Workload.pkl"
+import "@Workload/Workload.pkl"
 
 resources {
   new Namespace {

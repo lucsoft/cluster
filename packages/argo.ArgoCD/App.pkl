@@ -1,6 +1,6 @@
 module App
 
-import "../crds/Application.pkl" as ArgoApp
+import "./crd/Application.pkl"
 
 name = "app"
 
@@ -12,9 +12,9 @@ project = "default"
 
 namespace = "default"
 
-source: ArgoApp.Source
+source: Application.Source
 
-application = new ArgoApp {
+application = new Application {
   metadata {
     name = app.name
     namespace = "argocd"
@@ -38,6 +38,5 @@ application = new ArgoApp {
       namespace = app.namespace
     }
     source = app.source
-
   }
 }

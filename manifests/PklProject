@@ -1,7 +1,0 @@
-amends "pkl:Project"
-
-dependencies {
-  ["k8s"] {
-    uri = "package://pkg.pkl-lang.org/pkl-k8s/k8s@1.1.1"
-  }
-}

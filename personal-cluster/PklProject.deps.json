@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "resolvedDependencies": {
+    "package://pkg.pkl-lang.org/pkl-k8s/k8s@1": {
+      "type": "remote",
+      "uri": "projectpackage://pkg.pkl-lang.org/pkl-k8s/k8s@1.3.0",
+      "checksums": {
+        "sha256": "1d948c9fc41e188fcd18ebb656b5d9ddc5f377cb16158bb421be7752bb913926"
+      }
+    },
+    "package://pkg.pkl-lang.org/lucsoft/itzg.minecraft@0": {
+      "type": "local",
+      "uri": "projectpackage://pkg.pkl-lang.org/lucsoft/itzg.minecraft@0.1.0",
+      "path": "../packages/itzg.minecraft"
+    },
+    "package://pkg.pkl-lang.org/lucsoft/lucsoft.k8s.Workload@0": {
+      "type": "local",
+      "uri": "projectpackage://pkg.pkl-lang.org/lucsoft/lucsoft.k8s.Workload@0.1.0",
+      "path": "../packages/lucsoft.k8s.Workload"
+    },
+    "package://pkg.pkl-lang.org/lucsoft/argo.ArgoCD@0": {
+      "type": "local",
+      "uri": "projectpackage://pkg.pkl-lang.org/lucsoft/argo.ArgoCD@0.1.0",
+      "path": "../packages/argo.ArgoCD"
+    }
+  }
+}

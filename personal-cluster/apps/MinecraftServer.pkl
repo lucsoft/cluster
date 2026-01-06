@@ -1,7 +1,6 @@
+import "@itzg.minecraft/McRouter.pkl"
+import "@itzg.minecraft/McServer.pkl"
 import "@k8s/api/core/v1/Namespace.pkl"
-
-import "../components/McRouter.pkl"
-import "../components/McServer.pkl"
 
 local mcServers: Listing<McServer> = new {
   new {
