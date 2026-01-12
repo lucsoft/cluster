@@ -1,0 +1,6 @@
+amends "../basePklProject.pkl"
+import "../versions.pkl"
+
+package {
+  version = "0.1.0"
+}

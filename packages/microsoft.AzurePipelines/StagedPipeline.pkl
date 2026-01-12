@@ -1,0 +1,47 @@
+module microsoft.StagedPipeline
+
+extends "./ServiceSchema.pkl"
+
+hidden fileName = "CI"
+
+/// Pipeline name
+name: NonEmptyString?
+
+/// Append the commit message to the build number
+appendCommitMessageToRunName: Boolean1?
+
+/// Continuous integration triggers
+trigger: Trigger?
+
+/// Pipeline template parameters
+parameters: PipelineTemplateParameters?
+
+/// Pull request triggers
+pr: Pr?
+
+/// Scheduled triggers
+schedules: Schedules?
+
+/// Containers and repositories used in the build
+resources: Resources?
+
+/// Variables for this pipeline
+variables: Variables?
+
+/// Behavior lock requests from this stage should exhibit in relation to other exclusive lock requests
+lockBehavior: LockBehavior?
+
+/// Stages are groups of jobs that can run without human intervention
+stages: Stages
+
+/// Pool where jobs in this pipeline will run unless otherwise specified
+pool: Pool?
+
+output {
+  files {
+    ["azure-pipeline-\(fileName).generated.yaml"] {
+      value = module
+      renderer = new YamlRenderer {}
+    }
+  }
+}

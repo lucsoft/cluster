@@ -1,0 +1,8 @@
+name: James
+stages:
+- stage: Test
+  displayName: Test Stage
+  jobs:
+  - job: PrintHelloWorld
+    steps:
+    - script: echo "This is a Test!" $(Pipeline.Workspace)

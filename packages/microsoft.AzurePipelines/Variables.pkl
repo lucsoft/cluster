@@ -1,0 +1,7 @@
+local class PipelineType {
+  Workspace: "$(Pipeline.Workspace)"
+}
+
+Pipeline: PipelineType = new {
+  Workspace = "$(Pipeline.Workspace)"
+}

@@ -1,0 +1,24 @@
+amends "../StagedPipeline.pkl"
+import "../Variables.pkl"
+
+name = "James"
+
+stages {
+  new {
+    stage = "Test"
+    displayName = "Test Stage"
+    jobs {
+      new {
+        job = "PrintHelloWorld"
+        steps {
+          new ScriptStep {
+            script =
+              """
+              echo "This is a Test!" \(Variables.Pipeline.Workspace)
+              """
+          }
+        }
+      }
+    }
+  }
+}
