@@ -1,0 +1,95 @@
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/api/core/v1/SecretList.pkl"
+import "@k8s/K8sResource.pkl"
+
+import "./Environment.pkl"
+import "./Function.pkl"
+import "./HTTPTrigger.pkl"
+import "./Package.pkl"
+
+fixed apiVersion = "v1"
+fixed kind = "List"
+
+hidden name: String
+hidden namespace: String = "default"
+
+local moduleThis = this
+
+hidden environment: Environment = throw("Environment must be provided")
+
+class Expose {
+  path: String
+  methods: Listing<String>
+}
+
+hidden exposed: Expose
+
+hidden literal: String? | Resource = throw("Literal code or Resource must be provided")
+
+hidden package: Package = new Package {
+  metadata {
+    name = moduleThis.name
+    namespace = moduleThis.namespace
+  }
+  spec {
+    deployment {
+      type = "literal"
+      literal =
+        if (moduleThis.literal is Resource)
+          moduleThis.literal.text.base64
+        else
+          moduleThis.literal.base64
+    }
+    environment {
+      name = moduleThis.environment.metadata.name!!
+      namespace = moduleThis.environment.metadata.namespace ?? moduleThis.namespace
+    }
+  }
+}
+
+hidden func: Function = new Function {
+  metadata {
+    name = moduleThis.name
+    namespace = moduleThis.namespace
+  }
+  spec {
+    InvokeStrategy {
+      ExecutionStrategy {
+        ExecutorType = "poolmgr"
+      }
+      StrategyType = "execution"
+    }
+    environment {
+      name = moduleThis.environment.metadata.name!!
+      namespace = moduleThis.environment.metadata.namespace ?? moduleThis.namespace
+    }
+    package {
+      packageref {
+        name = moduleThis.package.metadata.name!!
+        namespace = moduleThis.package.metadata.namespace!!
+      }
+    }
+  }
+}
+
+items: Listing<K8sResource> = new {
+  package
+  func
+  when (exposed != null) {
+    new HTTPTrigger {
+      metadata {
+        name = moduleThis.name
+        namespace = moduleThis.namespace
+      }
+      spec {
+        functionref {
+          type = "name"
+          name = moduleThis.name
+        }
+        methods = moduleThis.exposed.methods
+        relativeurl = moduleThis.exposed.path
+      }
+    }
+  }
+}

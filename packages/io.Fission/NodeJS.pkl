@@ -1,0 +1,16 @@
+amends "./Environment.pkl"
+
+metadata {
+  name = "nodejs"
+}
+
+spec {
+  version = 3
+  poolsize = 2
+  runtime {
+    container {
+      name = "nodejs"
+    }
+    image = "ghcr.io/fission/node-env"
+  }
+}
