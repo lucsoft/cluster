@@ -1,0 +1,13 @@
+amends "../export.pkl"
+
+import "@ArgoCD/App.pkl"
+
+import "./Fission.pkl"
+
+resources =
+  new Listing<App> {
+    Fission.app
+  }
+    .toList()
+    .map((app) -> app.application)
+    .toListing()

@@ -8,28 +8,39 @@ local app = this
 
 autoSync = true
 
+destination: Application.Destination = new {}
+
+ignoreDifferences: Listing<Application.IgnoreDifference> = new {}
+
 project = "default"
 
 namespace = "default"
 
-source: Application.Source
+source: Application.Source?
+
+sources: Listing<Application.Source>?
 
 application = new Application {
   metadata {
     name = app.name
     namespace = "argocd"
+    annotations {
+      ["argocd.argoproj.io/compare-options"] = "ServerSideDiff=true"
+    }
   }
   spec {
     syncPolicy {
       when (app.autoSync == true) {
         automated {
           prune = true
+          selfHeal = true
         }
       }
       syncOptions {
         "RespectIgnoreDifferences=true"
         "ApplyOutOfSyncOnly=true"
         "AutoCreateNamespace=true"
+        "ServerSideApply=true"
       }
     }
     project = app.project
@@ -37,6 +48,8 @@ application = new Application {
       server = "https://kubernetes.default.svc"
       namespace = app.namespace
     }
+    ignoreDifferences = app.ignoreDifferences
     source = app.source
+    sources = app.sources
   }
 }
