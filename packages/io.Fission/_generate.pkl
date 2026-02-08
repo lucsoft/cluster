@@ -1,6 +1,7 @@
 amends "package://pkg.pkl-lang.org/pkl-pantry/k8s.contrib.crd@1.0.13#/generate.pkl"
 import "pkl:yaml"
 
+import "@k8s/api/core/v1/PodSpec.pkl"
 local fissionTarget = "v1.22.0"
 local fissionCrdBasePath =
   "https://raw.githubusercontent.com/fission/fission/\(fissionTarget)/crds/v1"
@@ -20,3 +21,15 @@ sourceContents =
       .toList()
       .map((item) -> (new yaml.Parser {}.parse(read("\(fissionCrdBasePath)/\(item)")) as Dynamic)),
   )
+
+converters {
+  ["environments.fission.io"] {
+    [List("spec", "builder", "podspec")] = PodSpec
+    [List("spec", "builder", "container")] = PodSpec.Container
+    [List("spec", "runtime", "podspec")] = PodSpec
+    [List("spec", "runtime", "container")] = PodSpec.Container
+  }
+  ["functions.fission.io"] {
+    [List("spec", "podspec")] = PodSpec
+  }
+}
