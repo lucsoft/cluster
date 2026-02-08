@@ -1,0 +1,102 @@
+/// Package Think of these as function-level images.
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <file:///Users/lucsoft/Developer/infra-hmsys-sys/packages/io.Fission/>.
+module io.fission.v1.Package
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "fission.io/v1"
+
+fixed kind: "Package"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// PackageSpec includes source/deploy archives and the reference of environment to build the package.
+spec: Spec
+
+/// Status indicates the build status of package.
+status: Status?
+
+/// PackageSpec includes source/deploy archives and the reference of environment to build the package.
+class Spec {
+  /// BuildCommand is a custom build command that builder used to build the source archive.
+  buildcmd: String?
+
+  /// Deployment is the deployable archive that environment runtime used to run user function.
+  deployment: Deployment?
+
+  /// Environment is a reference to the environment for building source archive.
+  environment: Environment
+
+  /// Source is the archive contains source code and dependencies file. If the package status is in
+  /// PENDING state, builder manager will then notify builder to compile source and save the result as
+  /// deployable archive.
+  source: Source?
+}
+
+/// Deployment is the deployable archive that environment runtime used to run user function.
+class Deployment {
+  /// Checksum ensures the integrity of packages referenced by URL. Ignored for literals.
+  checksum: Checksum?
+
+  /// Literal contents of the package. Can be used for encoding packages below TODO (256 KB?) size.
+  literal: String?
+
+  /// Type defines how the package is specified: literal or URL. Available value: - literal - url
+  type: String?
+
+  /// URL references a package.
+  url: String?
+}
+
+/// Checksum ensures the integrity of packages referenced by URL. Ignored for literals.
+class Checksum {
+  sum: String?
+
+  /// ChecksumType specifies the checksum algorithm, such as sha256, used for a checksum.
+  type: String?
+}
+
+/// Environment is a reference to the environment for building source archive.
+class Environment {
+  name: String
+
+  namespace: String
+}
+
+/// Source is the archive contains source code and dependencies file. If the package status is in PENDING
+/// state, builder manager will then notify builder to compile source and save the result as deployable
+/// archive.
+class Source {
+  /// Checksum ensures the integrity of packages referenced by URL. Ignored for literals.
+  checksum: Checksum?
+
+  /// Literal contents of the package. Can be used for encoding packages below TODO (256 KB?) size.
+  literal: String?
+
+  /// Type defines how the package is specified: literal or URL. Available value: - literal - url
+  type: String?
+
+  /// URL references a package.
+  url: String?
+}
+
+/// Status indicates the build status of package.
+class Status {
+  /// BuildLog stores build log during the compilation.
+  buildlog: String?
+
+  /// BuildStatus is the package build status.
+  buildstatus: String?
+
+  /// LastUpdateTimestamp will store the timestamp the package was last updated metav1.Time is a wrapper
+  /// around time.Time which supports correct marshaling to YAML and JSON.
+  /// https://github.com/kubernetes/apimachinery/blob/44bd77c24ef93cd3a5eb6fef64e514025d10d44e/pkg/apis/meta/v1/time.go#L26-L35
+  lastUpdateTimestamp: String?
+}

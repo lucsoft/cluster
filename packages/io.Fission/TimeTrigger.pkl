@@ -1,0 +1,52 @@
+/// TimeTrigger invokes functions based on given cron schedule.
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <file:///Users/lucsoft/Developer/infra-hmsys-sys/packages/io.Fission/>.
+module io.fission.v1.TimeTrigger
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "fission.io/v1"
+
+fixed kind: "TimeTrigger"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// TimeTriggerSpec invokes the specific function at a time or times specified by a cron string.
+spec: Spec
+
+/// TimeTriggerSpec invokes the specific function at a time or times specified by a cron string.
+class Spec {
+  /// Cron schedule
+  cron: String
+
+  /// The reference to function
+  functionref: Functionref
+
+  /// HTTP Method for trigger, ex : GET, POST, PUT, DELETE, HEAD (default: "POST")
+  method: String?
+
+  /// Subpath to trigger a specific route if function internally supports routing, (default: "/")
+  subpath: String?
+}
+
+/// The reference to function
+class Functionref {
+  /// Function Reference by weight. this map contains function name as key and its weight as the value.
+  /// This is for canary upgrade purpose.
+  functionweights: Mapping<String, Int>?
+
+  /// Name of the function.
+  name: String
+
+  /// Type indicates whether this function reference is by name or selector. For now, the only supported
+  /// reference type is by "name". Future reference types: * Function by label or annotation * Branch or
+  /// tag of a versioned function * A "rolling upgrade" from one version of a function to another
+  /// Available value: - name - function-weights
+  type: String
+}

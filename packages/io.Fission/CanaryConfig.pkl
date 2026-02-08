@@ -1,0 +1,53 @@
+/// CanaryConfig is for canary deployment of two functions.
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <file:///Users/lucsoft/Developer/infra-hmsys-sys/packages/io.Fission/>.
+module io.fission.v1.CanaryConfig
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "fission.io/v1"
+
+fixed kind: "CanaryConfig"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// CanaryConfigSpec defines the canary configuration spec
+spec: Spec
+
+/// CanaryConfigStatus represents canary config status
+status: Status
+
+/// CanaryConfigSpec defines the canary configuration spec
+class Spec {
+  /// Weight increment interval, string representation of time.Duration, ex : 1m, 2h, 2d (default: "2m")
+  duration: String?
+
+  /// FailureType refers to the type of failure
+  failureType: String?
+
+  /// Threshold in percentage beyond which the new version of the function is considered unstable
+  failurethreshold: Int?
+
+  /// New version of the function
+  newfunction: String
+
+  /// Old stable version of the function
+  oldfunction: String
+
+  /// HTTP trigger that this config references
+  trigger: String
+
+  /// Weight increment step for function
+  weightincrement: Int?
+}
+
+/// CanaryConfigStatus represents canary config status
+class Status {
+  status: String
+}

@@ -1,0 +1,22 @@
+amends "package://pkg.pkl-lang.org/pkl-pantry/k8s.contrib.crd@1.0.13#/generate.pkl"
+import "pkl:yaml"
+
+local fissionTarget = "v1.22.0"
+local fissionCrdBasePath =
+  "https://raw.githubusercontent.com/fission/fission/\(fissionTarget)/crds/v1"
+// noinspection UnresolvedElement
+local fissionKustomize: Listing<String> =
+  new yaml.Parser {}.parse(read("\(fissionCrdBasePath)/kustomization.yaml")).resources
+
+source = ""
+
+k8sImportPath = "@k8s"
+
+sourceContents =
+  new YamlRenderer {
+    isStream = true
+  }.renderDocument(
+    fissionKustomize
+      .toList()
+      .map((item) -> (new yaml.Parser {}.parse(read("\(fissionCrdBasePath)/\(item)")) as Dynamic)),
+  )
