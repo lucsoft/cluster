@@ -43,14 +43,14 @@ Deno.serve(async (req: Request) => {
     console.log("[REQ]", req.method, url.href);
     if (pattern.test(url) && !fullPattern.test(url)) {
         const { packageName } = pattern.exec(url)!.pathname.groups;
-        return Response.redirect(new URL("/packages/" + packageName + "@latest", url), 302);
+        return Response.redirect(new URL("/packages/" + packageName + "@0.0.0", url), 302);
     }
     else if (fullPattern.test(url)) {
         const { packageName, version } = fullPattern.exec(url)!.pathname.groups;
 
         const kv = await Deno.openKv();
 
-        const realVersion = version === "latest" ? await getCurrentHash("https://github.com/lucsoft/cluster") : version;
+        const realVersion = version === "0.0.0" ? await getCurrentHash("https://github.com/lucsoft/cluster") : version;
 
         const response = await kv.get<{ output: string; }>([ "packages", packageName!, realVersion! ]);
 
