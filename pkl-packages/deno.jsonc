@@ -11,6 +11,7 @@
         "@lit/task": "npm:@lit/task@^1.0.3",
         "@std/assert": "jsr:@std/assert@^1.0.18",
         "@std/http": "jsr:@std/http@^1.0.24",
+        "@std/semver": "jsr:@std/semver@^1.0.8",
         "lit": "npm:lit@^3.3.2"
     }
 }

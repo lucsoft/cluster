@@ -8,24 +8,24 @@
         "sha256": "1d948c9fc41e188fcd18ebb656b5d9ddc5f377cb16158bb421be7752bb913926"
       }
     },
-    "package://pkg.pkl-lang.org/lucsoft/itzg.minecraft@0": {
+    "package://pkl-packages.lucsoft.deno.net/packages/itzg.minecraft@0": {
       "type": "local",
-      "uri": "projectpackage://pkg.pkl-lang.org/lucsoft/itzg.minecraft@0.1.0",
+      "uri": "projectpackage://pkl-packages.lucsoft.deno.net/packages/itzg.minecraft@0.1.0",
       "path": "../packages/itzg.minecraft"
     },
-    "package://pkg.pkl-lang.org/lucsoft/lucsoft.k8s.Workload@0": {
+    "package://pkl-packages.lucsoft.deno.net/packages/lucsoft.k8s.Workload@0": {
       "type": "local",
-      "uri": "projectpackage://pkg.pkl-lang.org/lucsoft/lucsoft.k8s.Workload@0.1.0",
+      "uri": "projectpackage://pkl-packages.lucsoft.deno.net/packages/lucsoft.k8s.Workload@0.1.0",
       "path": "../packages/lucsoft.k8s.Workload"
     },
-    "package://pkg.pkl-lang.org/lucsoft/argo.ArgoCD@0": {
+    "package://pkl-packages.lucsoft.deno.net/packages/argo.ArgoCD@0": {
       "type": "local",
-      "uri": "projectpackage://pkg.pkl-lang.org/lucsoft/argo.ArgoCD@0.1.0",
+      "uri": "projectpackage://pkl-packages.lucsoft.deno.net/packages/argo.ArgoCD@0.1.0",
       "path": "../packages/argo.ArgoCD"
     },
-    "package://pkg.pkl-lang.org/lucsoft/io.Fission@0": {
+    "package://pkl-packages.lucsoft.deno.net/packages/io.Fission@0": {
       "type": "local",
-      "uri": "projectpackage://pkg.pkl-lang.org/lucsoft/io.Fission@0.1.0",
+      "uri": "projectpackage://pkl-packages.lucsoft.deno.net/packages/io.Fission@0.1.0",
       "path": "../packages/io.Fission"
     }
   }
