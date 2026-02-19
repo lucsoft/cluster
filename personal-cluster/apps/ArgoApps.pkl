@@ -2,11 +2,11 @@ amends "../export.pkl"
 
 import "@ArgoCD/App.pkl"
 
-import "./Fission.pkl"
+import "./Knative.pkl"
 
 resources =
   new Listing<App> {
-    Fission.app
+    Knative.app
   }
     .toList()
     .map((app) -> app.application)

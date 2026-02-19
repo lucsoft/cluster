@@ -1,5 +1,5 @@
 amends "pkl:Project"
-import "../packages//versions.pkl"
+import "../packages/versions.pkl"
 
 dependencies {
   ["k8s"] {
@@ -8,4 +8,5 @@ dependencies {
   ["Workload"] = import("../packages/lucsoft.k8s.Workload/PklProject")
   ["itzg.minecraft"] = import("../packages/itzg.minecraft/PklProject")
   ["ArgoCD"] = import("../packages/argo.ArgoCD/PklProject")
+  ["Fission"] = import("../packages/io.Fission/PklProject")
 }

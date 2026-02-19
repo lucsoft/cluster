@@ -1,0 +1,772 @@
+/// Schema for the knativeeventings API
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <file:///Users/lucsoft/Developer/infra-hmsys-sys/packages/dev.Knative/>.
+module dev.knative.operator.v1beta1.KnativeEventing
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "operator.knative.dev/v1beta1"
+
+fixed kind: "KnativeEventing"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// Spec defines the desired state of KnativeEventing
+spec: Spec?
+
+status: Status?
+
+/// Spec defines the desired state of KnativeEventing
+class Spec {
+  /// A list of the additional eventing manifests, which will be installed by the operator
+  additionalManifests: Listing<AdditionalManifest>?
+
+  /// A means to override the corresponding entries in the upstream configmaps
+  config: Mapping<String, Mapping<String, String>>?
+
+  /// The default broker type to use for the brokers Knative creates. If no value is provided,
+  /// MTChannelBasedBroker will be used.
+  defaultBrokerClass: String?
+
+  /// Allows specification of HA control plane
+  `high-availability`: HighAvailability?
+
+  /// A mapping of deployment or statefulset name to override
+  workloads: Listing<Workload>?
+
+  /// A field of namespace name to override the labels and annotations
+  namespace: Namespace?
+
+  /// A mapping of deployment name to override
+  deployments: Listing<Deployment>?
+
+  /// A mapping of service name to override
+  services: Listing<Service>?
+
+  /// A mapping of podDisruptionBudget name to override
+  podDisruptionBudgets: Listing<PodDisruptionBudget>?
+
+  /// The source configuration for Knative Eventing
+  source: Source?
+
+  /// A list of eventing manifests, which will be installed by the operator
+  manifests: Listing<Manifest>?
+
+  /// A means to override the corresponding deployment images in the upstream. This affects both
+  /// apps/v1.Deployment and caching.internal.knative.dev/v1alpha1.Image.
+  registry: Registry?
+
+  /// Specifies the selection mode for the sinkbinding webhook. If the value is `inclusion`, only
+  /// namespaces/objects labelled as `bindings.knative.dev/include:true` will be considered. If
+  /// `exclusion` is selected, only `bindings.knative.dev/exclude:true` label is checked and these will
+  /// NOT be considered. The default is `exclusion`.
+  sinkBindingSelectionMode: String?
+
+  /// The version of Knative Eventing to be installed
+  version: String?
+}
+
+class AdditionalManifest {
+  /// The link of the additional manifest URL
+  URL: String?
+}
+
+/// Allows specification of HA control plane
+class HighAvailability {
+  /// The number of replicas that HA parts of the control plane will be scaled to
+  replicas: Int(isPositive)?
+}
+
+class Workload {
+  /// The name of the deployment
+  name: String?
+
+  /// Labels overrides labels for the deployment and its template.
+  labels: Mapping<String, String>?
+
+  /// LivenessProbes overrides liveness probes for the containers.
+  livenessProbes: Listing<ReadinessProbe>?
+
+  /// Annotations overrides labels for the deployment and its template.
+  annotations: Mapping<String, String>?
+
+  /// Env overrides env vars for the containers.
+  env: Listing<Env>?
+
+  /// The number of replicas that HA parts of the control plane will be scaled to
+  replicas: Int(isPositive)?
+
+  /// NodeSelector overrides nodeSelector for the deployment.
+  nodeSelector: Mapping<String, String>?
+
+  /// ReadinessProbes overrides readiness probes for the containers.
+  readinessProbes: Listing<ReadinessProbe>?
+
+  /// If specified, the pod's tolerations.
+  tolerations: Listing<Toleration>?
+
+  /// Use the host's network namespace if true. Make sure to understand the security implications if you
+  /// want to enable it. When hostNetwork is enabled, this will set dnsPolicy to ClusterFirstWithHostNet
+  /// automatically.
+  hostNetwork: Boolean?
+
+  /// If specified, the pod's topology spread constraints.
+  topologySpreadConstraints: Listing<TopologySpreadConstraint>?
+
+  /// Version the cluster should be on.
+  version: String?
+
+  /// VolumeMounts allows configuration of additional VolumeMounts on the output StatefulSet definition.
+  /// VolumeMounts specified will be appended to other VolumeMounts in the alertmanager container, that
+  /// are generated as a result of StorageSpec objects.
+  volumeMounts: Listing<VolumeMount>?
+
+  /// If specified, the pod's scheduling constraints.
+  affinity: Affinity?
+
+  /// If specified, the container's resources.
+  resources: Listing<Resource>?
+}
+
+/// ProbesRequirementsOverride enables the user to override any container's env vars.
+class ReadinessProbe {
+  /// The container name
+  container: String
+
+  /// Minimum consecutive failures for the probe to be considered failed after having succeeded. Defaults
+  /// to 3. Minimum value is 1.
+  failureThreshold: Int?
+
+  /// Number of seconds after the container has started before liveness probes are initiated. More info:
+  /// https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+  initialDelaySeconds: Int?
+
+  /// How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1.
+  periodSeconds: Int?
+
+  /// Minimum consecutive successes for the probe to be considered successful after having failed.
+  /// Defaults to 1. Must be 1 for liveness and startup. Minimum value is 1.
+  successThreshold: Int?
+
+  /// Optional duration in seconds the pod needs to terminate gracefully upon probe failure. The grace
+  /// period is the duration in seconds after the processes running in the pod are sent a termination
+  /// signal and the time when the processes are forcibly halted with a kill signal. Set this value
+  /// longer than the expected cleanup time for your process. If this value is nil, the pod's
+  /// terminationGracePeriodSeconds will be used. Otherwise, this value overrides the value provided by
+  /// the pod spec. Value must be non-negative integer. The value zero indicates stop immediately via the
+  /// kill signal (no opportunity to shut down). This is a beta field and requires enabling
+  /// ProbeTerminationGracePeriod feature gate. Minimum value is 1. spec.terminationGracePeriodSeconds is
+  /// used if unset.
+  terminationGracePeriodSeconds: Int?
+
+  /// Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. More
+  /// info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+  timeoutSeconds: Int?
+}
+
+class Env {
+  /// The container name
+  container: String
+
+  /// The desired EnvVarRequirements
+  envVars: Listing<EnvVar>?
+}
+
+/// EnvVar represents an environment variable present in a Container.
+class EnvVar {
+  /// Name of the environment variable. Must be a C_IDENTIFIER.
+  name: String
+
+  /// Variable references $(VAR_NAME) are expanded using the previously defined environment variables in
+  /// the container and any service environment variables. If a variable cannot be resolved, the
+  /// reference in the input string will be unchanged. Double $$ are reduced to a single $, which allows
+  /// for escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)" will produce the string literal
+  /// "$(VAR_NAME)". Escaped references will never be expanded, regardless of whether the variable exists
+  /// or not. Defaults to "".
+  value: String?
+
+  /// Source for the environment variable's value. Cannot be used if value is not empty.
+  valueFrom: ValueFrom?
+}
+
+/// Source for the environment variable's value. Cannot be used if value is not empty.
+class ValueFrom {
+  /// Selects a key of a ConfigMap.
+  configMapKeyRef: ConfigMapKeyRef?
+
+  /// Selects a field of the pod: supports metadata.name, metadata.namespace, `metadata.labels['<KEY>']`,
+  /// `metadata.annotations['<KEY>']`, spec.nodeName, spec.serviceAccountName, status.hostIP,
+  /// status.podIP, status.podIPs.
+  fieldRef: FieldRef?
+
+  /// Selects a resource of the container: only resources limits and requests (limits.cpu, limits.memory,
+  /// limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are
+  /// currently supported.
+  resourceFieldRef: ResourceFieldRef?
+
+  /// Selects a key of a secret in the pod's namespace
+  secretKeyRef: SecretKeyRef?
+}
+
+/// Selects a key of a ConfigMap.
+class ConfigMapKeyRef {
+  /// The key to select.
+  key: String
+
+  /// Name of the referent. More info:
+  /// https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other
+  /// useful fields. apiVersion, kind, uid?
+  name: String?
+
+  /// Specify whether the ConfigMap or its key must be defined
+  optional: Boolean?
+}
+
+/// Selects a field of the pod: supports metadata.name, metadata.namespace, `metadata.labels['<KEY>']`,
+/// `metadata.annotations['<KEY>']`, spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP,
+/// status.podIPs.
+class FieldRef {
+  /// Version of the schema the FieldPath is written in terms of, defaults to "v1".
+  apiVersion: String?
+
+  /// Path of the field to select in the specified API version.
+  fieldPath: String
+}
+
+/// Selects a resource of the container: only resources limits and requests (limits.cpu, limits.memory,
+/// limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently
+/// supported.
+class ResourceFieldRef {
+  /// Container name: required for volumes, optional for env vars
+  containerName: String?
+
+  /// Specifies the output format of the exposed resources, defaults to "1"
+  divisor: (Int|String)?
+
+  /// Required: resource to select
+  resource: String
+}
+
+/// Selects a key of a secret in the pod's namespace
+class SecretKeyRef {
+  /// The key of the secret to select from. Must be a valid secret key.
+  key: String
+
+  /// Name of the referent. More info:
+  /// https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other
+  /// useful fields. apiVersion, kind, uid?
+  name: String?
+
+  /// Specify whether the Secret or its key must be defined
+  optional: Boolean?
+}
+
+/// The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect>
+/// using the matching operator <operator>.
+class Toleration {
+  /// Effect indicates the taint effect to match. Empty means match all taint effects. When specified,
+  /// allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+  effect: String?
+
+  /// Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key
+  /// is empty, operator must be Exists; this combination means to match all values and all keys.
+  key: String?
+
+  /// Operator represents a key's relationship to the value. Valid operators are Exists and Equal.
+  /// Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all
+  /// taints of a particular category.
+  operator: String?
+
+  /// TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute,
+  /// otherwise this field is ignored) tolerates the taint. By default, it is not set, which means
+  /// tolerate the taint forever (do not evict). Zero and negative values will be treated as 0 (evict
+  /// immediately) by the system.
+  tolerationSeconds: Int?
+
+  /// Value is the taint value the toleration matches to. If the operator is Exists, the value should be
+  /// empty, otherwise just a regular string.
+  value: String?
+}
+
+/// TopologySpreadConstraint specifies how to spread matching pods among the given topology.
+class TopologySpreadConstraint {
+  /// LabelSelector is used to find matching pods. Pods that match this label selector are counted to
+  /// determine the number of pods in their corresponding topology domain.
+  labelSelector: LabelSelector?
+
+  /// MaxSkew describes the degree to which pods may be unevenly distributed. It's the maximum permitted
+  /// difference between the number of matching pods in any two topology domains of a given topology
+  /// type. For example, in a 3-zone cluster, MaxSkew is set to 1, and pods with the same labelSelector
+  /// spread as 1/1/0: | zone1 | zone2 | zone3 | | P | P | | - if MaxSkew is 1, incoming pod can only be
+  /// scheduled to zone3 to become 1/1/1; scheduling it onto zone1(zone2) would make the ActualSkew(2-0)
+  /// on zone1(zone2) violate MaxSkew(1). - if MaxSkew is 2, incoming pod can be scheduled onto any zone.
+  /// It's a required field. Default value is 1 and 0 is not allowed.
+  maxSkew: Int
+
+  /// TopologyKey is the key of node labels. Nodes that have a label with this key and identical values
+  /// are considered to be in the same topology. We consider each <key, value> as a "bucket", and try to
+  /// put balanced number of pods into each bucket. It's a required field.
+  topologyKey: String
+
+  /// WhenUnsatisfiable indicates how to deal with a pod if it doesn't satisfy the spread constraint. -
+  /// DoNotSchedule (default) tells the scheduler not to schedule it - ScheduleAnyway tells the scheduler
+  /// to still schedule it It's considered as "Unsatisfiable" if and only if placing incoming pod on any
+  /// topology violates "MaxSkew". For example, in a 3-zone cluster, MaxSkew is set to 1, and pods with
+  /// the same labelSelector spread as 3/1/1: | zone1 | zone2 | zone3 | | P P P | P | P | If
+  /// WhenUnsatisfiable is set to DoNotSchedule, incoming pod can only be scheduled to zone2(zone3) to
+  /// become 3/2/1(3/1/2) as ActualSkew(2-1) on zone2(zone3) satisfies MaxSkew(1). In other words, the
+  /// cluster can still be imbalanced, but scheduler won't make it *more* imbalanced. It's a required
+  /// field.
+  whenUnsatisfiable: String
+}
+
+/// LabelSelector is used to find matching pods. Pods that match this label selector are counted to
+/// determine the number of pods in their corresponding topology domain.
+class LabelSelector {
+  /// matchExpressions is a list of label selector requirements. The requirements are ANDed.
+  matchExpressions: Listing<MatchExpression>?
+
+  /// matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is
+  /// equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and
+  /// the values array contains only "value". The requirements are ANDed.
+  matchLabels: Mapping<String, String>?
+}
+
+/// A label selector requirement is a selector that contains values, a key, and an operator that relates
+/// the key and values.
+class MatchExpression {
+  /// key is the label key that the selector applies to.
+  key: String
+
+  /// operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists
+  /// and DoesNotExist.
+  operator: String
+
+  /// values is an array of string values. If the operator is In or NotIn, the values array must be
+  /// non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is
+  /// replaced during a strategic merge patch.
+  values: Listing<String>?
+}
+
+/// VolumeMount describes a mounting of a Volume within a container.
+class VolumeMount {
+  /// Path within the container at which the volume should be mounted. Must not contain ':'.
+  mountPath: String
+
+  /// mountPropagation determines how mounts are propagated from the host to container and the other way
+  /// around. When not set, MountPropagationNone is used. This field is beta in 1.10.
+  mountPropagation: String?
+
+  /// This must match the Name of a Volume.
+  name: String
+
+  /// Mounted read-only if true, read-write otherwise (false or unspecified). Defaults to false.
+  readOnly: Boolean?
+
+  /// Path within the volume from which the container's volume should be mounted. Defaults to ""
+  /// (volume's root).
+  subPath: String?
+
+  /// Expanded path within the volume from which the container's volume should be mounted. Behaves
+  /// similarly to SubPath but environment variable references $(VAR_NAME) are expanded using the
+  /// container's environment. Defaults to "" (volume's root). SubPathExpr and SubPath are mutually
+  /// exclusive.
+  subPathExpr: String?
+}
+
+/// If specified, the pod's scheduling constraints.
+class Affinity {
+  /// Describes node affinity scheduling rules for the pod.
+  nodeAffinity: NodeAffinity?
+
+  /// Describes pod affinity scheduling rules (e.g. co-locate this pod in the same node, zone, etc. as
+  /// some other pod(s)).
+  podAffinity: PodAffinity?
+
+  /// Describes pod anti-affinity scheduling rules (e.g. avoid putting this pod in the same node, zone,
+  /// etc. as some other pod(s)).
+  podAntiAffinity: PodAntiAffinity?
+}
+
+/// Describes node affinity scheduling rules for the pod.
+class NodeAffinity {
+  /// The scheduler will prefer to schedule pods to nodes that satisfy the affinity expressions specified
+  /// by this field, but it may choose a node that violates one or more of the expressions. The node that
+  /// is most preferred is the one with the greatest sum of weights, i.e. for each node that meets all of
+  /// the scheduling requirements (resource request, requiredDuringScheduling affinity expressions,
+  /// etc.), compute a sum by iterating through the elements of this field and adding "weight" to the sum
+  /// if the node matches the corresponding matchExpressions; the node(s) with the highest sum are the
+  /// most preferred.
+  preferredDuringSchedulingIgnoredDuringExecution: Listing<PreferredDuringSchedulingIgnoredDuringExecution>?
+
+  /// If the affinity requirements specified by this field are not met at scheduling time, the pod will
+  /// not be scheduled onto the node. If the affinity requirements specified by this field cease to be
+  /// met at some point during pod execution (e.g. due to an update), the system may or may not try to
+  /// eventually evict the pod from its node.
+  requiredDuringSchedulingIgnoredDuringExecution: RequiredDuringSchedulingIgnoredDuringExecution?
+}
+
+/// An empty preferred scheduling term matches all objects with implicit weight 0 (i.e. it's a no-op). A
+/// null preferred scheduling term matches no objects (i.e. is also a no-op).
+class PreferredDuringSchedulingIgnoredDuringExecution {
+  /// A node selector term, associated with the corresponding weight.
+  preference: Preference
+
+  /// Weight associated with matching the corresponding nodeSelectorTerm, in the range 1-100.
+  weight: Int
+}
+
+/// A node selector term, associated with the corresponding weight.
+class Preference {
+  /// A list of node selector requirements by node's labels.
+  matchExpressions: Listing<MatchField>?
+
+  /// A list of node selector requirements by node's fields.
+  matchFields: Listing<MatchField>?
+}
+
+/// A node selector requirement is a selector that contains values, a key, and an operator that relates
+/// the key and values.
+class MatchField {
+  /// The label key that the selector applies to.
+  key: String
+
+  /// Represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists,
+  /// DoesNotExist. Gt, and Lt.
+  operator: String
+
+  /// An array of string values. If the operator is In or NotIn, the values array must be non-empty. If
+  /// the operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or
+  /// Lt, the values array must have a single element, which will be interpreted as an integer. This
+  /// array is replaced during a strategic merge patch.
+  values: Listing<String>?
+}
+
+/// If the affinity requirements specified by this field are not met at scheduling time, the pod will not
+/// be scheduled onto the node. If the affinity requirements specified by this field cease to be met at
+/// some point during pod execution (e.g. due to an update), the system may or may not try to eventually
+/// evict the pod from its node.
+class RequiredDuringSchedulingIgnoredDuringExecution {
+  /// Required. A list of node selector terms. The terms are ORed.
+  nodeSelectorTerms: Listing<NodeSelectorTerm>
+}
+
+/// A null or empty node selector term matches no objects. The requirements of them are ANDed. The
+/// TopologySelectorTerm type implements a subset of the NodeSelectorTerm.
+class NodeSelectorTerm {
+  /// A list of node selector requirements by node's labels.
+  matchExpressions: Listing<MatchField>?
+
+  /// A list of node selector requirements by node's fields.
+  matchFields: Listing<MatchField>?
+}
+
+/// Describes pod affinity scheduling rules (e.g. co-locate this pod in the same node, zone, etc. as some
+/// other pod(s)).
+class PodAffinity {
+  /// The scheduler will prefer to schedule pods to nodes that satisfy the affinity expressions specified
+  /// by this field, but it may choose a node that violates one or more of the expressions. The node that
+  /// is most preferred is the one with the greatest sum of weights, i.e. for each node that meets all of
+  /// the scheduling requirements (resource request, requiredDuringScheduling affinity expressions,
+  /// etc.), compute a sum by iterating through the elements of this field and adding "weight" to the sum
+  /// if the node has pods which matches the corresponding podAffinityTerm; the node(s) with the highest
+  /// sum are the most preferred.
+  preferredDuringSchedulingIgnoredDuringExecution: Listing<PreferredDuringSchedulingIgnoredDuringExecution>?
+
+  /// If the affinity requirements specified by this field are not met at scheduling time, the pod will
+  /// not be scheduled onto the node. If the affinity requirements specified by this field cease to be
+  /// met at some point during pod execution (e.g. due to a pod label update), the system may or may not
+  /// try to eventually evict the pod from its node. When there are multiple elements, the lists of nodes
+  /// corresponding to each podAffinityTerm are intersected, i.e. all terms must be satisfied.
+  requiredDuringSchedulingIgnoredDuringExecution: Listing<RequiredDuringSchedulingIgnoredDuringExecution>?
+}
+
+/// The weights of all of the matched WeightedPodAffinityTerm fields are added per-node to find the most
+/// preferred node(s)
+class PreferredDuringSchedulingIgnoredDuringExecution {
+  /// Required. A pod affinity term, associated with the corresponding weight.
+  podAffinityTerm: PodAffinityTerm
+
+  /// weight associated with matching the corresponding podAffinityTerm, in the range 1-100.
+  weight: Int
+}
+
+/// Required. A pod affinity term, associated with the corresponding weight.
+class PodAffinityTerm {
+  /// A label query over a set of resources, in this case pods.
+  labelSelector: LabelSelector?
+
+  /// namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty
+  /// list means "this pod's namespace"
+  namespaces: Listing<String>?
+
+  /// This pod should be co-located (affinity) or not co-located (anti-affinity) with the pods matching
+  /// the labelSelector in the specified namespaces, where co-located is defined as running on a node
+  /// whose value of the label with key topologyKey matches that of any node on which any of the selected
+  /// pods is running. Empty topologyKey is not allowed.
+  topologyKey: String
+}
+
+/// A label query over a set of resources, in this case pods.
+class LabelSelector {
+  /// matchExpressions is a list of label selector requirements. The requirements are ANDed.
+  matchExpressions: Listing<MatchExpression>?
+
+  /// matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is
+  /// equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and
+  /// the values array contains only "value". The requirements are ANDed.
+  matchLabels: Mapping<String, String>?
+}
+
+/// Defines a set of pods (namely those matching the labelSelector relative to the given namespace(s))
+/// that this pod should be co-located (affinity) or not co-located (anti-affinity) with, where
+/// co-located is defined as running on a node whose value of the label with key <topologyKey> matches
+/// that of any node on which a pod of the set of pods is running
+class RequiredDuringSchedulingIgnoredDuringExecution {
+  /// A label query over a set of resources, in this case pods.
+  labelSelector: LabelSelector?
+
+  /// namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty
+  /// list means "this pod's namespace"
+  namespaces: Listing<String>?
+
+  /// This pod should be co-located (affinity) or not co-located (anti-affinity) with the pods matching
+  /// the labelSelector in the specified namespaces, where co-located is defined as running on a node
+  /// whose value of the label with key topologyKey matches that of any node on which any of the selected
+  /// pods is running. Empty topologyKey is not allowed.
+  topologyKey: String
+}
+
+/// Describes pod anti-affinity scheduling rules (e.g. avoid putting this pod in the same node, zone,
+/// etc. as some other pod(s)).
+class PodAntiAffinity {
+  /// The scheduler will prefer to schedule pods to nodes that satisfy the anti-affinity expressions
+  /// specified by this field, but it may choose a node that violates one or more of the expressions. The
+  /// node that is most preferred is the one with the greatest sum of weights, i.e. for each node that
+  /// meets all of the scheduling requirements (resource request, requiredDuringScheduling anti-affinity
+  /// expressions, etc.), compute a sum by iterating through the elements of this field and adding
+  /// "weight" to the sum if the node has pods which matches the corresponding podAffinityTerm; the
+  /// node(s) with the highest sum are the most preferred.
+  preferredDuringSchedulingIgnoredDuringExecution: Listing<PreferredDuringSchedulingIgnoredDuringExecution>?
+
+  /// If the anti-affinity requirements specified by this field are not met at scheduling time, the pod
+  /// will not be scheduled onto the node. If the anti-affinity requirements specified by this field
+  /// cease to be met at some point during pod execution (e.g. due to a pod label update), the system may
+  /// or may not try to eventually evict the pod from its node. When there are multiple elements, the
+  /// lists of nodes corresponding to each podAffinityTerm are intersected, i.e. all terms must be
+  /// satisfied.
+  requiredDuringSchedulingIgnoredDuringExecution: Listing<RequiredDuringSchedulingIgnoredDuringExecution>?
+}
+
+/// The pod this Resource is used to specify the requests and limits for a certain container based on the
+/// name.
+class Resource {
+  /// The name of the container
+  container: String?
+
+  limits: Requests?
+
+  requests: Requests?
+}
+
+class Requests {
+  cpu: String(matches(Regex("^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$")))?
+
+  memory: String(matches(Regex("^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$")))?
+}
+
+/// A field of namespace name to override the labels and annotations
+class Namespace {
+  /// Labels overrides labels for the namespace and its template.
+  labels: Mapping<String, String>?
+
+  /// Annotations overrides labels for the namespace and its template.
+  annotations: Mapping<String, String>?
+}
+
+class Deployment {
+  /// The name of the deployment
+  name: String?
+
+  /// Labels overrides labels for the deployment and its template.
+  labels: Mapping<String, String>?
+
+  /// Annotations overrides labels for the deployment and its template.
+  annotations: Mapping<String, String>?
+
+  /// Env overrides env vars for the containers.
+  env: Listing<Env>?
+
+  /// LivenessProbes overrides liveness probes for the containers.
+  livenessProbes: Listing<ReadinessProbe>?
+
+  /// The number of replicas that HA parts of the control plane will be scaled to
+  replicas: Int(isPositive)?
+
+  /// NodeSelector overrides nodeSelector for the deployment.
+  nodeSelector: Mapping<String, String>?
+
+  /// ReadinessProbes overrides readiness probes for the containers.
+  readinessProbes: Listing<ReadinessProbe>?
+
+  /// If specified, the pod's tolerations.
+  tolerations: Listing<Toleration>?
+
+  /// Use the host's network namespace if true. Make sure to understand the security implications if you
+  /// want to enable it. When hostNetwork is enabled, this will set dnsPolicy to ClusterFirstWithHostNet
+  /// automatically.
+  hostNetwork: Boolean?
+
+  /// If specified, the pod's topology spread constraints.
+  topologySpreadConstraints: Listing<TopologySpreadConstraint>?
+
+  /// If specified, the pod's scheduling constraints.
+  affinity: Affinity?
+
+  /// If specified, the container's resources.
+  resources: Listing<Resource>?
+}
+
+class Service {
+  /// The name of the service
+  name: String?
+
+  /// Labels overrides labels for the service
+  labels: Mapping<String, String>?
+
+  /// Annotations overrides labels for the service
+  annotations: Mapping<String, String>?
+
+  /// Selector overrides selector for the service
+  selector: Mapping<String, String>?
+}
+
+class PodDisruptionBudget {
+  /// The name of the podDisruptionBudget
+  name: String?
+
+  /// An eviction is allowed if at least "minAvailable" pods selected by "selector" will still be
+  /// available after the eviction, i.e. even in the absence of the evicted pod. So for example you can
+  /// prevent all voluntary evictions by specifying "100%".
+  minAvailable: (Int|String)?
+
+  /// An eviction is allowed if at most "maxUnavailable" pods selected by "selector" are unavailable
+  /// after the eviction, i.e. even in absence of the evicted pod. For example, one can prevent all
+  /// voluntary evictions by specifying 0. This is a mutually exclusive setting with "minAvailable".
+  maxUnavailable: (Int|String)?
+}
+
+/// The source configuration for Knative Eventing
+class Source {
+  /// Ceph settings
+  ceph: Ceph?
+
+  /// GitHub settings
+  github: Github?
+
+  /// GitLab settings
+  gitlab: Gitlab?
+
+  /// Apache Kafka settings
+  kafka: Kafka?
+
+  /// RabbitMQ settings
+  rabbitmq: Rabbitmq?
+
+  /// Redis settings
+  redis: Redis?
+}
+
+/// Ceph settings
+class Ceph {
+  enabled: Boolean?
+}
+
+/// GitHub settings
+class Github {
+  enabled: Boolean?
+}
+
+/// GitLab settings
+class Gitlab {
+  enabled: Boolean?
+}
+
+/// Apache Kafka settings
+class Kafka {
+  enabled: Boolean?
+}
+
+/// RabbitMQ settings
+class Rabbitmq {
+  enabled: Boolean?
+}
+
+/// Redis settings
+class Redis {
+  enabled: Boolean?
+}
+
+class Manifest {
+  /// The link of the manifest URL
+  URL: String?
+}
+
+/// A means to override the corresponding deployment images in the upstream. This affects both
+/// apps/v1.Deployment and caching.internal.knative.dev/v1alpha1.Image.
+class Registry {
+  /// A list of secrets to be used when pulling the knative images. The secret must be created in the
+  /// same namespace as the knative-eventing deployments, and not the namespace of this resource.
+  imagePullSecrets: Listing<ImagePullSecret>?
+
+  /// A map of a container name or image name to the full image location of the individual knative image.
+  `override`: Mapping<String, String>?
+}
+
+class ImagePullSecret {
+  /// The name of the secret.
+  name: String?
+}
+
+class Status {
+  /// The latest available observations of a resource's current state.
+  conditions: Listing<Condition>?
+
+  /// The list of eventing manifests, which have been installed by the operator
+  manifests: Listing<String>?
+
+  /// The generation last processed by the controller
+  observedGeneration: Int?
+
+  /// The version of the installed release
+  version: String?
+}
+
+class Condition {
+  /// LastTransitionTime is the last time the condition transitioned from one status to another. We use
+  /// VolatileTime in place of metav1.Time to exclude this from creating equality.Semantic differences
+  /// (all other things held constant).
+  lastTransitionTime: String?
+
+  /// A human readable message indicating details about the transition.
+  message: String?
+
+  /// The reason for the condition's last transition.
+  reason: String?
+
+  /// Severity with which to treat failures of this type of condition. When this is not specified, it
+  /// defaults to Error.
+  severity: String?
+
+  /// Status of the condition, one of True, False, Unknown.
+  status: String
+
+  /// Type of condition.
+  type: String
+}
