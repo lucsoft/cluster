@@ -55,7 +55,7 @@ Deno.serve(async (req: Request) => {
             await sbx.fs.mkdir("/home/app/bin");
             await sbx.fs.mkdir("/home/app/repo");
             await sbx.sh`
-                git clone --depth 1 ${repoUrl} .
+                git clone ${repoUrl} .
                 git switch --detach tags/${version}
             `.cwd("./repo");
             await sbx.sh`
@@ -66,11 +66,7 @@ Deno.serve(async (req: Request) => {
             `.cwd("/home/app/bin");
 
 
-            await sbx.sh`
-                pwd
-                ls -la
-                /home/app/bin/pkl project package --skip-publish-check
-            `
+            await sbx.sh`/home/app/bin/pkl project package --skip-publish-check`
                 .cwd(`/home/app/repo/packages/${packageName}`);
 
             const responding = await sbx.sh`cd /home/app/repo/packages/${packageName}; /home/app/bin/pkl project package --skip-publish-check`
