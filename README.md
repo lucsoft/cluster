@@ -7,6 +7,7 @@ This project uses [Pkl](https://pkl-lang.org/) for configuration management, ena
 
 - **/personal-cluster**: Main cluster configuration and secrets.
 - **/packages**: Reusable Pkl packages for various workloads and tools.
+- **/pkl-packages**: Source code for Pkl repository hosting the packages. <https://pkl-pkgs.lucsoft.de/>
 
 ## Packages
 
@@ -20,6 +21,8 @@ The following Pkl packages are available under `/packages`:
 
 - **lucsoft.k8s.Workload**
     Generic Pkl package for Kubernetes workloads.
+
+Up to date list can be found in the repository <https://pkl-pkgs.lucsoft.de/>.
 
 ## Getting Started
 
