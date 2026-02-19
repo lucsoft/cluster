@@ -9,9 +9,11 @@
       }
     },
     "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Workload@0": {
-      "type": "local",
+      "type": "remote",
       "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Workload@0.1.0",
-      "path": "../lucsoft.k8s.Workload"
+      "checksums": {
+        "sha256": "115073d58571bfd8b59145276d888f3582aa5327714a0ca443a006ffcdfbbce3"
+      }
     }
   }
 }

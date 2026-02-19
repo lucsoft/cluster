@@ -5,8 +5,16 @@ dependencies {
   ["k8s"] {
     uri = "package://pkg.pkl-lang.org/pkl-k8s/k8s@\(versions.pklK8sVersion)"
   }
-  ["Workload"] = import("../packages/lucsoft.k8s.Workload/PklProject")
-  ["itzg.minecraft"] = import("../packages/itzg.minecraft/PklProject")
-  ["ArgoCD"] = import("../packages/argo.ArgoCD/PklProject")
-  ["Fission"] = import("../packages/io.Fission/PklProject")
+  ["Workload"] {
+    uri = "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Workload@0.1.0"
+  }
+  ["itzg.minecraft"] {
+    uri = "package://pkl-pkgs.lucsoft.de/packages/itzg.minecraft@0.1.0"
+  }
+  ["ArgoCD"] {
+    uri = "package://pkl-pkgs.lucsoft.de/packages/io.ArgoCD@0.1.0"
+  }
+  ["Fission"] {
+    uri = "package://pkl-pkgs.lucsoft.de/packages/io.Fission@0.1.0"
+  }
 }
