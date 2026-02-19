@@ -5,55 +5,14 @@ import { buildPackage } from "./build.ts";
 import { getAllPackages, getAllTags } from "./github.ts";
 import { respondHtml } from "./respondHtml.ts";
 
-
-
 const matching = /.out\/.*\/(?<fileName>.*)/;
+const fullPattern = new URLPattern({ pathname: "/packages/:packageName@:version/*?" });
 
 Deno.serve(async (req: Request) => {
     const url = new URL(req.url);
-    const fullPattern = new URLPattern({ pathname: "/packages/:packageName@:version/*?" });
     console.log("[REQ]", req.method, url.href);
+
     const kv = await Deno.openKv();
-    if (fullPattern.test(url)) {
-        const { packageName, version } = fullPattern.exec(url)!.pathname.groups;
-        assert(version, "Version is required");
-        assert(packageName, "Package name is required");
-        parse(version);
-
-        const cachedResponse = await kv.get<{ output: string; }>([ "packages", packageName, version ]);
-        const output = cachedResponse.value?.output ?? await buildPackage(kv, version, packageName);
-
-        const relative = fullPattern.exec(url)!.pathname.groups[ "0" ];
-
-        if (relative) {
-            const fileName = output.match(matching)?.groups?.fileName;
-
-            if (!fileName)
-                return new Response("File not found", { status: 404 });
-
-            const file = await kv.get<{ data: Uint8Array<ArrayBuffer>; }>([ "packages", packageName, version, fileName ]);
-
-            if (!file.value)
-                return new Response("File not found", { status: 404 });
-
-            return new Response(file.value.data, {
-                headers: { "Content-Type": "application/octet-stream" },
-            });
-        }
-
-        const mainFile = output.split("\n").toSorted((a, b) => a.localeCompare(b))[ 0 ];
-        const fileName = mainFile.match(matching)?.groups?.fileName;
-        if (!fileName)
-            return new Response("File not found", { status: 404 });
-
-        const file = await kv.get<{ data: Uint8Array<ArrayBuffer>; }>([ "packages", packageName, version, fileName ]);
-        if (!file.value)
-            return new Response("File not found", { status: 404 });
-
-        return new Response(file.value.data, {
-            headers: { "Content-Type": "application/octet-stream" },
-        });
-    }
 
     const tags = await getAllTags(kv);
     const newestTag = tags
@@ -63,6 +22,39 @@ Deno.serve(async (req: Request) => {
     assert(newestTag, "No tags found");
 
     const packages = await getAllPackages(kv, format(newestTag));
+
+    if (fullPattern.test(url)) {
+        const { packageName, version } = fullPattern.exec(url)!.pathname.groups;
+        assert(version, "Version is required");
+        assert(packageName, "Package name is required");
+        if (!packages.includes(packageName)) {
+            return new Response("Package not found", { status: 404 });
+        }
+        if (!tags.includes(version)) {
+            return new Response("Version not found", { status: 404 });
+        }
+
+        parse(version);
+
+        const cachedResponse = await kv.get<{ output: string; }>([ "packages", packageName, version ]);
+        const output = cachedResponse.value?.output ?? await buildPackage(kv, version, packageName);
+
+        const isRelativePath = fullPattern.exec(url)!.pathname.groups[ "0" ];
+        const notFoundError = new Response("File not found", { status: 404 });
+
+        const fileName = isRelativePath
+            ? output.match(matching)?.groups?.fileName
+            : output.split("\n").toSorted((a, b) => a.localeCompare(b))[ 0 ].match(matching)?.groups?.fileName;
+
+        if (!fileName) return notFoundError;
+
+        const file = await kv.get<{ data: Uint8Array<ArrayBuffer>; }>([ "packages", packageName, version, fileName ]);
+        if (!file.value) return notFoundError;
+
+        return new Response(file.value.data, {
+            headers: { "Content-Type": "application/octet-stream" },
+        });
+    }
 
     return respondHtml(html`
         <meta name="color-scheme" content="dark light">
