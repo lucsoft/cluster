@@ -1,0 +1,14 @@
+import "@k8s/K8sResource.pkl"
+
+resources: Listing<K8sResource>(
+  isDistinctBy((it) ->
+    it.kind + it.apiVersion + it.toMap()["metadata"].name + it.toMap()["metadata"].namespace
+  ),
+) = new {}
+
+output {
+  value = resources
+  renderer = (K8sResource.output.renderer as YamlRenderer) {
+    isStream = true
+  }
+}

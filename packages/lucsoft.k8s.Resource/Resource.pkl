@@ -1,0 +1,3 @@
+import "@k8s/K8sResource.pkl"
+
+resources: Listing<K8sResource> = new {}

@@ -3,14 +3,19 @@ import { compare, format, parse } from "@std/semver";
 import { html } from "lit";
 import { buildPackage } from "./build.ts";
 import { getAllPackages, getAllTags } from "./github.ts";
+import icon from "./icon.svg" with { type: "text" };
 import { respondHtml } from "./respondHtml.ts";
 
 const matching = /.out\/.*\/(?<fileName>.*)/;
 const fullPattern = new URLPattern({ pathname: "/packages/:packageName@:version/*?" });
+const iconPattern = new URLPattern({ pathname: "/icon.svg" });
 
 Deno.serve(async (req: Request) => {
     const url = new URL(req.url);
     console.log("[REQ]", req.method, url.href);
+
+    if (iconPattern.test(url))
+        return new Response(icon, { headers: { "Content-Type": "image/svg+xml" } });
 
     const kv = await Deno.openKv();
 
@@ -100,6 +105,7 @@ Deno.serve(async (req: Request) => {
                 }
             }
         </style>
+        <img src="/icon.svg" width="256" alt="Icon">
         <h1>Packages</h1>
         <ul>
             ${packages.map(pkg => html`

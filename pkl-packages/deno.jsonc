@@ -5,6 +5,10 @@
     "compilerOptions": {
         "checkJs": true
     },
+    "unstable": [
+        "kv",
+        "raw-imports"
+    ],
     "imports": {
         "@deno/sandbox": "jsr:@deno/sandbox@^0.12.0",
         "@lit-labs/ssr": "npm:@lit-labs/ssr@^4.0.0",

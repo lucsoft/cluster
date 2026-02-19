@@ -16,7 +16,6 @@ export async function getAllTags(kv: Deno.Kv): Promise<string[]> {
     const cachedTags = await kv.get<CachedInfo<string[]>>([ "github", "tags" ]);
 
     if (isCacheValid(cachedTags.value, 2 * 60 * 1000)) {
-        console.log("Using cached tags");
         return cachedTags.value.value;
     }
 
@@ -39,7 +38,6 @@ export async function getAllTags(kv: Deno.Kv): Promise<string[]> {
 export async function getAllPackages(kv: Deno.Kv, targetTag: string): Promise<string[]> {
     const cachedPackages = await kv.get<CachedInfo<string[]>>([ "github", "packages", targetTag ]);
     if (isCacheValid(cachedPackages.value, 60 * 60 * 1000)) {
-        console.log("Using cached packages");
         return cachedPackages.value.value;
     }
     const repoPathMatch = repoUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
