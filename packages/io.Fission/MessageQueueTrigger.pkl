@@ -233,7 +233,7 @@ class Podspec {
   /// set. If RuntimeClass is configured and selected in the PodSpec, Overhead will be set to the value
   /// defined in the corresponding RuntimeClass, otherwise it will remain unset and treated as zero. More
   /// info: https://git.k8s.io/enhancements/keps/sig-node/688-pod-overhead/README.md
-  overhead: Mapping<String, Int|String>?
+  overhead: Mapping<String, Int | String>?
 
   /// PreemptionPolicy is the Policy for preempting pods with lower priority. One of Never,
   /// PreemptLowerPriority. Defaults to PreemptLowerPriority if unset.
@@ -372,7 +372,9 @@ class NodeAffinity {
   /// etc.), compute a sum by iterating through the elements of this field and adding "weight" to the sum
   /// if the node matches the corresponding matchExpressions; the node(s) with the highest sum are the
   /// most preferred.
-  preferredDuringSchedulingIgnoredDuringExecution: Listing<PreferredDuringSchedulingIgnoredDuringExecution>?
+  preferredDuringSchedulingIgnoredDuringExecution: Listing<
+    PreferredDuringSchedulingIgnoredDuringExecution,
+  >?
 
   /// If the affinity requirements specified by this field are not met at scheduling time, the pod will
   /// not be scheduled onto the node. If the affinity requirements specified by this field cease to be
@@ -446,14 +448,18 @@ class PodAffinity {
   /// etc.), compute a sum by iterating through the elements of this field and adding "weight" to the sum
   /// if the node has pods which matches the corresponding podAffinityTerm; the node(s) with the highest
   /// sum are the most preferred.
-  preferredDuringSchedulingIgnoredDuringExecution: Listing<PreferredDuringSchedulingIgnoredDuringExecution>?
+  preferredDuringSchedulingIgnoredDuringExecution: Listing<
+    PreferredDuringSchedulingIgnoredDuringExecution,
+  >?
 
   /// If the affinity requirements specified by this field are not met at scheduling time, the pod will
   /// not be scheduled onto the node. If the affinity requirements specified by this field cease to be
   /// met at some point during pod execution (e.g. due to a pod label update), the system may or may not
   /// try to eventually evict the pod from its node. When there are multiple elements, the lists of nodes
   /// corresponding to each podAffinityTerm are intersected, i.e. all terms must be satisfied.
-  requiredDuringSchedulingIgnoredDuringExecution: Listing<RequiredDuringSchedulingIgnoredDuringExecution>?
+  requiredDuringSchedulingIgnoredDuringExecution: Listing<
+    RequiredDuringSchedulingIgnoredDuringExecution,
+  >?
 }
 
 /// The weights of all of the matched WeightedPodAffinityTerm fields are added per-node to find the most
@@ -605,7 +611,9 @@ class PodAntiAffinity {
   /// expressions, etc.), compute a sum by iterating through the elements of this field and subtracting
   /// "weight" from the sum if the node has pods which matches the corresponding podAffinityTerm; the
   /// node(s) with the highest sum are the most preferred.
-  preferredDuringSchedulingIgnoredDuringExecution: Listing<PreferredDuringSchedulingIgnoredDuringExecution>?
+  preferredDuringSchedulingIgnoredDuringExecution: Listing<
+    PreferredDuringSchedulingIgnoredDuringExecution,
+  >?
 
   /// If the anti-affinity requirements specified by this field are not met at scheduling time, the pod
   /// will not be scheduled onto the node. If the anti-affinity requirements specified by this field
@@ -613,7 +621,9 @@ class PodAntiAffinity {
   /// or may not try to eventually evict the pod from its node. When there are multiple elements, the
   /// lists of nodes corresponding to each podAffinityTerm are intersected, i.e. all terms must be
   /// satisfied.
-  requiredDuringSchedulingIgnoredDuringExecution: Listing<RequiredDuringSchedulingIgnoredDuringExecution>?
+  requiredDuringSchedulingIgnoredDuringExecution: Listing<
+    RequiredDuringSchedulingIgnoredDuringExecution,
+  >?
 }
 
 /// A single application container that you want to run within a pod.
@@ -858,7 +868,7 @@ class ResourceFieldRef {
   containerName: String?
 
   /// Specifies the output format of the exposed resources, defaults to "1"
-  divisor: (Int|String)?
+  divisor: (Int | String)?
 
   /// Required: resource to select
   resource: String
@@ -981,7 +991,7 @@ class HttpGet {
 
   /// Name or number of the port to access on the container. Number must be in the range 1 to 65535. Name
   /// must be an IANA_SVC_NAME.
-  port: Int|String
+  port: Int | String
 
   /// Scheme to use for connecting to the host. Defaults to HTTP.
   scheme: String?
@@ -1011,7 +1021,7 @@ class TcpSocket {
 
   /// Number or name of the port to access on the container. Number must be in the range 1 to 65535. Name
   /// must be an IANA_SVC_NAME.
-  port: Int|String
+  port: Int | String
 }
 
 /// PreStop is called immediately before a container is terminated due to an API request or management
@@ -1102,7 +1112,7 @@ class TcpSocket {
 
   /// Number or name of the port to access on the container. Number must be in the range 1 to 65535. Name
   /// must be an IANA_SVC_NAME.
-  port: Int|String
+  port: Int | String
 }
 
 /// ContainerPort represents a network port in a single container.
@@ -1196,13 +1206,13 @@ class Resources {
 
   /// Limits describes the maximum amount of compute resources allowed. More info:
   /// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-  limits: Mapping<String, Int|String>?
+  limits: Mapping<String, Int | String>?
 
   /// Requests describes the minimum amount of compute resources required. If Requests is omitted for a
   /// container, it defaults to Limits if that is explicitly specified, otherwise to an
   /// implementation-defined value. Requests cannot exceed Limits. More info:
   /// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-  requests: Mapping<String, Int|String>?
+  requests: Mapping<String, Int | String>?
 }
 
 /// ResourceClaim references one entry in PodSpec.ResourceClaims.
@@ -1734,13 +1744,13 @@ class Resources {
 
   /// Limits describes the maximum amount of compute resources allowed. More info:
   /// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-  limits: Mapping<String, Int|String>?
+  limits: Mapping<String, Int | String>?
 
   /// Requests describes the minimum amount of compute resources required. If Requests is omitted for a
   /// container, it defaults to Limits if that is explicitly specified, otherwise to an
   /// implementation-defined value. Requests cannot exceed Limits. More info:
   /// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-  requests: Mapping<String, Int|String>?
+  requests: Mapping<String, Int | String>?
 }
 
 /// Optional: SecurityContext defines the security options the ephemeral container should be run with. If
@@ -1913,13 +1923,13 @@ class Resources {
 
   /// Limits describes the maximum amount of compute resources allowed. More info:
   /// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-  limits: Mapping<String, Int|String>?
+  limits: Mapping<String, Int | String>?
 
   /// Requests describes the minimum amount of compute resources required. If Requests is omitted for a
   /// container, it defaults to Limits if that is explicitly specified, otherwise to an
   /// implementation-defined value. Requests cannot exceed Limits. More info:
   /// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-  requests: Mapping<String, Int|String>?
+  requests: Mapping<String, Int | String>?
 }
 
 /// PodSchedulingGate is associated to a Pod to guard its scheduling.
@@ -2676,7 +2686,7 @@ class ResourceFieldRef {
   containerName: String?
 
   /// Specifies the output format of the exposed resources, defaults to "1"
-  divisor: (Int|String)?
+  divisor: (Int | String)?
 
   /// Required: resource to select
   resource: String
@@ -2695,7 +2705,7 @@ class EmptyDir {
   /// value between the SizeLimit specified here and the sum of memory limits of all containers in a pod.
   /// The default is nil which means that the limit is undefined. More info:
   /// https://kubernetes.io/docs/concepts/storage/volumes#emptydir
-  sizeLimit: (Int|String)?
+  sizeLimit: (Int | String)?
 }
 
 /// ephemeral represents a volume that is handled by a cluster storage driver. The volume's lifecycle is
@@ -2892,13 +2902,13 @@ class DataSourceRef {
 class Resources {
   /// Limits describes the maximum amount of compute resources allowed. More info:
   /// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-  limits: Mapping<String, Int|String>?
+  limits: Mapping<String, Int | String>?
 
   /// Requests describes the minimum amount of compute resources required. If Requests is omitted for a
   /// container, it defaults to Limits if that is explicitly specified, otherwise to an
   /// implementation-defined value. Requests cannot exceed Limits. More info:
   /// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-  requests: Mapping<String, Int|String>?
+  requests: Mapping<String, Int | String>?
 }
 
 /// selector is a label query over volumes to consider for binding.

@@ -1,95 +1,32 @@
-// deno-lint-ignore-file no-explicit-any
-import { Sandbox } from "@deno/sandbox";
 import { assert } from "@std/assert";
-import { parse } from "@std/semver";
+import { compare, format, parse } from "@std/semver";
 import { html } from "lit";
+import { buildPackage } from "./build.ts";
+import { getAllPackages, getAllTags } from "./github.ts";
 import { respondHtml } from "./respondHtml.ts";
 
-const repoUrl = "https://github.com/lucsoft/cluster";
 
-async function getFoldersInsideGithubRepo(repoUrl: string): Promise<string[]> {
-    const repoPathMatch = repoUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
-    if (!repoPathMatch) return [];
 
-    const [ _, owner, repo ] = repoPathMatch;
-    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/packages`;
-
-    const res = await fetch(apiUrl);
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data
-        .filter((item: any) => item.type === "dir")
-        .map((item: any) => item.name);
-}
-
-async function getCurrentHash(repoUrl: string): Promise<string> {
-    const repoPathMatch = repoUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
-    if (!repoPathMatch) return "";
-
-    const [ _, owner, repo ] = repoPathMatch;
-    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/commits?per_page=1`;
-
-    const res = await fetch(apiUrl);
-    assert(res.ok, `Failed to fetch commits: ${res.status} ${res.statusText}`);
-    if (!res.ok) return "";
-    const data = await res.json();
-    return data[ 0 ]?.sha || "";
-}
 const matching = /.out\/.*\/(?<fileName>.*)/;
 
 Deno.serve(async (req: Request) => {
     const url = new URL(req.url);
     const fullPattern = new URLPattern({ pathname: "/packages/:packageName@:version/*?" });
     console.log("[REQ]", req.method, url.href);
+    const kv = await Deno.openKv();
     if (fullPattern.test(url)) {
         const { packageName, version } = fullPattern.exec(url)!.pathname.groups;
         assert(version, "Version is required");
         assert(packageName, "Package name is required");
         parse(version);
-        const kv = await Deno.openKv();
 
-        const response = await kv.get<{ output: string; }>([ "packages", packageName, version ]);
-
-        if (!response.value) {
-            await using sbx = await Sandbox.create({ org: "lucsoft" });
-            await sbx.fs.mkdir("/home/app/bin");
-            await sbx.fs.mkdir("/home/app/repo");
-            await sbx.sh`
-                git clone ${repoUrl} .
-                git switch --detach tags/${version}
-            `.cwd("./repo");
-            await sbx.sh`
-                export PATH="/home/app/bin:$PATH"
-                curl -L -o pkl 'https://github.com/apple/pkl/releases/download/0.30.2/pkl-linux-amd64'
-                chmod +x pkl
-                pkl --version
-            `.cwd("/home/app/bin");
-
-
-            await sbx.sh`/home/app/bin/pkl project package --skip-publish-check`
-                .cwd(`/home/app/repo/packages/${packageName}`);
-
-            const responding = await sbx.sh`cd /home/app/repo/packages/${packageName}; /home/app/bin/pkl project package --skip-publish-check`
-                .text();
-
-            const output = responding.trim();
-
-            await kv.set([ "packages", packageName, version ], { output });
-
-            for (const element of output.trim().split("\n")) {
-                const data = await sbx.fs.readFile(`./repo/packages/${packageName}/${element.trim()}`);
-                const realName = element.match(matching)?.groups?.fileName;
-                assert(realName, `Failed to extract file name from: ${element}`);
-                await kv.set([ "packages", packageName, version, realName ], { data });
-            }
-
-            (response as unknown as { value: { output: string; }; }).value = { output };
-        }
+        const cachedResponse = await kv.get<{ output: string; }>([ "packages", packageName, version ]);
+        const output = cachedResponse.value?.output ?? await buildPackage(kv, version, packageName);
 
         const relative = fullPattern.exec(url)!.pathname.groups[ "0" ];
-        assert(response.value, "Response value should be set at this point");
+
         if (relative) {
-            const fileName = response.value.output.match(matching)?.groups?.fileName;
+            const fileName = output.match(matching)?.groups?.fileName;
 
             if (!fileName)
                 return new Response("File not found", { status: 404 });
@@ -104,7 +41,7 @@ Deno.serve(async (req: Request) => {
             });
         }
 
-        const mainFile = response.value.output.split("\n").toSorted((a, b) => a.localeCompare(b))[ 0 ];
+        const mainFile = output.split("\n").toSorted((a, b) => a.localeCompare(b))[ 0 ];
         const fileName = mainFile.match(matching)?.groups?.fileName;
         if (!fileName)
             return new Response("File not found", { status: 404 });
@@ -117,17 +54,68 @@ Deno.serve(async (req: Request) => {
             headers: { "Content-Type": "application/octet-stream" },
         });
     }
-    const packages = await getFoldersInsideGithubRepo("https://github.com/lucsoft/cluster");
+    const packages = await getAllPackages(kv);
+    const tags = await getAllTags(kv);
+    const newestTag = tags
+        .map(tag => parse(tag))
+        .toSorted((a, b) => compare(a, b))
+        .at(-1);
+
+    assert(newestTag, "No tags found");
+
     return respondHtml(html`
         <meta name="color-scheme" content="dark light">
         <style>
             body {
                 font-family: system-ui, sans-serif;
+                display: grid;
+                grid-auto-flow: row;
+                align-content: start;
+                gap: 32px;
+                margin: 32px 0;
+                justify-items: center;
+                grid-template-rows: max-content;
+            }
+
+            h1
+            {
+                margin: 0;
+            }
+
+            ul
+            {
+                display: grid;
+                grid-auto-flow: row;
+                max-width: max-content;
+                gap: 8px;
+                margin: 0;
+                padding: 0;
+
+                li
+                {
+                    display: grid;
+                    border: 1px solid #ccc;
+                    padding: 12px;
+                    gap: 8px;
+                    border-radius: 4px;
+                    &:hover {
+                        background-color: #8181811f;
+                    }
+                    .title {
+                        font-weight: bold;
+                    }
+                }
             }
         </style>
-        <h1>Package List: </h1>
+        <h1>Packages</h1>
         <ul>
-            ${packages.map(pkg => html`<li><a href="/packages/${pkg}">${pkg}</a></li>`)}
+            ${packages.map(pkg => html`
+                <li>
+                    <span class="title">${pkg}</span>
+                    <span>${`package://pkl-pkgs.lucsoft.de/packages/${pkg}@${format(newestTag)}`}</span>
+                </li>
+            `)}
         </ul>
+        <a href="https://github.com/lucsoft/cluster">Source code on GitHub</a>
     `);
 });

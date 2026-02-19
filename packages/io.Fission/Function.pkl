@@ -6,8 +6,8 @@ module io.fission.v1.Function
 
 extends "@k8s/K8sResource.pkl"
 
-import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
 import "@k8s/api/core/v1/PodSpec.pkl"
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
 
 fixed apiVersion: "fission.io/v1"
 
@@ -158,7 +158,7 @@ class ScaleDown {
   /// consumption falls below 95Mi or exceeds 101Mi.
   ///
   /// This is an alpha field and requires enabling the HPAConfigurableTolerance feature gate.
-  tolerance: (Int|String)?
+  tolerance: (Int | String)?
 }
 
 /// HPAScalingPolicy is a single policy which must hold true for a specified past interval.
@@ -203,7 +203,7 @@ class ScaleUp {
   /// consumption falls below 95Mi or exceeds 101Mi.
   ///
   /// This is an alpha field and requires enabling the HPAConfigurableTolerance feature gate.
-  tolerance: (Int|String)?
+  tolerance: (Int | String)?
 }
 
 /// MetricSpec specifies how to scale based on a single metric (only `type` and one other matching field
@@ -264,13 +264,13 @@ class Target {
 
   /// averageValue is the target value of the average of the metric across all relevant pods (as a
   /// quantity)
-  averageValue: (Int|String)?
+  averageValue: (Int | String)?
 
   /// type represents whether the metric type is Utilization, Value, or AverageValue
   type: String
 
   /// value is the target value of the metric (as a quantity).
-  value: (Int|String)?
+  value: (Int | String)?
 }
 
 /// external refers to a global metric that is not associated with any Kubernetes object. It allows
@@ -428,13 +428,13 @@ class Resources {
 
   /// Limits describes the maximum amount of compute resources allowed. More info:
   /// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-  limits: Mapping<String, Int|String>?
+  limits: Mapping<String, Int | String>?
 
   /// Requests describes the minimum amount of compute resources required. If Requests is omitted for a
   /// container, it defaults to Limits if that is explicitly specified, otherwise to an
   /// implementation-defined value. Requests cannot exceed Limits. More info:
   /// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-  requests: Mapping<String, Int|String>?
+  requests: Mapping<String, Int | String>?
 }
 
 /// ResourceClaim references one entry in PodSpec.ResourceClaims.

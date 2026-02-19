@@ -6,8 +6,8 @@ module io.fission.v1.Environment
 
 extends "@k8s/K8sResource.pkl"
 
-import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
 import "@k8s/api/core/v1/PodSpec.pkl"
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
 
 fixed apiVersion: "fission.io/v1"
 
@@ -100,13 +100,13 @@ class Resources {
 
   /// Limits describes the maximum amount of compute resources allowed. More info:
   /// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-  limits: Mapping<String, Int|String>?
+  limits: Mapping<String, Int | String>?
 
   /// Requests describes the minimum amount of compute resources required. If Requests is omitted for a
   /// container, it defaults to Limits if that is explicitly specified, otherwise to an
   /// implementation-defined value. Requests cannot exceed Limits. More info:
   /// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-  requests: Mapping<String, Int|String>?
+  requests: Mapping<String, Int | String>?
 }
 
 /// ResourceClaim references one entry in PodSpec.ResourceClaims.

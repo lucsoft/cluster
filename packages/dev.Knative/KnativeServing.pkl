@@ -6,8 +6,9 @@ module dev.knative.operator.v1beta1.KnativeServing
 
 extends "@k8s/K8sResource.pkl"
 
-import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
 import "file:///Users/lucsoft/Developer/infra-hmsys-sys/packages/dev.Knative/_common.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
 
 fixed apiVersion: "operator.knative.dev/v1beta1"
 
@@ -81,7 +82,7 @@ class ControllerCustomCerts {
   name: String?
 
   /// One of ConfigMap or Secret
-  type: ("ConfigMap"|"Secret"|"")?
+  type: ("ConfigMap" | "Secret" | "")?
 }
 
 /// Allows specification of HA control plane
@@ -254,7 +255,7 @@ class ResourceFieldRef {
   containerName: String?
 
   /// Specifies the output format of the exposed resources, defaults to "1"
-  divisor: (Int|String)?
+  divisor: (Int | String)?
 
   /// Required: resource to select
   resource: String
@@ -410,7 +411,9 @@ class NodeAffinity {
   /// etc.), compute a sum by iterating through the elements of this field and adding "weight" to the sum
   /// if the node matches the corresponding matchExpressions; the node(s) with the highest sum are the
   /// most preferred.
-  preferredDuringSchedulingIgnoredDuringExecution: Listing<PreferredDuringSchedulingIgnoredDuringExecution>?
+  preferredDuringSchedulingIgnoredDuringExecution: Listing<
+    PreferredDuringSchedulingIgnoredDuringExecution,
+  >?
 
   /// If the affinity requirements specified by this field are not met at scheduling time, the pod will
   /// not be scheduled onto the node. If the affinity requirements specified by this field cease to be
@@ -484,14 +487,18 @@ class PodAffinity {
   /// etc.), compute a sum by iterating through the elements of this field and adding "weight" to the sum
   /// if the node has pods which matches the corresponding podAffinityTerm; the node(s) with the highest
   /// sum are the most preferred.
-  preferredDuringSchedulingIgnoredDuringExecution: Listing<PreferredDuringSchedulingIgnoredDuringExecution>?
+  preferredDuringSchedulingIgnoredDuringExecution: Listing<
+    PreferredDuringSchedulingIgnoredDuringExecution,
+  >?
 
   /// If the affinity requirements specified by this field are not met at scheduling time, the pod will
   /// not be scheduled onto the node. If the affinity requirements specified by this field cease to be
   /// met at some point during pod execution (e.g. due to a pod label update), the system may or may not
   /// try to eventually evict the pod from its node. When there are multiple elements, the lists of nodes
   /// corresponding to each podAffinityTerm are intersected, i.e. all terms must be satisfied.
-  requiredDuringSchedulingIgnoredDuringExecution: Listing<RequiredDuringSchedulingIgnoredDuringExecution>?
+  requiredDuringSchedulingIgnoredDuringExecution: Listing<
+    RequiredDuringSchedulingIgnoredDuringExecution,
+  >?
 }
 
 /// The weights of all of the matched WeightedPodAffinityTerm fields are added per-node to find the most
@@ -560,7 +567,9 @@ class PodAntiAffinity {
   /// expressions, etc.), compute a sum by iterating through the elements of this field and adding
   /// "weight" to the sum if the node has pods which matches the corresponding podAffinityTerm; the
   /// node(s) with the highest sum are the most preferred.
-  preferredDuringSchedulingIgnoredDuringExecution: Listing<PreferredDuringSchedulingIgnoredDuringExecution>?
+  preferredDuringSchedulingIgnoredDuringExecution: Listing<
+    PreferredDuringSchedulingIgnoredDuringExecution,
+  >?
 
   /// If the anti-affinity requirements specified by this field are not met at scheduling time, the pod
   /// will not be scheduled onto the node. If the anti-affinity requirements specified by this field
@@ -568,7 +577,9 @@ class PodAntiAffinity {
   /// or may not try to eventually evict the pod from its node. When there are multiple elements, the
   /// lists of nodes corresponding to each podAffinityTerm are intersected, i.e. all terms must be
   /// satisfied.
-  requiredDuringSchedulingIgnoredDuringExecution: Listing<RequiredDuringSchedulingIgnoredDuringExecution>?
+  requiredDuringSchedulingIgnoredDuringExecution: Listing<
+    RequiredDuringSchedulingIgnoredDuringExecution,
+  >?
 }
 
 /// The pod this Resource is used to specify the requests and limits for a certain container based on the
@@ -604,12 +615,12 @@ class PodDisruptionBudget {
   /// An eviction is allowed if at least "minAvailable" pods selected by "selector" will still be
   /// available after the eviction, i.e. even in the absence of the evicted pod. So for example you can
   /// prevent all voluntary evictions by specifying "100%".
-  minAvailable: (Int|String)?
+  minAvailable: (Int | String)?
 
   /// An eviction is allowed if at most "maxUnavailable" pods selected by "selector" are unavailable
   /// after the eviction, i.e. even in absence of the evicted pod. For example, one can prevent all
   /// voluntary evictions by specifying 0. This is a mutually exclusive setting with "minAvailable".
-  maxUnavailable: (Int|String)?
+  maxUnavailable: (Int | String)?
 }
 
 /// The ingress configuration for Knative Serving
