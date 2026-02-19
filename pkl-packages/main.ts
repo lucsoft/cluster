@@ -54,14 +54,15 @@ Deno.serve(async (req: Request) => {
             headers: { "Content-Type": "application/octet-stream" },
         });
     }
-    const packages = await getAllPackages(kv);
+
     const tags = await getAllTags(kv);
     const newestTag = tags
         .map(tag => parse(tag))
         .toSorted((a, b) => compare(a, b))
         .at(-1);
-
     assert(newestTag, "No tags found");
+
+    const packages = await getAllPackages(kv, format(newestTag));
 
     return respondHtml(html`
         <meta name="color-scheme" content="dark light">

@@ -15,7 +15,7 @@ function isCacheValid<T>(cached: CachedInfo<T> | null, maxAgeMs: number): cached
 export async function getAllTags(kv: Deno.Kv): Promise<string[]> {
     const cachedTags = await kv.get<CachedInfo<string[]>>([ "github", "tags" ]);
 
-    if (isCacheValid(cachedTags.value, 60 * 1000)) {
+    if (isCacheValid(cachedTags.value, 2 * 60 * 1000)) {
         console.log("Using cached tags");
         return cachedTags.value.value;
     }
@@ -35,9 +35,10 @@ export async function getAllTags(kv: Deno.Kv): Promise<string[]> {
     return response;
 }
 
-export async function getAllPackages(kv: Deno.Kv): Promise<string[]> {
-    const cachedPackages = await kv.get<CachedInfo<string[]>>([ "github", "packages" ]);
-    if (isCacheValid(cachedPackages.value, 60 * 1000)) {
+
+export async function getAllPackages(kv: Deno.Kv, targetTag: string): Promise<string[]> {
+    const cachedPackages = await kv.get<CachedInfo<string[]>>([ "github", "packages", targetTag ]);
+    if (isCacheValid(cachedPackages.value, 60 * 60 * 1000)) {
         console.log("Using cached packages");
         return cachedPackages.value.value;
     }
@@ -45,7 +46,7 @@ export async function getAllPackages(kv: Deno.Kv): Promise<string[]> {
     if (!repoPathMatch) return [];
 
     const [ _, owner, repo ] = repoPathMatch;
-    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/packages`;
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/packages?ref=${targetTag}`;
 
     const res = await fetch(apiUrl);
     assert(res.ok, `Failed to fetch packages: ${res.status} ${res.statusText} ${JSON.stringify(Object.fromEntries(res.headers.entries()))}`);
@@ -55,6 +56,6 @@ export async function getAllPackages(kv: Deno.Kv): Promise<string[]> {
         .filter((item: any) => item.type === "dir")
         // deno-lint-ignore no-explicit-any
         .map((item: any) => item.name);
-    await kv.set([ "github", "packages" ], { from: new Date(), value: response });
+    await kv.set([ "github", "packages", targetTag ], { from: new Date(), value: response });
     return response;
 }
