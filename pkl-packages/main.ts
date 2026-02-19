@@ -56,7 +56,7 @@ Deno.serve(async (req: Request) => {
             await sbx.fs.mkdir("/home/app/repo");
             await sbx.sh`
                 git clone --depth 1 ${repoUrl} .
-                git reset --hard ${version}
+                git switch --detach tags/${version}
             `.cwd("./repo");
             await sbx.sh`
                 export PATH="/home/app/bin:$PATH"
@@ -69,11 +69,11 @@ Deno.serve(async (req: Request) => {
             await sbx.sh`
                 pwd
                 ls -la
-                /home/app/bin/pkl project package
+                /home/app/bin/pkl project package --skip-publish-check
             `
                 .cwd(`/home/app/repo/packages/${packageName}`);
 
-            const responding = await sbx.sh`cd /home/app/repo/packages/${packageName}; /home/app/bin/pkl project package`
+            const responding = await sbx.sh`cd /home/app/repo/packages/${packageName}; /home/app/bin/pkl project package --skip-publish-check`
                 .text();
 
             const output = responding.trim();

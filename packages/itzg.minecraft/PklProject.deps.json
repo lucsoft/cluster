@@ -8,9 +8,9 @@
         "sha256": "1d948c9fc41e188fcd18ebb656b5d9ddc5f377cb16158bb421be7752bb913926"
       }
     },
-    "package://pkl-packages.lucsoft.deno.net/packages/lucsoft.k8s.Workload@0": {
+    "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Workload@0": {
       "type": "local",
-      "uri": "projectpackage://pkl-packages.lucsoft.deno.net/packages/lucsoft.k8s.Workload@0.1.0",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Workload@0.1.0",
       "path": "../lucsoft.k8s.Workload"
     }
   }

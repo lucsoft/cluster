@@ -17,8 +17,7 @@ local packageName: String = findRootModule(myModule).relativePathTo(module).last
 
 package {
   name = packageName
-  baseUri = "package://pkl-packages.lucsoft.deno.net/packages/\(name)"
-  packageZipUrl =
-    "https://pkl-packages.lucsoft.deno.net/packages/\(name)@\(version)/\(name)@\(version).zip"
+  baseUri = "package://pkl-pkgs.lucsoft.de/packages/\(name)"
+  packageZipUrl = "https://pkl-pkgs.lucsoft.de/packages/\(name)@\(version)/\(name)@\(version).zip"
   license = "MIT"
 }
