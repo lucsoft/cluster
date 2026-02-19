@@ -1,0 +1,76 @@
+/// TLSOption is the CRD implementation of a Traefik TLS Option, allowing to configure some parameters of
+/// the TLS connection. More info:
+/// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/tls/tls-certificates/#certificates-stores#tls-options
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <file:///Users/lucsoft/Developer/infra-hmsys-sys/packages/io.Traefik/>.
+module io.traefik.v1alpha1.TLSOption
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "traefik.io/v1alpha1"
+
+fixed kind: "TLSOption"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// TLSOptionSpec defines the desired state of a TLSOption.
+spec: Spec
+
+/// TLSOptionSpec defines the desired state of a TLSOption.
+class Spec {
+  /// ALPNProtocols defines the list of supported application level protocols for the TLS handshake, in
+  /// order of preference. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/tls/tls-certificates/#certificates-stores#alpn-protocols
+  alpnProtocols: Listing<String>?
+
+  /// CipherSuites defines the list of supported cipher suites for TLS versions up to TLS 1.2. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/tls/tls-certificates/#certificates-stores#cipher-suites
+  cipherSuites: Listing<String>?
+
+  /// ClientAuth defines the server's policy for TLS Client Authentication.
+  clientAuth: ClientAuth?
+
+  /// CurvePreferences defines the preferred elliptic curves. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/tls/tls-certificates/#certificates-stores#curve-preferences
+  curvePreferences: Listing<String>?
+
+  /// DisableSessionTickets disables TLS session resumption via session tickets.
+  disableSessionTickets: Boolean?
+
+  /// MaxVersion defines the maximum TLS version that Traefik will accept. Possible values: VersionTLS10,
+  /// VersionTLS11, VersionTLS12, VersionTLS13. Default: None.
+  maxVersion: String?
+
+  /// MinVersion defines the minimum TLS version that Traefik will accept. Possible values: VersionTLS10,
+  /// VersionTLS11, VersionTLS12, VersionTLS13. Default: VersionTLS10.
+  minVersion: String?
+
+  /// PreferServerCipherSuites defines whether the server chooses a cipher suite among his own instead of
+  /// among the client's. It is enabled automatically when minVersion or maxVersion is set. Deprecated:
+  /// https://github.com/golang/go/issues/45430
+  preferServerCipherSuites: Boolean?
+
+  /// SniStrict defines whether Traefik allows connections from clients connections that do not specify a
+  /// server_name extension.
+  sniStrict: Boolean?
+}
+
+/// ClientAuth defines the server's policy for TLS Client Authentication.
+class ClientAuth {
+  /// ClientAuthType defines the client authentication type to apply.
+  clientAuthType: (
+    "NoClientCert"
+    |"RequestClientCert"
+    |"RequireAnyClientCert"
+    |"VerifyClientCertIfGiven"
+    |"RequireAndVerifyClientCert")?
+
+  /// SecretNames defines the names of the referenced Kubernetes Secret storing certificate details.
+  secretNames: Listing<String>?
+}

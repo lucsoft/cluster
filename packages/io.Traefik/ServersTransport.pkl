@@ -1,0 +1,104 @@
+/// ServersTransport is the CRD implementation of a ServersTransport. If no serversTransport is
+/// specified, the default@internal will be used. The default@internal serversTransport is created from
+/// the static configuration. More info:
+/// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/load-balancing/serverstransport/
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <file:///Users/lucsoft/Developer/infra-hmsys-sys/packages/io.Traefik/>.
+module io.traefik.v1alpha1.ServersTransport
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "traefik.io/v1alpha1"
+
+fixed kind: "ServersTransport"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// ServersTransportSpec defines the desired state of a ServersTransport.
+spec: Spec
+
+/// ServersTransportSpec defines the desired state of a ServersTransport.
+class Spec {
+  /// CertificatesSecrets defines a list of secret storing client certificates for mTLS.
+  certificatesSecrets: Listing<String>?
+
+  /// DisableHTTP2 disables HTTP/2 for connections with backend servers.
+  disableHTTP2: Boolean?
+
+  /// ForwardingTimeouts defines the timeouts for requests forwarded to the backend servers.
+  forwardingTimeouts: ForwardingTimeouts?
+
+  /// InsecureSkipVerify disables SSL certificate verification.
+  insecureSkipVerify: Boolean?
+
+  /// MaxIdleConnsPerHost controls the maximum idle (keep-alive) to keep per-host.
+  maxIdleConnsPerHost: Int(this >= -1)?
+
+  /// PeerCertURI defines the peer cert URI used to match against SAN URI during the peer certificate
+  /// verification.
+  peerCertURI: String?
+
+  /// RootCAs defines a list of CA certificate Secrets or ConfigMaps used to validate server
+  /// certificates.
+  rootCAs: Listing<RootCA>?
+
+  /// RootCAsSecrets defines a list of CA secret used to validate self-signed certificate. Deprecated:
+  /// RootCAsSecrets is deprecated, please use the RootCAs option instead.
+  rootCAsSecrets: Listing<String>?
+
+  /// ServerName defines the server name used to contact the server.
+  serverName: String?
+
+  /// Spiffe defines the SPIFFE configuration.
+  spiffe: Spiffe?
+}
+
+/// ForwardingTimeouts defines the timeouts for requests forwarded to the backend servers.
+class ForwardingTimeouts {
+  /// DialTimeout is the amount of time to wait until a connection to a backend server can be
+  /// established.
+  dialTimeout: (Int|String)?
+
+  /// IdleConnTimeout is the maximum period for which an idle HTTP keep-alive connection will remain open
+  /// before closing itself.
+  idleConnTimeout: (Int|String)?
+
+  /// PingTimeout is the timeout after which the HTTP/2 connection will be closed if a response to ping
+  /// is not received.
+  pingTimeout: (Int|String)?
+
+  /// ReadIdleTimeout is the timeout after which a health check using ping frame will be carried out if
+  /// no frame is received on the HTTP/2 connection.
+  readIdleTimeout: (Int|String)?
+
+  /// ResponseHeaderTimeout is the amount of time to wait for a server's response headers after fully
+  /// writing the request (including its body, if any).
+  responseHeaderTimeout: (Int|String)?
+}
+
+/// RootCA defines a reference to a Secret or a ConfigMap that holds a CA certificate. If both a Secret
+/// and a ConfigMap reference are defined, the Secret reference takes precedence.
+class RootCA {
+  /// ConfigMap defines the name of a ConfigMap that holds a CA certificate. The referenced ConfigMap
+  /// must contain a certificate under either a tls.ca or a ca.crt key.
+  configMap: String?
+
+  /// Secret defines the name of a Secret that holds a CA certificate. The referenced Secret must contain
+  /// a certificate under either a tls.ca or a ca.crt key.
+  secret: String?
+}
+
+/// Spiffe defines the SPIFFE configuration.
+class Spiffe {
+  /// IDs defines the allowed SPIFFE IDs (takes precedence over the SPIFFE TrustDomain).
+  ids: Listing<String>?
+
+  /// TrustDomain defines the allowed SPIFFE trust domain.
+  trustDomain: String?
+}

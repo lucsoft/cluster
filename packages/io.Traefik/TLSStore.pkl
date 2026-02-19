@@ -1,0 +1,67 @@
+/// TLSStore is the CRD implementation of a Traefik TLS Store. For the time being, only the TLSStore
+/// named default is supported. This means that you cannot have two stores that are named default in
+/// different Kubernetes namespaces. More info:
+/// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/tls/tls-certificates/#certificates-stores#certificates-stores
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <file:///Users/lucsoft/Developer/infra-hmsys-sys/packages/io.Traefik/>.
+module io.traefik.v1alpha1.TLSStore
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "traefik.io/v1alpha1"
+
+fixed kind: "TLSStore"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// TLSStoreSpec defines the desired state of a TLSStore.
+spec: Spec
+
+/// TLSStoreSpec defines the desired state of a TLSStore.
+class Spec {
+  /// Certificates is a list of secret names, each secret holding a key/certificate pair to add to the
+  /// store.
+  certificates: Listing<Certificate>?
+
+  /// DefaultCertificate defines the default certificate configuration.
+  defaultCertificate: DefaultCertificate?
+
+  /// DefaultGeneratedCert defines the default generated certificate configuration.
+  defaultGeneratedCert: DefaultGeneratedCert?
+}
+
+/// Certificate holds a secret name for the TLSStore resource.
+class Certificate {
+  /// SecretName is the name of the referenced Kubernetes Secret to specify the certificate details.
+  secretName: String
+}
+
+/// DefaultCertificate defines the default certificate configuration.
+class DefaultCertificate {
+  /// SecretName is the name of the referenced Kubernetes Secret to specify the certificate details.
+  secretName: String
+}
+
+/// DefaultGeneratedCert defines the default generated certificate configuration.
+class DefaultGeneratedCert {
+  /// Domain is the domain definition for the DefaultCertificate.
+  domain: Domain?
+
+  /// Resolver is the name of the resolver that will be used to issue the DefaultCertificate.
+  resolver: String?
+}
+
+/// Domain is the domain definition for the DefaultCertificate.
+class Domain {
+  /// Main defines the main domain name.
+  main: String?
+
+  /// SANs defines the subject alternative domain names.
+  sans: Listing<String>?
+}

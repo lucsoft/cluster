@@ -1,0 +1,101 @@
+/// ServersTransportTCP is the CRD implementation of a TCPServersTransport. If no tcpServersTransport is
+/// specified, a default one named default@internal will be used. The default@internal
+/// tcpServersTransport can be configured in the static configuration. More info:
+/// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/tcp/serverstransport/
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <file:///Users/lucsoft/Developer/infra-hmsys-sys/packages/io.Traefik/>.
+module io.traefik.v1alpha1.ServersTransportTCP
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "traefik.io/v1alpha1"
+
+fixed kind: "ServersTransportTCP"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// ServersTransportTCPSpec defines the desired state of a ServersTransportTCP.
+spec: Spec
+
+/// ServersTransportTCPSpec defines the desired state of a ServersTransportTCP.
+class Spec {
+  /// DialKeepAlive is the interval between keep-alive probes for an active network connection. If zero,
+  /// keep-alive probes are sent with a default value (currently 15 seconds), if supported by the
+  /// protocol and operating system. Network protocols or operating systems that do not support
+  /// keep-alives ignore this field. If negative, keep-alive probes are disabled.
+  dialKeepAlive: (Int|String)?
+
+  /// DialTimeout is the amount of time to wait until a connection to a backend server can be
+  /// established.
+  dialTimeout: (Int|String)?
+
+  /// ProxyProtocol holds the PROXY Protocol configuration.
+  proxyProtocol: ProxyProtocol?
+
+  /// TerminationDelay defines the delay to wait before fully terminating the connection, after one
+  /// connected peer has closed its writing capability.
+  terminationDelay: (Int|String)?
+
+  /// TLS defines the TLS configuration
+  tls: Tls?
+}
+
+/// ProxyProtocol holds the PROXY Protocol configuration.
+class ProxyProtocol {
+  /// Version defines the PROXY Protocol version to use.
+  version: Int(isBetween(1, 2))?
+}
+
+/// TLS defines the TLS configuration
+class Tls {
+  /// CertificatesSecrets defines a list of secret storing client certificates for mTLS.
+  certificatesSecrets: Listing<String>?
+
+  /// InsecureSkipVerify disables TLS certificate verification.
+  insecureSkipVerify: Boolean?
+
+  /// MaxIdleConnsPerHost controls the maximum idle (keep-alive) to keep per-host. PeerCertURI defines
+  /// the peer cert URI used to match against SAN URI during the peer certificate verification.
+  peerCertURI: String?
+
+  /// RootCAs defines a list of CA certificate Secrets or ConfigMaps used to validate server
+  /// certificates.
+  rootCAs: Listing<RootCA>?
+
+  /// RootCAsSecrets defines a list of CA secret used to validate self-signed certificate. Deprecated:
+  /// RootCAsSecrets is deprecated, please use the RootCAs option instead.
+  rootCAsSecrets: Listing<String>?
+
+  /// ServerName defines the server name used to contact the server.
+  serverName: String?
+
+  /// Spiffe defines the SPIFFE configuration.
+  spiffe: Spiffe?
+}
+
+/// RootCA defines a reference to a Secret or a ConfigMap that holds a CA certificate. If both a Secret
+/// and a ConfigMap reference are defined, the Secret reference takes precedence.
+class RootCA {
+  /// ConfigMap defines the name of a ConfigMap that holds a CA certificate. The referenced ConfigMap
+  /// must contain a certificate under either a tls.ca or a ca.crt key.
+  configMap: String?
+
+  /// Secret defines the name of a Secret that holds a CA certificate. The referenced Secret must contain
+  /// a certificate under either a tls.ca or a ca.crt key.
+  secret: String?
+}
+
+/// Spiffe defines the SPIFFE configuration.
+class Spiffe {
+  /// IDs defines the allowed SPIFFE IDs (takes precedence over the SPIFFE TrustDomain).
+  ids: Listing<String>?
+
+  /// TrustDomain defines the allowed SPIFFE trust domain.
+  trustDomain: String?
+}

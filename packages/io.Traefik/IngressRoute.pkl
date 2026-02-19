@@ -1,0 +1,329 @@
+/// IngressRoute is the CRD implementation of a Traefik HTTP Router.
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <file:///Users/lucsoft/Developer/infra-hmsys-sys/packages/io.Traefik/>.
+module io.traefik.v1alpha1.IngressRoute
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "traefik.io/v1alpha1"
+
+fixed kind: "IngressRoute"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// IngressRouteSpec defines the desired state of IngressRoute.
+spec: Spec
+
+/// IngressRouteSpec defines the desired state of IngressRoute.
+class Spec {
+  /// EntryPoints defines the list of entry point names to bind to. Entry points have to be configured in
+  /// the static configuration. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/install-configuration/entrypoints/ Default: all.
+  entryPoints: Listing<String>?
+
+  /// ParentRefs defines references to parent IngressRoute resources for multi-layer routing. When set,
+  /// this IngressRoute's routers will be children of the referenced parent IngressRoute's routers. More
+  /// info: https://doc.traefik.io/traefik/v3.6/routing/routers/#parentrefs
+  parentRefs: Listing<ParentRef>?
+
+  /// Routes defines the list of routes.
+  routes: Listing<Route>
+
+  /// TLS defines the TLS configuration. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/routing/router/#tls
+  tls: Tls?
+}
+
+/// IngressRouteRef is a reference to an IngressRoute resource.
+class ParentRef {
+  /// Name defines the name of the referenced IngressRoute resource.
+  name: String
+
+  /// Namespace defines the namespace of the referenced IngressRoute resource.
+  namespace: String?
+}
+
+/// Route holds the HTTP route configuration.
+class Route {
+  /// Kind defines the kind of the route. Rule is the only supported kind. If not defined, defaults to
+  /// Rule.
+  kind: "Rule"?
+
+  /// Match defines the router's rule. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/routing/rules-and-priority/
+  match: String
+
+  /// Middlewares defines the list of references to Middleware resources. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/kubernetes/crd/http/middleware/
+  middlewares: Listing<Middleware>?
+
+  /// Observability defines the observability configuration for a router. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/routing/observability/
+  observability: Observability?
+
+  /// Priority defines the router's priority. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/routing/rules-and-priority/#priority
+  priority: Int(this <= 9223372036854775000)?
+
+  /// Services defines the list of Service. It can contain any combination of TraefikService and/or
+  /// reference to a Kubernetes Service.
+  services: Listing<Service>?
+
+  /// Syntax defines the router's rule syntax. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/routing/rules-and-priority/#rulesyntax
+  /// Deprecated: Please do not use this field and rewrite the router rules to use the v3 syntax.
+  syntax: String?
+}
+
+/// MiddlewareRef is a reference to a Middleware resource.
+class Middleware {
+  /// Name defines the name of the referenced Middleware resource.
+  name: String
+
+  /// Namespace defines the namespace of the referenced Middleware resource.
+  namespace: String?
+}
+
+/// Observability defines the observability configuration for a router. More info:
+/// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/routing/observability/
+class Observability {
+  /// AccessLogs enables access logs for this router.
+  accessLogs: Boolean?
+
+  /// Metrics enables metrics for this router.
+  metrics: Boolean?
+
+  /// TraceVerbosity defines the verbosity level of the tracing for this router.
+  traceVerbosity: ("minimal"|"detailed")?
+
+  /// Tracing enables tracing for this router.
+  tracing: Boolean?
+}
+
+/// Service defines an upstream HTTP service to proxy traffic to.
+class Service {
+  /// Healthcheck defines health checks for ExternalName services.
+  healthCheck: HealthCheck?
+
+  /// Kind defines the kind of the Service.
+  kind: ("Service"|"TraefikService")?
+
+  /// Name defines the name of the referenced Kubernetes Service or TraefikService. The differentiation
+  /// between the two is specified in the Kind field.
+  name: String
+
+  /// Namespace defines the namespace of the referenced Kubernetes Service or TraefikService.
+  namespace: String?
+
+  /// NativeLB controls, when creating the load-balancer, whether the LB's children are directly the pods
+  /// IPs or if the only child is the Kubernetes Service clusterIP. The Kubernetes Service itself does
+  /// load-balance to the pods. By default, NativeLB is false.
+  nativeLB: Boolean?
+
+  /// NodePortLB controls, when creating the load-balancer, whether the LB's children are directly the
+  /// nodes internal IPs using the nodePort when the service type is NodePort. It allows services to be
+  /// reachable when Traefik runs externally from the Kubernetes cluster but within the same network of
+  /// the nodes. By default, NodePortLB is false.
+  nodePortLB: Boolean?
+
+  /// PassHostHeader defines whether the client Host header is forwarded to the upstream Kubernetes
+  /// Service. By default, passHostHeader is true.
+  passHostHeader: Boolean?
+
+  /// PassiveHealthCheck defines passive health checks for ExternalName services.
+  passiveHealthCheck: PassiveHealthCheck?
+
+  /// Port defines the port of a Kubernetes Service. This can be a reference to a named port.
+  port: (Int|String)?
+
+  /// ResponseForwarding defines how Traefik forwards the response from the upstream Kubernetes Service
+  /// to the client.
+  responseForwarding: ResponseForwarding?
+
+  /// Scheme defines the scheme to use for the request to the upstream Kubernetes Service. It defaults to
+  /// https when Kubernetes Service port is 443, http otherwise.
+  scheme: String?
+
+  /// ServersTransport defines the name of ServersTransport resource to use. It allows to configure the
+  /// transport between Traefik and your servers. Can only be used on a Kubernetes Service.
+  serversTransport: String?
+
+  /// Sticky defines the sticky sessions configuration. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/load-balancing/service/#sticky-sessions
+  sticky: Sticky?
+
+  /// Strategy defines the load balancing strategy between the servers. Supported values are: wrr
+  /// (Weighed round-robin), p2c (Power of two choices), hrw (Highest Random Weight), and leasttime
+  /// (Least-Time). RoundRobin value is deprecated and supported for backward compatibility.
+  strategy: ("wrr"|"p2c"|"hrw"|"leasttime"|"RoundRobin")?
+
+  /// Weight defines the weight and should only be specified when Name references a TraefikService object
+  /// (and to be precise, one that embeds a Weighted Round Robin).
+  weight: Int(isPositive)?
+}
+
+/// Healthcheck defines health checks for ExternalName services.
+class HealthCheck {
+  /// FollowRedirects defines whether redirects should be followed during the health check calls.
+  /// Default: true
+  followRedirects: Boolean?
+
+  /// Headers defines custom headers to be sent to the health check endpoint.
+  headers: Mapping<String, String>?
+
+  /// Hostname defines the value of hostname in the Host header of the health check request.
+  hostname: String?
+
+  /// Interval defines the frequency of the health check calls for healthy targets. Default: 30s
+  interval: (Int|String)?
+
+  /// Method defines the healthcheck method.
+  method: String?
+
+  /// Mode defines the health check mode. If defined to grpc, will use the gRPC health check protocol to
+  /// probe the server. Default: http
+  mode: String?
+
+  /// Path defines the server URL path for the health check endpoint.
+  path: String?
+
+  /// Port defines the server URL port for the health check endpoint.
+  port: Int?
+
+  /// Scheme replaces the server URL scheme for the health check endpoint.
+  scheme: String?
+
+  /// Status defines the expected HTTP status code of the response to the health check request.
+  status: Int?
+
+  /// Timeout defines the maximum duration Traefik will wait for a health check request before
+  /// considering the server unhealthy. Default: 5s
+  timeout: (Int|String)?
+
+  /// UnhealthyInterval defines the frequency of the health check calls for unhealthy targets. When
+  /// UnhealthyInterval is not defined, it defaults to the Interval value. Default: 30s
+  unhealthyInterval: (Int|String)?
+}
+
+/// PassiveHealthCheck defines passive health checks for ExternalName services.
+class PassiveHealthCheck {
+  /// FailureWindow defines the time window during which the failed attempts must occur for the server to
+  /// be marked as unhealthy. It also defines for how long the server will be considered unhealthy.
+  failureWindow: (Int|String)?
+
+  /// MaxFailedAttempts is the number of consecutive failed attempts allowed within the failure window
+  /// before marking the server as unhealthy.
+  maxFailedAttempts: Int?
+}
+
+/// ResponseForwarding defines how Traefik forwards the response from the upstream Kubernetes Service to
+/// the client.
+class ResponseForwarding {
+  /// FlushInterval defines the interval, in milliseconds, in between flushes to the client while copying
+  /// the response body. A negative value means to flush immediately after each write to the client. This
+  /// configuration is ignored when ReverseProxy recognizes a response as a streaming response; for such
+  /// responses, writes are flushed to the client immediately. Default: 100ms
+  flushInterval: String?
+}
+
+/// Sticky defines the sticky sessions configuration. More info:
+/// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/load-balancing/service/#sticky-sessions
+class Sticky {
+  /// Cookie defines the sticky cookie configuration.
+  cookie: Cookie?
+}
+
+/// Cookie defines the sticky cookie configuration.
+class Cookie {
+  /// Domain defines the host to which the cookie will be sent. More info:
+  /// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#domaindomain-value
+  domain: String?
+
+  /// HTTPOnly defines whether the cookie can be accessed by client-side APIs, such as JavaScript.
+  httpOnly: Boolean?
+
+  /// MaxAge defines the number of seconds until the cookie expires. When set to a negative number, the
+  /// cookie expires immediately. When set to zero, the cookie never expires.
+  maxAge: Int?
+
+  /// Name defines the Cookie name.
+  name: String?
+
+  /// Path defines the path that must exist in the requested URL for the browser to send the Cookie
+  /// header. When not provided the cookie will be sent on every request to the domain. More info:
+  /// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#pathpath-value
+  path: String?
+
+  /// SameSite defines the same site policy. More info:
+  /// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
+  sameSite: ("none"|"lax"|"strict")?
+
+  /// Secure defines whether the cookie can only be transmitted over an encrypted connection (i.e.
+  /// HTTPS).
+  secure: Boolean?
+}
+
+/// TLS defines the TLS configuration. More info:
+/// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/routing/router/#tls
+class Tls {
+  /// CertResolver defines the name of the certificate resolver to use. Cert resolvers have to be
+  /// configured in the static configuration. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/install-configuration/tls/certificate-resolvers/acme/
+  certResolver: String?
+
+  /// Domains defines the list of domains that will be used to issue certificates. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/tls/tls-certificates/#domains
+  domains: Listing<Domain>?
+
+  /// Options defines the reference to a TLSOption, that specifies the parameters of the TLS connection.
+  /// If not defined, the `default` TLSOption is used. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/tls/tls-options/
+  options: Options?
+
+  /// SecretName is the name of the referenced Kubernetes Secret to specify the certificate details.
+  secretName: String?
+
+  /// Store defines the reference to the TLSStore, that will be used to store certificates. Please note
+  /// that only `default` TLSStore can be used.
+  store: Store?
+}
+
+/// Domain holds a domain name with SANs.
+class Domain {
+  /// Main defines the main domain name.
+  main: String?
+
+  /// SANs defines the subject alternative domain names.
+  sans: Listing<String>?
+}
+
+/// Options defines the reference to a TLSOption, that specifies the parameters of the TLS connection. If
+/// not defined, the `default` TLSOption is used. More info:
+/// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/tls/tls-options/
+class Options {
+  /// Name defines the name of the referenced TLSOption. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/kubernetes/crd/http/tlsoption/
+  name: String
+
+  /// Namespace defines the namespace of the referenced TLSOption. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/kubernetes/crd/http/tlsoption/
+  namespace: String?
+}
+
+/// Store defines the reference to the TLSStore, that will be used to store certificates. Please note
+/// that only `default` TLSStore can be used.
+class Store {
+  /// Name defines the name of the referenced TLSStore. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/kubernetes/crd/http/tlsstore/
+  name: String
+
+  /// Namespace defines the namespace of the referenced TLSStore. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/kubernetes/crd/http/tlsstore/
+  namespace: String?
+}

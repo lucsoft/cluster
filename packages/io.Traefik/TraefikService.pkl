@@ -1,0 +1,358 @@
+/// TraefikService is the CRD implementation of a Traefik Service. TraefikService object allows to: -
+/// Apply weight to Services on load-balancing - Mirror traffic on services More info:
+/// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/kubernetes/crd/http/traefikservice/
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <file:///Users/lucsoft/Developer/infra-hmsys-sys/packages/io.Traefik/>.
+module io.traefik.v1alpha1.TraefikService
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "traefik.io/v1alpha1"
+
+fixed kind: "TraefikService"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// TraefikServiceSpec defines the desired state of a TraefikService.
+spec: Spec
+
+/// TraefikServiceSpec defines the desired state of a TraefikService.
+class Spec {
+  /// HighestRandomWeight defines the highest random weight service configuration.
+  highestRandomWeight: HighestRandomWeight?
+
+  /// Mirroring defines the Mirroring service configuration.
+  mirroring: Mirroring?
+
+  /// Weighted defines the Weighted Round Robin configuration.
+  weighted: Weighted?
+}
+
+/// HighestRandomWeight defines the highest random weight service configuration.
+class HighestRandomWeight {
+  /// Services defines the list of Kubernetes Service and/or TraefikService to load-balance, with weight.
+  services: Listing<Service>?
+}
+
+/// Service defines an upstream HTTP service to proxy traffic to.
+class Service {
+  /// Healthcheck defines health checks for ExternalName services.
+  healthCheck: HealthCheck?
+
+  /// Kind defines the kind of the Service.
+  kind: ("Service"|"TraefikService")?
+
+  /// Name defines the name of the referenced Kubernetes Service or TraefikService. The differentiation
+  /// between the two is specified in the Kind field.
+  name: String
+
+  /// Namespace defines the namespace of the referenced Kubernetes Service or TraefikService.
+  namespace: String?
+
+  /// NativeLB controls, when creating the load-balancer, whether the LB's children are directly the pods
+  /// IPs or if the only child is the Kubernetes Service clusterIP. The Kubernetes Service itself does
+  /// load-balance to the pods. By default, NativeLB is false.
+  nativeLB: Boolean?
+
+  /// NodePortLB controls, when creating the load-balancer, whether the LB's children are directly the
+  /// nodes internal IPs using the nodePort when the service type is NodePort. It allows services to be
+  /// reachable when Traefik runs externally from the Kubernetes cluster but within the same network of
+  /// the nodes. By default, NodePortLB is false.
+  nodePortLB: Boolean?
+
+  /// PassHostHeader defines whether the client Host header is forwarded to the upstream Kubernetes
+  /// Service. By default, passHostHeader is true.
+  passHostHeader: Boolean?
+
+  /// PassiveHealthCheck defines passive health checks for ExternalName services.
+  passiveHealthCheck: PassiveHealthCheck?
+
+  /// Port defines the port of a Kubernetes Service. This can be a reference to a named port.
+  port: (Int|String)?
+
+  /// ResponseForwarding defines how Traefik forwards the response from the upstream Kubernetes Service
+  /// to the client.
+  responseForwarding: ResponseForwarding?
+
+  /// Scheme defines the scheme to use for the request to the upstream Kubernetes Service. It defaults to
+  /// https when Kubernetes Service port is 443, http otherwise.
+  scheme: String?
+
+  /// ServersTransport defines the name of ServersTransport resource to use. It allows to configure the
+  /// transport between Traefik and your servers. Can only be used on a Kubernetes Service.
+  serversTransport: String?
+
+  /// Sticky defines the sticky sessions configuration. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/load-balancing/service/#sticky-sessions
+  sticky: Sticky?
+
+  /// Strategy defines the load balancing strategy between the servers. Supported values are: wrr
+  /// (Weighed round-robin), p2c (Power of two choices), hrw (Highest Random Weight), and leasttime
+  /// (Least-Time). RoundRobin value is deprecated and supported for backward compatibility.
+  strategy: ("wrr"|"p2c"|"hrw"|"leasttime"|"RoundRobin")?
+
+  /// Weight defines the weight and should only be specified when Name references a TraefikService object
+  /// (and to be precise, one that embeds a Weighted Round Robin).
+  weight: Int(isPositive)?
+}
+
+/// Healthcheck defines health checks for ExternalName services.
+class HealthCheck {
+  /// FollowRedirects defines whether redirects should be followed during the health check calls.
+  /// Default: true
+  followRedirects: Boolean?
+
+  /// Headers defines custom headers to be sent to the health check endpoint.
+  headers: Mapping<String, String>?
+
+  /// Hostname defines the value of hostname in the Host header of the health check request.
+  hostname: String?
+
+  /// Interval defines the frequency of the health check calls for healthy targets. Default: 30s
+  interval: (Int|String)?
+
+  /// Method defines the healthcheck method.
+  method: String?
+
+  /// Mode defines the health check mode. If defined to grpc, will use the gRPC health check protocol to
+  /// probe the server. Default: http
+  mode: String?
+
+  /// Path defines the server URL path for the health check endpoint.
+  path: String?
+
+  /// Port defines the server URL port for the health check endpoint.
+  port: Int?
+
+  /// Scheme replaces the server URL scheme for the health check endpoint.
+  scheme: String?
+
+  /// Status defines the expected HTTP status code of the response to the health check request.
+  status: Int?
+
+  /// Timeout defines the maximum duration Traefik will wait for a health check request before
+  /// considering the server unhealthy. Default: 5s
+  timeout: (Int|String)?
+
+  /// UnhealthyInterval defines the frequency of the health check calls for unhealthy targets. When
+  /// UnhealthyInterval is not defined, it defaults to the Interval value. Default: 30s
+  unhealthyInterval: (Int|String)?
+}
+
+/// PassiveHealthCheck defines passive health checks for ExternalName services.
+class PassiveHealthCheck {
+  /// FailureWindow defines the time window during which the failed attempts must occur for the server to
+  /// be marked as unhealthy. It also defines for how long the server will be considered unhealthy.
+  failureWindow: (Int|String)?
+
+  /// MaxFailedAttempts is the number of consecutive failed attempts allowed within the failure window
+  /// before marking the server as unhealthy.
+  maxFailedAttempts: Int?
+}
+
+/// ResponseForwarding defines how Traefik forwards the response from the upstream Kubernetes Service to
+/// the client.
+class ResponseForwarding {
+  /// FlushInterval defines the interval, in milliseconds, in between flushes to the client while copying
+  /// the response body. A negative value means to flush immediately after each write to the client. This
+  /// configuration is ignored when ReverseProxy recognizes a response as a streaming response; for such
+  /// responses, writes are flushed to the client immediately. Default: 100ms
+  flushInterval: String?
+}
+
+/// Sticky defines the sticky sessions configuration. More info:
+/// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/load-balancing/service/#sticky-sessions
+class Sticky {
+  /// Cookie defines the sticky cookie configuration.
+  cookie: Cookie?
+}
+
+/// Cookie defines the sticky cookie configuration.
+class Cookie {
+  /// Domain defines the host to which the cookie will be sent. More info:
+  /// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#domaindomain-value
+  domain: String?
+
+  /// HTTPOnly defines whether the cookie can be accessed by client-side APIs, such as JavaScript.
+  httpOnly: Boolean?
+
+  /// MaxAge defines the number of seconds until the cookie expires. When set to a negative number, the
+  /// cookie expires immediately. When set to zero, the cookie never expires.
+  maxAge: Int?
+
+  /// Name defines the Cookie name.
+  name: String?
+
+  /// Path defines the path that must exist in the requested URL for the browser to send the Cookie
+  /// header. When not provided the cookie will be sent on every request to the domain. More info:
+  /// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#pathpath-value
+  path: String?
+
+  /// SameSite defines the same site policy. More info:
+  /// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
+  sameSite: ("none"|"lax"|"strict")?
+
+  /// Secure defines whether the cookie can only be transmitted over an encrypted connection (i.e.
+  /// HTTPS).
+  secure: Boolean?
+}
+
+/// Mirroring defines the Mirroring service configuration.
+class Mirroring {
+  /// Healthcheck defines health checks for ExternalName services.
+  healthCheck: HealthCheck?
+
+  /// Kind defines the kind of the Service.
+  kind: ("Service"|"TraefikService")?
+
+  /// MaxBodySize defines the maximum size allowed for the body of the request. If the body is larger,
+  /// the request is not mirrored. Default value is -1, which means unlimited size.
+  maxBodySize: Int?
+
+  /// MirrorBody defines whether the body of the request should be mirrored. Default value is true.
+  mirrorBody: Boolean?
+
+  /// Mirrors defines the list of mirrors where Traefik will duplicate the traffic.
+  mirrors: Listing<Mirror>?
+
+  /// Name defines the name of the referenced Kubernetes Service or TraefikService. The differentiation
+  /// between the two is specified in the Kind field.
+  name: String
+
+  /// Namespace defines the namespace of the referenced Kubernetes Service or TraefikService.
+  namespace: String?
+
+  /// NativeLB controls, when creating the load-balancer, whether the LB's children are directly the pods
+  /// IPs or if the only child is the Kubernetes Service clusterIP. The Kubernetes Service itself does
+  /// load-balance to the pods. By default, NativeLB is false.
+  nativeLB: Boolean?
+
+  /// NodePortLB controls, when creating the load-balancer, whether the LB's children are directly the
+  /// nodes internal IPs using the nodePort when the service type is NodePort. It allows services to be
+  /// reachable when Traefik runs externally from the Kubernetes cluster but within the same network of
+  /// the nodes. By default, NodePortLB is false.
+  nodePortLB: Boolean?
+
+  /// PassHostHeader defines whether the client Host header is forwarded to the upstream Kubernetes
+  /// Service. By default, passHostHeader is true.
+  passHostHeader: Boolean?
+
+  /// PassiveHealthCheck defines passive health checks for ExternalName services.
+  passiveHealthCheck: PassiveHealthCheck?
+
+  /// Port defines the port of a Kubernetes Service. This can be a reference to a named port.
+  port: (Int|String)?
+
+  /// ResponseForwarding defines how Traefik forwards the response from the upstream Kubernetes Service
+  /// to the client.
+  responseForwarding: ResponseForwarding?
+
+  /// Scheme defines the scheme to use for the request to the upstream Kubernetes Service. It defaults to
+  /// https when Kubernetes Service port is 443, http otherwise.
+  scheme: String?
+
+  /// ServersTransport defines the name of ServersTransport resource to use. It allows to configure the
+  /// transport between Traefik and your servers. Can only be used on a Kubernetes Service.
+  serversTransport: String?
+
+  /// Sticky defines the sticky sessions configuration. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/load-balancing/service/#sticky-sessions
+  sticky: Sticky?
+
+  /// Strategy defines the load balancing strategy between the servers. Supported values are: wrr
+  /// (Weighed round-robin), p2c (Power of two choices), hrw (Highest Random Weight), and leasttime
+  /// (Least-Time). RoundRobin value is deprecated and supported for backward compatibility.
+  strategy: ("wrr"|"p2c"|"hrw"|"leasttime"|"RoundRobin")?
+
+  /// Weight defines the weight and should only be specified when Name references a TraefikService object
+  /// (and to be precise, one that embeds a Weighted Round Robin).
+  weight: Int(isPositive)?
+}
+
+/// MirrorService holds the mirror configuration.
+class Mirror {
+  /// Healthcheck defines health checks for ExternalName services.
+  healthCheck: HealthCheck?
+
+  /// Kind defines the kind of the Service.
+  kind: ("Service"|"TraefikService")?
+
+  /// Name defines the name of the referenced Kubernetes Service or TraefikService. The differentiation
+  /// between the two is specified in the Kind field.
+  name: String
+
+  /// Namespace defines the namespace of the referenced Kubernetes Service or TraefikService.
+  namespace: String?
+
+  /// NativeLB controls, when creating the load-balancer, whether the LB's children are directly the pods
+  /// IPs or if the only child is the Kubernetes Service clusterIP. The Kubernetes Service itself does
+  /// load-balance to the pods. By default, NativeLB is false.
+  nativeLB: Boolean?
+
+  /// NodePortLB controls, when creating the load-balancer, whether the LB's children are directly the
+  /// nodes internal IPs using the nodePort when the service type is NodePort. It allows services to be
+  /// reachable when Traefik runs externally from the Kubernetes cluster but within the same network of
+  /// the nodes. By default, NodePortLB is false.
+  nodePortLB: Boolean?
+
+  /// PassHostHeader defines whether the client Host header is forwarded to the upstream Kubernetes
+  /// Service. By default, passHostHeader is true.
+  passHostHeader: Boolean?
+
+  /// PassiveHealthCheck defines passive health checks for ExternalName services.
+  passiveHealthCheck: PassiveHealthCheck?
+
+  /// Percent defines the part of the traffic to mirror. Supported values: 0 to 100.
+  percent: Int?
+
+  /// Port defines the port of a Kubernetes Service. This can be a reference to a named port.
+  port: (Int|String)?
+
+  /// ResponseForwarding defines how Traefik forwards the response from the upstream Kubernetes Service
+  /// to the client.
+  responseForwarding: ResponseForwarding?
+
+  /// Scheme defines the scheme to use for the request to the upstream Kubernetes Service. It defaults to
+  /// https when Kubernetes Service port is 443, http otherwise.
+  scheme: String?
+
+  /// ServersTransport defines the name of ServersTransport resource to use. It allows to configure the
+  /// transport between Traefik and your servers. Can only be used on a Kubernetes Service.
+  serversTransport: String?
+
+  /// Sticky defines the sticky sessions configuration. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/load-balancing/service/#sticky-sessions
+  sticky: Sticky?
+
+  /// Strategy defines the load balancing strategy between the servers. Supported values are: wrr
+  /// (Weighed round-robin), p2c (Power of two choices), hrw (Highest Random Weight), and leasttime
+  /// (Least-Time). RoundRobin value is deprecated and supported for backward compatibility.
+  strategy: ("wrr"|"p2c"|"hrw"|"leasttime"|"RoundRobin")?
+
+  /// Weight defines the weight and should only be specified when Name references a TraefikService object
+  /// (and to be precise, one that embeds a Weighted Round Robin).
+  weight: Int(isPositive)?
+}
+
+/// Weighted defines the Weighted Round Robin configuration.
+class Weighted {
+  /// Services defines the list of Kubernetes Service and/or TraefikService to load-balance, with weight.
+  services: Listing<Service>?
+
+  /// Sticky defines whether sticky sessions are enabled. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/kubernetes/crd/http/traefikservice/#stickiness-and-load-balancing
+  sticky: Sticky?
+}
+
+/// Sticky defines whether sticky sessions are enabled. More info:
+/// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/kubernetes/crd/http/traefikservice/#stickiness-and-load-balancing
+class Sticky {
+  /// Cookie defines the sticky cookie configuration.
+  cookie: Cookie?
+}

@@ -1,0 +1,25 @@
+amends "package://pkg.pkl-lang.org/pkl-pantry/k8s.contrib.crd@1.0.13#/generate.pkl"
+import "pkl:yaml"
+
+local version = "v39.0.1"
+local baseUrl =
+  "https://raw.githubusercontent.com/traefik/traefik-helm-chart/\(version)/traefik/crds"
+// noinspection UnresolvedElement
+local kustomize: Listing<String> =
+  new yaml.Parser {}.parse(read("\(baseUrl)/kustomization.yaml")).resources
+
+source = ""
+
+k8sImportPath = "@k8s"
+
+sourceContents =
+  new YamlRenderer {
+    isStream = true
+  }.renderDocument(
+    kustomize
+      .toList()
+      .filter((item) -> item.startsWith("traefik"))
+      .map((item) -> (new yaml.Parser {}.parse(read("\(baseUrl)/\(item)")) as Dynamic)),
+  )
+
+converters {}

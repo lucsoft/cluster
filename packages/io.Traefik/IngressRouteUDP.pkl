@@ -1,0 +1,64 @@
+/// IngressRouteUDP is a CRD implementation of a Traefik UDP Router.
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <file:///Users/lucsoft/Developer/infra-hmsys-sys/packages/io.Traefik/>.
+module io.traefik.v1alpha1.IngressRouteUDP
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "traefik.io/v1alpha1"
+
+fixed kind: "IngressRouteUDP"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// IngressRouteUDPSpec defines the desired state of a IngressRouteUDP.
+spec: Spec
+
+/// IngressRouteUDPSpec defines the desired state of a IngressRouteUDP.
+class Spec {
+  /// EntryPoints defines the list of entry point names to bind to. Entry points have to be configured in
+  /// the static configuration. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/install-configuration/entrypoints/ Default: all.
+  entryPoints: Listing<String>?
+
+  /// Routes defines the list of routes.
+  routes: Listing<Route>
+}
+
+/// RouteUDP holds the UDP route configuration.
+class Route {
+  /// Services defines the list of UDP services.
+  services: Listing<Service>?
+}
+
+/// ServiceUDP defines an upstream UDP service to proxy traffic to.
+class Service {
+  /// Name defines the name of the referenced Kubernetes Service.
+  name: String
+
+  /// Namespace defines the namespace of the referenced Kubernetes Service.
+  namespace: String?
+
+  /// NativeLB controls, when creating the load-balancer, whether the LB's children are directly the pods
+  /// IPs or if the only child is the Kubernetes Service clusterIP. The Kubernetes Service itself does
+  /// load-balance to the pods. By default, NativeLB is false.
+  nativeLB: Boolean?
+
+  /// NodePortLB controls, when creating the load-balancer, whether the LB's children are directly the
+  /// nodes internal IPs using the nodePort when the service type is NodePort. It allows services to be
+  /// reachable when Traefik runs externally from the Kubernetes cluster but within the same network of
+  /// the nodes. By default, NodePortLB is false.
+  nodePortLB: Boolean?
+
+  /// Port defines the port of a Kubernetes Service. This can be a reference to a named port.
+  port: Int|String
+
+  /// Weight defines the weight used when balancing requests between multiple Kubernetes Service.
+  weight: Int(isPositive)?
+}

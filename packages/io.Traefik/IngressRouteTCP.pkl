@@ -1,0 +1,181 @@
+/// IngressRouteTCP is the CRD implementation of a Traefik TCP Router.
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <file:///Users/lucsoft/Developer/infra-hmsys-sys/packages/io.Traefik/>.
+module io.traefik.v1alpha1.IngressRouteTCP
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "traefik.io/v1alpha1"
+
+fixed kind: "IngressRouteTCP"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// IngressRouteTCPSpec defines the desired state of IngressRouteTCP.
+spec: Spec
+
+/// IngressRouteTCPSpec defines the desired state of IngressRouteTCP.
+class Spec {
+  /// EntryPoints defines the list of entry point names to bind to. Entry points have to be configured in
+  /// the static configuration. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/install-configuration/entrypoints/ Default: all.
+  entryPoints: Listing<String>?
+
+  /// Routes defines the list of routes.
+  routes: Listing<Route>
+
+  /// TLS defines the TLS configuration on a layer 4 / TCP Route. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/tcp/routing/router/#tls
+  tls: Tls?
+}
+
+/// RouteTCP holds the TCP route configuration.
+class Route {
+  /// Match defines the router's rule. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/tcp/routing/rules-and-priority/
+  match: String
+
+  /// Middlewares defines the list of references to MiddlewareTCP resources.
+  middlewares: Listing<Middleware>?
+
+  /// Priority defines the router's priority. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/tcp/routing/rules-and-priority/#priority
+  priority: Int(this <= 9223372036854775000)?
+
+  /// Services defines the list of TCP services.
+  services: Listing<Service>?
+
+  /// Syntax defines the router's rule syntax. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/tcp/routing/rules-and-priority/#rulesyntax
+  /// Deprecated: Please do not use this field and rewrite the router rules to use the v3 syntax.
+  syntax: ("v3"|"v2")?
+}
+
+/// ObjectReference is a generic reference to a Traefik resource.
+class Middleware {
+  /// Name defines the name of the referenced Traefik resource.
+  name: String
+
+  /// Namespace defines the namespace of the referenced Traefik resource.
+  namespace: String?
+}
+
+/// ServiceTCP defines an upstream TCP service to proxy traffic to.
+class Service {
+  /// Name defines the name of the referenced Kubernetes Service.
+  name: String
+
+  /// Namespace defines the namespace of the referenced Kubernetes Service.
+  namespace: String?
+
+  /// NativeLB controls, when creating the load-balancer, whether the LB's children are directly the pods
+  /// IPs or if the only child is the Kubernetes Service clusterIP. The Kubernetes Service itself does
+  /// load-balance to the pods. By default, NativeLB is false.
+  nativeLB: Boolean?
+
+  /// NodePortLB controls, when creating the load-balancer, whether the LB's children are directly the
+  /// nodes internal IPs using the nodePort when the service type is NodePort. It allows services to be
+  /// reachable when Traefik runs externally from the Kubernetes cluster but within the same network of
+  /// the nodes. By default, NodePortLB is false.
+  nodePortLB: Boolean?
+
+  /// Port defines the port of a Kubernetes Service. This can be a reference to a named port.
+  port: Int|String
+
+  /// ProxyProtocol defines the PROXY protocol configuration. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/tcp/service/#proxy-protocol
+  /// Deprecated: ProxyProtocol will not be supported in future APIVersions, please use ServersTransport
+  /// to configure ProxyProtocol instead.
+  proxyProtocol: ProxyProtocol?
+
+  /// ServersTransport defines the name of ServersTransportTCP resource to use. It allows to configure
+  /// the transport between Traefik and your servers. Can only be used on a Kubernetes Service.
+  serversTransport: String?
+
+  /// TerminationDelay defines the deadline that the proxy sets, after one of its connected peers
+  /// indicates it has closed the writing capability of its connection, to close the reading capability
+  /// as well, hence fully terminating the connection. It is a duration in milliseconds, defaulting to
+  /// 100. A negative value means an infinite deadline (i.e. the reading capability is never closed).
+  /// Deprecated: TerminationDelay will not be supported in future APIVersions, please use
+  /// ServersTransport to configure the TerminationDelay instead.
+  terminationDelay: Int?
+
+  /// TLS determines whether to use TLS when dialing with the backend.
+  tls: Boolean?
+
+  /// Weight defines the weight used when balancing requests between multiple Kubernetes Service.
+  weight: Int(isPositive)?
+}
+
+/// ProxyProtocol defines the PROXY protocol configuration. More info:
+/// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/tcp/service/#proxy-protocol
+/// Deprecated: ProxyProtocol will not be supported in future APIVersions, please use ServersTransport to
+/// configure ProxyProtocol instead.
+class ProxyProtocol {
+  /// Version defines the PROXY Protocol version to use.
+  version: Int(isBetween(1, 2))?
+}
+
+/// TLS defines the TLS configuration on a layer 4 / TCP Route. More info:
+/// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/tcp/routing/router/#tls
+class Tls {
+  /// CertResolver defines the name of the certificate resolver to use. Cert resolvers have to be
+  /// configured in the static configuration. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/install-configuration/tls/certificate-resolvers/acme/
+  certResolver: String?
+
+  /// Domains defines the list of domains that will be used to issue certificates. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/tcp/tls/#domains
+  domains: Listing<Domain>?
+
+  /// Options defines the reference to a TLSOption, that specifies the parameters of the TLS connection.
+  /// If not defined, the `default` TLSOption is used. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/tcp/tls/#tls-options
+  options: Options?
+
+  /// Passthrough defines whether a TLS router will terminate the TLS connection.
+  passthrough: Boolean?
+
+  /// SecretName is the name of the referenced Kubernetes Secret to specify the certificate details.
+  secretName: String?
+
+  /// Store defines the reference to the TLSStore, that will be used to store certificates. Please note
+  /// that only `default` TLSStore can be used.
+  store: Store?
+}
+
+/// Domain holds a domain name with SANs.
+class Domain {
+  /// Main defines the main domain name.
+  main: String?
+
+  /// SANs defines the subject alternative domain names.
+  sans: Listing<String>?
+}
+
+/// Options defines the reference to a TLSOption, that specifies the parameters of the TLS connection. If
+/// not defined, the `default` TLSOption is used. More info:
+/// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/tcp/tls/#tls-options
+class Options {
+  /// Name defines the name of the referenced Traefik resource.
+  name: String
+
+  /// Namespace defines the namespace of the referenced Traefik resource.
+  namespace: String?
+}
+
+/// Store defines the reference to the TLSStore, that will be used to store certificates. Please note
+/// that only `default` TLSStore can be used.
+class Store {
+  /// Name defines the name of the referenced Traefik resource.
+  name: String
+
+  /// Namespace defines the namespace of the referenced Traefik resource.
+  namespace: String?
+}

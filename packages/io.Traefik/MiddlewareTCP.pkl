@@ -1,0 +1,61 @@
+/// MiddlewareTCP is the CRD implementation of a Traefik TCP middleware. More info:
+/// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/tcp/middlewares/overview/
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <file:///Users/lucsoft/Developer/infra-hmsys-sys/packages/io.Traefik/>.
+module io.traefik.v1alpha1.MiddlewareTCP
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "traefik.io/v1alpha1"
+
+fixed kind: "MiddlewareTCP"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// MiddlewareTCPSpec defines the desired state of a MiddlewareTCP.
+spec: Spec
+
+/// MiddlewareTCPSpec defines the desired state of a MiddlewareTCP.
+class Spec {
+  /// InFlightConn defines the InFlightConn middleware configuration.
+  inFlightConn: InFlightConn?
+
+  /// IPAllowList defines the IPAllowList middleware configuration. This middleware accepts/refuses
+  /// connections based on the client IP. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/tcp/middlewares/ipallowlist/
+  ipAllowList: IpAllowList?
+
+  /// IPWhiteList defines the IPWhiteList middleware configuration. This middleware accepts/refuses
+  /// connections based on the client IP. Deprecated: please use IPAllowList instead. More info:
+  /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/tcp/middlewares/ipwhitelist/
+  ipWhiteList: IpWhiteList?
+}
+
+/// InFlightConn defines the InFlightConn middleware configuration.
+class InFlightConn {
+  /// Amount defines the maximum amount of allowed simultaneous connections. The middleware closes the
+  /// connection if there are already amount connections opened.
+  amount: Int(isPositive)?
+}
+
+/// IPAllowList defines the IPAllowList middleware configuration. This middleware accepts/refuses
+/// connections based on the client IP. More info:
+/// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/tcp/middlewares/ipallowlist/
+class IpAllowList {
+  /// SourceRange defines the allowed IPs (or ranges of allowed IPs by using CIDR notation).
+  sourceRange: Listing<String>?
+}
+
+/// IPWhiteList defines the IPWhiteList middleware configuration. This middleware accepts/refuses
+/// connections based on the client IP. Deprecated: please use IPAllowList instead. More info:
+/// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/tcp/middlewares/ipwhitelist/
+class IpWhiteList {
+  /// SourceRange defines the allowed IPs (or ranges of allowed IPs by using CIDR notation).
+  sourceRange: Listing<String>?
+}
