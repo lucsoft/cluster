@@ -1,0 +1,6 @@
+{
+  "deploy": {
+    "org": "lucsoft",
+    "app": "pkl-packages"
+  }
+}
