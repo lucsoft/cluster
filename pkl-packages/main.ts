@@ -55,7 +55,7 @@ Deno.serve(async (req: Request) => {
         const response = await kv.get<{ output: string; }>([ "packages", packageName!, realVersion! ]);
 
         if (!response.value) {
-            await using sbx = await Sandbox.create();
+            await using sbx = await Sandbox.create({ org: "lucsoft" });
             await sbx.fs.mkdir("/home/app/bin");
             await sbx.fs.mkdir("/home/app/repo");
             await sbx.sh`
