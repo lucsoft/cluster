@@ -1,3 +1,5 @@
+open module lucsoft.k8s.Resource
+
 import "@k8s/K8sResource.pkl"
 
 resources: Listing<K8sResource> = new {}
