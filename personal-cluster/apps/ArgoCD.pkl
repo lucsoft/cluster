@@ -1,0 +1,57 @@
+amends "@Resource/Entrypoint.pkl"
+import "@ArgoCD/App.pkl"
+
+resources {
+  new App {
+    name = "argo"
+    namespace = "argocd"
+    autoSync = false
+    source {
+      repoURL = "https://argoproj.github.io/argo-helm"
+      chart = "argo-cd"
+      targetRevision = "v9.4.3"
+      helm {
+        releaseName = "argocd"
+        valuesObject {
+          redis {
+            serviceAccount {
+              create = true
+            }
+          }
+          repoServer {
+            volumes {
+              new {
+                name = "pkl-temp"
+                emptyDir {}
+              }
+            }
+            extraContainers {
+              new {
+                name = "pkl"
+                image = "ghcr.io/lucsoft/argo-pkl-plugin:latest"
+                securityContext {
+                  runAsNonRoot = true
+                  runAsUser = 999
+                }
+                volumeMounts {
+                  new {
+                    mountPath = "/var/run/argocd"
+                    name = "var-files"
+                  }
+                  new {
+                    mountPath = "/home/argocd/cmp-server/plugins"
+                    name = "plugins"
+                  }
+                  new {
+                    mountPath = "/tmp"
+                    name = "pkl-temp"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }.application
+}

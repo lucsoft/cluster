@@ -54,7 +54,7 @@ class Route {
   /// Syntax defines the router's rule syntax. More info:
   /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/tcp/routing/rules-and-priority/#rulesyntax
   /// Deprecated: Please do not use this field and rewrite the router rules to use the v3 syntax.
-  syntax: ("v3"|"v2")?
+  syntax: ("v3" | "v2")?
 }
 
 /// ObjectReference is a generic reference to a Traefik resource.
@@ -86,7 +86,7 @@ class Service {
   nodePortLB: Boolean?
 
   /// Port defines the port of a Kubernetes Service. This can be a reference to a named port.
-  port: Int|String
+  port: Int | String
 
   /// ProxyProtocol defines the PROXY protocol configuration. More info:
   /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/tcp/service/#proxy-protocol

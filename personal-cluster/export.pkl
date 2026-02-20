@@ -1,18 +1,11 @@
-import "@k8s/K8sResource.pkl"
+extends "@Resource/Entrypoint.pkl"
 
 import "./apps/ArgoApps.pkl"
 import "./apps/MinecraftServer.pkl"
 import "./apps/Satisfactory.pkl"
 
-resources: Listing<K8sResource> = new {
+resources {
   ...Satisfactory.resources
   ...MinecraftServer.resources
   ...ArgoApps.resources
-}
-
-output {
-  value = resources
-  renderer = (K8sResource.output.renderer as YamlRenderer) {
-    isStream = true
-  }
 }

@@ -57,7 +57,7 @@ class Service {
   nodePortLB: Boolean?
 
   /// Port defines the port of a Kubernetes Service. This can be a reference to a named port.
-  port: Int|String
+  port: Int | String
 
   /// Weight defines the weight used when balancing requests between multiple Kubernetes Service.
   weight: Int(isPositive)?

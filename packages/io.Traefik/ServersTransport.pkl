@@ -63,23 +63,23 @@ class Spec {
 class ForwardingTimeouts {
   /// DialTimeout is the amount of time to wait until a connection to a backend server can be
   /// established.
-  dialTimeout: (Int|String)?
+  dialTimeout: (Int | String)?
 
   /// IdleConnTimeout is the maximum period for which an idle HTTP keep-alive connection will remain open
   /// before closing itself.
-  idleConnTimeout: (Int|String)?
+  idleConnTimeout: (Int | String)?
 
   /// PingTimeout is the timeout after which the HTTP/2 connection will be closed if a response to ping
   /// is not received.
-  pingTimeout: (Int|String)?
+  pingTimeout: (Int | String)?
 
   /// ReadIdleTimeout is the timeout after which a health check using ping frame will be carried out if
   /// no frame is received on the HTTP/2 connection.
-  readIdleTimeout: (Int|String)?
+  readIdleTimeout: (Int | String)?
 
   /// ResponseHeaderTimeout is the amount of time to wait for a server's response headers after fully
   /// writing the request (including its body, if any).
-  responseHeaderTimeout: (Int|String)?
+  responseHeaderTimeout: (Int | String)?
 }
 
 /// RootCA defines a reference to a Secret or a ConfigMap that holds a CA certificate. If both a Secret

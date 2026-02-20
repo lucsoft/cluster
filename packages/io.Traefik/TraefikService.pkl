@@ -46,7 +46,7 @@ class Service {
   healthCheck: HealthCheck?
 
   /// Kind defines the kind of the Service.
-  kind: ("Service"|"TraefikService")?
+  kind: ("Service" | "TraefikService")?
 
   /// Name defines the name of the referenced Kubernetes Service or TraefikService. The differentiation
   /// between the two is specified in the Kind field.
@@ -74,7 +74,7 @@ class Service {
   passiveHealthCheck: PassiveHealthCheck?
 
   /// Port defines the port of a Kubernetes Service. This can be a reference to a named port.
-  port: (Int|String)?
+  port: (Int | String)?
 
   /// ResponseForwarding defines how Traefik forwards the response from the upstream Kubernetes Service
   /// to the client.
@@ -95,7 +95,7 @@ class Service {
   /// Strategy defines the load balancing strategy between the servers. Supported values are: wrr
   /// (Weighed round-robin), p2c (Power of two choices), hrw (Highest Random Weight), and leasttime
   /// (Least-Time). RoundRobin value is deprecated and supported for backward compatibility.
-  strategy: ("wrr"|"p2c"|"hrw"|"leasttime"|"RoundRobin")?
+  strategy: ("wrr" | "p2c" | "hrw" | "leasttime" | "RoundRobin")?
 
   /// Weight defines the weight and should only be specified when Name references a TraefikService object
   /// (and to be precise, one that embeds a Weighted Round Robin).
@@ -115,7 +115,7 @@ class HealthCheck {
   hostname: String?
 
   /// Interval defines the frequency of the health check calls for healthy targets. Default: 30s
-  interval: (Int|String)?
+  interval: (Int | String)?
 
   /// Method defines the healthcheck method.
   method: String?
@@ -138,18 +138,18 @@ class HealthCheck {
 
   /// Timeout defines the maximum duration Traefik will wait for a health check request before
   /// considering the server unhealthy. Default: 5s
-  timeout: (Int|String)?
+  timeout: (Int | String)?
 
   /// UnhealthyInterval defines the frequency of the health check calls for unhealthy targets. When
   /// UnhealthyInterval is not defined, it defaults to the Interval value. Default: 30s
-  unhealthyInterval: (Int|String)?
+  unhealthyInterval: (Int | String)?
 }
 
 /// PassiveHealthCheck defines passive health checks for ExternalName services.
 class PassiveHealthCheck {
   /// FailureWindow defines the time window during which the failed attempts must occur for the server to
   /// be marked as unhealthy. It also defines for how long the server will be considered unhealthy.
-  failureWindow: (Int|String)?
+  failureWindow: (Int | String)?
 
   /// MaxFailedAttempts is the number of consecutive failed attempts allowed within the failure window
   /// before marking the server as unhealthy.
@@ -196,7 +196,7 @@ class Cookie {
 
   /// SameSite defines the same site policy. More info:
   /// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
-  sameSite: ("none"|"lax"|"strict")?
+  sameSite: ("none" | "lax" | "strict")?
 
   /// Secure defines whether the cookie can only be transmitted over an encrypted connection (i.e.
   /// HTTPS).
@@ -209,7 +209,7 @@ class Mirroring {
   healthCheck: HealthCheck?
 
   /// Kind defines the kind of the Service.
-  kind: ("Service"|"TraefikService")?
+  kind: ("Service" | "TraefikService")?
 
   /// MaxBodySize defines the maximum size allowed for the body of the request. If the body is larger,
   /// the request is not mirrored. Default value is -1, which means unlimited size.
@@ -247,7 +247,7 @@ class Mirroring {
   passiveHealthCheck: PassiveHealthCheck?
 
   /// Port defines the port of a Kubernetes Service. This can be a reference to a named port.
-  port: (Int|String)?
+  port: (Int | String)?
 
   /// ResponseForwarding defines how Traefik forwards the response from the upstream Kubernetes Service
   /// to the client.
@@ -268,7 +268,7 @@ class Mirroring {
   /// Strategy defines the load balancing strategy between the servers. Supported values are: wrr
   /// (Weighed round-robin), p2c (Power of two choices), hrw (Highest Random Weight), and leasttime
   /// (Least-Time). RoundRobin value is deprecated and supported for backward compatibility.
-  strategy: ("wrr"|"p2c"|"hrw"|"leasttime"|"RoundRobin")?
+  strategy: ("wrr" | "p2c" | "hrw" | "leasttime" | "RoundRobin")?
 
   /// Weight defines the weight and should only be specified when Name references a TraefikService object
   /// (and to be precise, one that embeds a Weighted Round Robin).
@@ -281,7 +281,7 @@ class Mirror {
   healthCheck: HealthCheck?
 
   /// Kind defines the kind of the Service.
-  kind: ("Service"|"TraefikService")?
+  kind: ("Service" | "TraefikService")?
 
   /// Name defines the name of the referenced Kubernetes Service or TraefikService. The differentiation
   /// between the two is specified in the Kind field.
@@ -312,7 +312,7 @@ class Mirror {
   percent: Int?
 
   /// Port defines the port of a Kubernetes Service. This can be a reference to a named port.
-  port: (Int|String)?
+  port: (Int | String)?
 
   /// ResponseForwarding defines how Traefik forwards the response from the upstream Kubernetes Service
   /// to the client.
@@ -333,7 +333,7 @@ class Mirror {
   /// Strategy defines the load balancing strategy between the servers. Supported values are: wrr
   /// (Weighed round-robin), p2c (Power of two choices), hrw (Highest Random Weight), and leasttime
   /// (Least-Time). RoundRobin value is deprecated and supported for backward compatibility.
-  strategy: ("wrr"|"p2c"|"hrw"|"leasttime"|"RoundRobin")?
+  strategy: ("wrr" | "p2c" | "hrw" | "leasttime" | "RoundRobin")?
 
   /// Weight defines the weight and should only be specified when Name references a TraefikService object
   /// (and to be precise, one that embeds a Weighted Round Robin).

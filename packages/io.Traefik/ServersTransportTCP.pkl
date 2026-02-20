@@ -29,18 +29,18 @@ class Spec {
   /// keep-alive probes are sent with a default value (currently 15 seconds), if supported by the
   /// protocol and operating system. Network protocols or operating systems that do not support
   /// keep-alives ignore this field. If negative, keep-alive probes are disabled.
-  dialKeepAlive: (Int|String)?
+  dialKeepAlive: (Int | String)?
 
   /// DialTimeout is the amount of time to wait until a connection to a backend server can be
   /// established.
-  dialTimeout: (Int|String)?
+  dialTimeout: (Int | String)?
 
   /// ProxyProtocol holds the PROXY Protocol configuration.
   proxyProtocol: ProxyProtocol?
 
   /// TerminationDelay defines the delay to wait before fully terminating the connection, after one
   /// connected peer has closed its writing capability.
-  terminationDelay: (Int|String)?
+  terminationDelay: (Int | String)?
 
   /// TLS defines the TLS configuration
   tls: Tls?

@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ConfigManagementPlugin
+metadata:
+  name: pkl
+spec:
+  init:
+    command: [pkl]
+    args: ["project", "resolve", "--cache-dir", "/tmp/pkl-cache"]
+  generate:
+    command: [sh, -c]
+    args:
+      - exec pkl eval --cache-dir /tmp/pkl-cache $PARAM_PKL_MODULES_0 $PARAM_PATH
+  discover:
+    fileName: "PklProject"
+  parameters:
+    static:
+      - name: pkl_modules
+        title: "LEGACY: The path to the pkl modules to be evaluated. This parameter is deprecated, please use the `path` parameter instead."
+        collectionType: array
+        array: []
+      - name: path
+        title: The path to the entry point of the pkl template.

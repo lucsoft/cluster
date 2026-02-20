@@ -66,10 +66,11 @@ class ClientAuth {
   /// ClientAuthType defines the client authentication type to apply.
   clientAuthType: (
     "NoClientCert"
-    |"RequestClientCert"
-    |"RequireAnyClientCert"
-    |"VerifyClientCertIfGiven"
-    |"RequireAndVerifyClientCert")?
+      | "RequestClientCert"
+      | "RequireAnyClientCert"
+      | "VerifyClientCertIfGiven"
+      | "RequireAndVerifyClientCert"
+  )?
 
   /// SecretNames defines the names of the referenced Kubernetes Secret storing certificate details.
   secretNames: Listing<String>?

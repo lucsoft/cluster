@@ -22,6 +22,13 @@
         "sha256": "65a45e31b8ab415f9d18fd7db41066d5ecdbf0622d09449482c5b68d26cf2a18"
       }
     },
+    "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Resource@0": {
+      "type": "remote",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Resource@0.2.2",
+      "checksums": {
+        "sha256": "f9dfe1caa73439f6e80061685ed6dedea4c48928cd8f93922c5caf39dbaf09c9"
+      }
+    },
     "package://pkl-pkgs.lucsoft.de/packages/argo.ArgoCD@0": {
       "type": "remote",
       "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/argo.ArgoCD@0.1.2",
