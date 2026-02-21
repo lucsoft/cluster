@@ -37,7 +37,9 @@ application: Application = new {
         }
       }
       syncOptions {
-        "RespectIgnoreDifferences=true"
+        when (ignoreDifferences != null) {
+          "RespectIgnoreDifferences=true"
+        }
         "ApplyOutOfSyncOnly=true"
         "AutoCreateNamespace=true"
         "ServerSideApply=true"
