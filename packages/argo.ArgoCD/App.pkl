@@ -10,7 +10,7 @@ autoSync = true
 
 destination: Application.Destination = new {}
 
-ignoreDifferences: Listing<Application.IgnoreDifference> = new {}
+ignoreDifferences: Listing<Application.IgnoreDifference>? = null
 
 project = "default"
 
@@ -20,7 +20,7 @@ source: Application.Source?
 
 sources: Listing<Application.Source>?
 
-application = new Application {
+application: Application = new {
   metadata {
     name = app.name
     namespace = "argocd"
