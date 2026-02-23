@@ -1,0 +1,26 @@
+amends "package://pkg.pkl-lang.org/pkl-pantry/k8s.contrib.crd@4.2.1#/generate.pkl"
+import "pkl:yaml"
+
+local version = "v1.19.3"
+local baseUrl = "https://raw.githubusercontent.com/cert-manager/cert-manager/\(version)/deploy/crds"
+// noinspection UnresolvedElement
+local kustomize: Listing<String> =
+  new yaml.Parser {}.parse(read("\(baseUrl)/kustomization.yaml")).resources
+
+source = ""
+baseApiGroup = "v1.cert-manager.io"
+
+k8sImportPath = "@k8s"
+
+sourceContents =
+  new YamlRenderer {
+    isStream = true
+  }.renderDocument(
+    List(
+      "cert-manager.io_clusterissuers.yaml",
+      "cert-manager.io_issuers.yaml",
+      "cert-manager.io_certificaterequests.yaml",
+    ).map((item) -> (new yaml.Parser {}.parse(read("\(baseUrl)/\(item)")) as Dynamic)),
+  )
+
+converters {}
