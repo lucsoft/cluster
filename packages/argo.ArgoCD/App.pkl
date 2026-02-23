@@ -1,6 +1,6 @@
 module App
 
-import "./crd/Application.pkl"
+import "./Application.pkl"
 
 name = "app"
 
@@ -8,17 +8,20 @@ local app = this
 
 autoSync = true
 
-destination: Application.Destination = new {}
+destination: Application.Destination = new {
+  name = "in-cluster"
+  namespace = app.namespace
+}
 
-ignoreDifferences: Listing<Application.IgnoreDifference>? = null
+ignoreDifferences: Listing<Application.ComparedToIgnoreDifference>? = null
 
 project = "default"
 
 namespace = "default"
 
-source: Application.Source?
+source: Application.SpecSource?
 
-sources: Listing<Application.Source>?
+sources: Listing<Application.ComparedToSource>?
 
 application: Application = new {
   metadata {
@@ -46,10 +49,7 @@ application: Application = new {
       }
     }
     project = app.project
-    destination {
-      server = "https://kubernetes.default.svc"
-      namespace = app.namespace
-    }
+    destination = app.destination
     ignoreDifferences = app.ignoreDifferences
     source = app.source
     sources = app.sources
