@@ -7,7 +7,7 @@ local baseUrl = "https://raw.githubusercontent.com/argoproj/argo-cd/\(version)/m
 local kustomize: Listing<String> =
   new yaml.Parser {}.parse(read("\(baseUrl)/kustomization.yaml")).resources
 
-source = ""
+source = "\(baseUrl)/kustomization.yaml"
 baseApiGroup = "v1alpha1.argoproj.io"
 
 k8sImportPath = "@k8s"

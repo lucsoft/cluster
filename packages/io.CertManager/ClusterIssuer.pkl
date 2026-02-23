@@ -8,8 +8,9 @@ module io.`cert-manager`.v1.ClusterIssuer
 
 extends "@k8s/K8sResource.pkl"
 
-import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
 import "pkl:base"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
 
 fixed apiVersion: "cert-manager.io/v1"
 
@@ -119,7 +120,7 @@ class Acme {
 class ExternalAccountBinding {
   /// Deprecated: keyAlgorithm field exists for historical compatibility reasons and should not be used.
   /// The algorithm is now hardcoded to HS256 in golang/x/crypto/acme.
-  keyAlgorithm: ("HS256"|"HS384"|"HS512")?
+  keyAlgorithm: ("HS256" | "HS384" | "HS512")?
 
   /// keyID is the ID of the CA key that the External Account is bound to.
   keyID: String
@@ -198,7 +199,7 @@ class Dns01 {
 
   /// CNAMEStrategy configures how the DNS01 provider should handle CNAME records when found in DNS
   /// zones.
-  cnameStrategy: ("None"|"Follow")?
+  cnameStrategy: ("None" | "Follow")?
 
   /// Use the DigitalOcean DNS API to manage DNS01 challenge records.
   digitalocean: Digitalocean?
@@ -263,7 +264,9 @@ class AzureDNS {
   clientSecretSecretRef: ClientSecretSecretRef?
 
   /// name of the Azure environment (default AzurePublicCloud)
-  environment: ("AzurePublicCloud"|"AzureChinaCloud"|"AzureGermanCloud"|"AzureUSGovernmentCloud")?
+  environment: (
+    "AzurePublicCloud" | "AzureChinaCloud" | "AzureGermanCloud" | "AzureUSGovernmentCloud"
+  )?
 
   /// name of the DNS zone that should be used
   hostedZoneName: String?
@@ -377,7 +380,7 @@ class Rfc2136 {
 
   /// Protocol to use for dynamic DNS update queries. Valid values are (case-sensitive) ``TCP`` and
   /// ``UDP``; ``UDP`` (default).
-  protocol: ("TCP"|"UDP")?
+  protocol: ("TCP" | "UDP")?
 
   /// The TSIG Algorithm configured in the DNS supporting RFC2136. Used only when ``tsigSecretSecretRef``
   /// and ``tsigKeyName`` are defined. Supported values are (case-insensitive): ``HMACMD5`` (default),
@@ -589,7 +592,10 @@ class ParentRef {
   /// (empty string).
   ///
   /// Support: Core
-  group: String(length <= 253, matches(Regex(#"^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+  group: String(
+    length <= 253,
+    matches(Regex(#"^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )?
 
   /// Kind is kind of the referent.
   ///
@@ -670,7 +676,10 @@ class ParentRef {
   /// attachment from this Route, the Route MUST be considered detached from the Gateway.
   ///
   /// Support: Core
-  sectionName: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+  sectionName: String(
+    length.isBetween(1, 253),
+    matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )?
 }
 
 /// Optional pod template used to configure the ACME challenge solver pods used for HTTP01 challenges.
@@ -755,7 +764,9 @@ class AffinityNodeAffinity {
   /// etc.), compute a sum by iterating through the elements of this field and adding "weight" to the sum
   /// if the node matches the corresponding matchExpressions; the node(s) with the highest sum are the
   /// most preferred.
-  preferredDuringSchedulingIgnoredDuringExecution: Listing<NodeAffinityPreferredDuringSchedulingIgnoredDuringExecution>?
+  preferredDuringSchedulingIgnoredDuringExecution: Listing<
+    NodeAffinityPreferredDuringSchedulingIgnoredDuringExecution,
+  >?
 
   /// If the affinity requirements specified by this field are not met at scheduling time, the pod will
   /// not be scheduled onto the node. If the affinity requirements specified by this field cease to be
@@ -829,14 +840,18 @@ class AffinityPodAffinity {
   /// etc.), compute a sum by iterating through the elements of this field and adding "weight" to the sum
   /// if the node has pods which matches the corresponding podAffinityTerm; the node(s) with the highest
   /// sum are the most preferred.
-  preferredDuringSchedulingIgnoredDuringExecution: Listing<PodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution>?
+  preferredDuringSchedulingIgnoredDuringExecution: Listing<
+    PodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution,
+  >?
 
   /// If the affinity requirements specified by this field are not met at scheduling time, the pod will
   /// not be scheduled onto the node. If the affinity requirements specified by this field cease to be
   /// met at some point during pod execution (e.g. due to a pod label update), the system may or may not
   /// try to eventually evict the pod from its node. When there are multiple elements, the lists of nodes
   /// corresponding to each podAffinityTerm are intersected, i.e. all terms must be satisfied.
-  requiredDuringSchedulingIgnoredDuringExecution: Listing<PodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution>?
+  requiredDuringSchedulingIgnoredDuringExecution: Listing<
+    PodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution,
+  >?
 }
 
 /// The weights of all of the matched WeightedPodAffinityTerm fields are added per-node to find the most
@@ -988,7 +1003,9 @@ class AffinityPodAntiAffinity {
   /// expressions, etc.), compute a sum by iterating through the elements of this field and subtracting
   /// "weight" from the sum if the node has pods which matches the corresponding podAffinityTerm; the
   /// node(s) with the highest sum are the most preferred.
-  preferredDuringSchedulingIgnoredDuringExecution: Listing<PodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution>?
+  preferredDuringSchedulingIgnoredDuringExecution: Listing<
+    PodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution,
+  >?
 
   /// If the anti-affinity requirements specified by this field are not met at scheduling time, the pod
   /// will not be scheduled onto the node. If the anti-affinity requirements specified by this field
@@ -996,7 +1013,9 @@ class AffinityPodAntiAffinity {
   /// or may not try to eventually evict the pod from its node. When there are multiple elements, the
   /// lists of nodes corresponding to each podAffinityTerm are intersected, i.e. all terms must be
   /// satisfied.
-  requiredDuringSchedulingIgnoredDuringExecution: Listing<PodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution>?
+  requiredDuringSchedulingIgnoredDuringExecution: Listing<
+    PodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution,
+  >?
 }
 
 /// LocalObjectReference contains enough information to let you locate the referenced object inside the
@@ -1016,13 +1035,13 @@ class SpecImagePullSecret {
 class SpecResources {
   /// Limits describes the maximum amount of compute resources allowed. More info:
   /// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-  limits: Mapping<String, Int|String>?
+  limits: Mapping<String, Int | String>?
 
   /// Requests describes the minimum amount of compute resources required. If Requests is omitted for a
   /// container, it defaults to Limits if that is explicitly specified, otherwise to the global values
   /// configured via controller flags. Requests cannot exceed Limits. More info:
   /// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-  requests: Mapping<String, Int|String>?
+  requests: Mapping<String, Int | String>?
 }
 
 /// If specified, the pod's security context
@@ -1592,7 +1611,7 @@ class Condition {
   reason: String?
 
   /// Status of the condition, one of (`True`, `False`, `Unknown`).
-  status: "True"|"False"|"Unknown"
+  status: "True" | "False" | "Unknown"
 
   /// Type of the condition, known values are (`Ready`).
   type: String

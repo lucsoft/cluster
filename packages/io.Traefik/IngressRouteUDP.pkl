@@ -1,7 +1,7 @@
 /// IngressRouteUDP is a CRD implementation of a Traefik UDP Router.
 ///
 /// This module was generated from the CustomResourceDefinition at
-/// <file:///Users/lucsoft/Developer/infra-hmsys-sys/packages/io.Traefik/>.
+/// <https://raw.githubusercontent.com/traefik/traefik-helm-chart/v39.0.1/traefik/crds/kustomization.yaml>.
 module io.traefik.v1alpha1.IngressRouteUDP
 
 extends "@k8s/K8sResource.pkl"

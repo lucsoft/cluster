@@ -84,28 +84,29 @@ class Spec {
   /// If unset, defaults to `digital signature` and `key encipherment`.
   usages: Listing<
     "signing"
-    |"digital signature"
-    |"content commitment"
-    |"key encipherment"
-    |"key agreement"
-    |"data encipherment"
-    |"cert sign"
-    |"crl sign"
-    |"encipher only"
-    |"decipher only"
-    |"any"
-    |"server auth"
-    |"client auth"
-    |"code signing"
-    |"email protection"
-    |"s/mime"
-    |"ipsec end system"
-    |"ipsec tunnel"
-    |"ipsec user"
-    |"timestamping"
-    |"ocsp signing"
-    |"microsoft sgc"
-    |"netscape sgc">?
+      | "digital signature"
+      | "content commitment"
+      | "key encipherment"
+      | "key agreement"
+      | "data encipherment"
+      | "cert sign"
+      | "crl sign"
+      | "encipher only"
+      | "decipher only"
+      | "any"
+      | "server auth"
+      | "client auth"
+      | "code signing"
+      | "email protection"
+      | "s/mime"
+      | "ipsec end system"
+      | "ipsec tunnel"
+      | "ipsec user"
+      | "timestamping"
+      | "ocsp signing"
+      | "microsoft sgc"
+      | "netscape sgc",
+  >?
 
   /// Username contains the name of the user that created the CertificateRequest. Populated by the
   /// cert-manager webhook on creation and immutable.
@@ -163,7 +164,7 @@ class Condition {
   reason: String?
 
   /// Status of the condition, one of (`True`, `False`, `Unknown`).
-  status: "True"|"False"|"Unknown"
+  status: "True" | "False" | "Unknown"
 
   /// Type of the condition, known values are (`Ready`, `InvalidRequest`, `Approved`, `Denied`).
   type: String

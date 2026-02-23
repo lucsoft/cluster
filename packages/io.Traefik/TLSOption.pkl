@@ -3,7 +3,7 @@
 /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/tls/tls-certificates/#certificates-stores#tls-options
 ///
 /// This module was generated from the CustomResourceDefinition at
-/// <file:///Users/lucsoft/Developer/infra-hmsys-sys/packages/io.Traefik/>.
+/// <https://raw.githubusercontent.com/traefik/traefik-helm-chart/v39.0.1/traefik/crds/kustomization.yaml>.
 module io.traefik.v1alpha1.TLSOption
 
 extends "@k8s/K8sResource.pkl"

@@ -8,8 +8,9 @@ local baseUrl =
 local kustomize: Listing<String> =
   new yaml.Parser {}.parse(read("\(baseUrl)/kustomization.yaml")).resources
 
-source = ""
+source = "\(baseUrl)/kustomization.yaml"
 
+baseApiGroup = "v1alpha1.traefik.io"
 k8sImportPath = "@k8s"
 
 sourceContents =

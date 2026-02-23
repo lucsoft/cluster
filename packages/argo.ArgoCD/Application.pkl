@@ -1,7 +1,7 @@
 /// Application is a definition of Application resource.
 ///
 /// This module was generated from the CustomResourceDefinition at
-/// <https://raw.githubusercontent.com/argoproj/argo-cd/v2.7.2/manifests/install.yaml>.
+/// <https://raw.githubusercontent.com/argoproj/argo-cd/v3.3.2/manifests/crds/kustomization.yaml>.
 module io.argoproj.v1alpha1.Application
 
 extends "@k8s/K8sResource.pkl"
@@ -36,10 +36,10 @@ class Operation {
   initiatedBy: InitiatedBy?
 
   /// Retry controls the strategy to apply if a sync fails
-  retry: Retry?
+  retry: OperationRetry?
 
   /// Sync contains parameters for the operation
-  sync: Sync?
+  sync: OperationSync?
 }
 
 class Info {
@@ -58,13 +58,17 @@ class InitiatedBy {
 }
 
 /// Retry controls the strategy to apply if a sync fails
-class Retry {
+class OperationRetry {
   /// Backoff controls how to backoff on subsequent retries of failed syncs
   backoff: Backoff?
 
   /// Limit is the maximum number of attempts for retrying a failed sync. If set to 0, no retries will be
   /// performed.
   limit: Int?
+
+  /// Refresh indicates if the latest revision should be used on retry instead of the initial one
+  /// (default: false)
+  refresh: Boolean?
 }
 
 /// Backoff controls how to backoff on subsequent retries of failed syncs
@@ -81,7 +85,10 @@ class Backoff {
 }
 
 /// Sync contains parameters for the operation
-class Sync {
+class OperationSync {
+  /// SelfHealAttemptsCount contains the number of auto-heal attempts
+  autoHealAttemptsCount: Int?
+
   /// DryRun specifies to perform a `kubectl apply --dry-run` without actually performing the sync
   dryRun: Boolean?
 
@@ -92,7 +99,7 @@ class Sync {
   prune: Boolean?
 
   /// Resources describes which resources shall be part of the sync
-  resources: Listing<Resource>?
+  resources: Listing<SyncResource>?
 
   /// Revision is the revision (Git) or chart version (Helm) which to sync the application to If omitted,
   /// will use the revision specified in app spec.
@@ -104,21 +111,21 @@ class Sync {
 
   /// Source overrides the source definition set in the application. This is typically set in a Rollback
   /// operation and is nil during a Sync operation
-  source: Source?
+  source: SyncSource?
 
   /// Sources overrides the source definition set in the application. This is typically set in a Rollback
   /// operation and is nil during a Sync operation
-  sources: Listing<Source>?
+  sources: Listing<ComparedToSource>?
 
   /// SyncOptions provide per-sync sync-options, e.g. Validate=false
   syncOptions: Listing<String>?
 
   /// SyncStrategy describes how to perform the sync
-  syncStrategy: SyncStrategy?
+  syncStrategy: SyncSyncStrategy?
 }
 
 /// SyncOperationResource contains resources to sync.
-class SyncOperationResource {
+class SyncResource {
   group: String?
 
   kind: String
@@ -128,8 +135,47 @@ class SyncOperationResource {
   namespace: String?
 }
 
+/// Source overrides the source definition set in the application. This is typically set in a Rollback
+/// operation and is nil during a Sync operation
+class SyncSource {
+  /// Chart is a Helm chart name, and must be specified for applications sourced from a Helm repo.
+  chart: String?
+
+  /// Directory holds path/directory specific options
+  directory: SourceDirectory?
+
+  /// Helm holds helm specific options
+  helm: SourceHelm?
+
+  /// Kustomize holds kustomize specific options
+  kustomize: SourceKustomize?
+
+  /// Name is used to refer to a source and is displayed in the UI. It is used in multi-source
+  /// Applications.
+  name: String?
+
+  /// Path is a directory path within the Git repository, and is only valid for applications sourced from
+  /// Git.
+  path: String?
+
+  /// Plugin holds config management plugin specific options
+  plugin: SourcePlugin?
+
+  /// Ref is reference to another source within sources field. This field will not be used if used with a
+  /// `source` tag.
+  ref: String?
+
+  /// RepoURL is the URL to the repository (Git or Helm) that contains the application manifests
+  repoURL: String
+
+  /// TargetRevision defines the revision of the source to sync the application to. In case of Git, this
+  /// can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver
+  /// tag for the Chart's version.
+  targetRevision: String?
+}
+
 /// Directory holds path/directory specific options
-class Directory {
+class SourceDirectory {
   /// Exclude contains a glob pattern to match paths against that should be explicitly excluded from
   /// being used during manifest generation
   exclude: String?
@@ -167,7 +213,12 @@ class Tla {
 }
 
 /// Helm holds helm specific options
-class Helm {
+class SourceHelm {
+  /// APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating
+  /// manifests. By default, Argo CD uses the API versions of the target cluster. The format is
+  /// [group/]version/kind.
+  apiVersions: Listing<String>?
+
   /// FileParameters are file parameters to the helm template
   fileParameters: Listing<FileParameter>?
 
@@ -175,9 +226,17 @@ class Helm {
   /// not appending them to helm template --values
   ignoreMissingValueFiles: Boolean?
 
+  /// KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By
+  /// default, Argo CD uses the Kubernetes version of the target cluster.
+  kubeVersion: String?
+
+  /// Namespace is an optional namespace to template with. If left empty, defaults to the app's
+  /// destination namespace.
+  namespace: String?
+
   /// Parameters is a list of Helm parameters which are passed to the helm template command upon manifest
   /// generation
-  parameters: Listing<HelmParameter>?
+  parameters: Listing<SourceHelmParameter>?
 
   /// PassCredentials pass credentials to all domains (Helm's --pass-credentials)
   passCredentials: Boolean?
@@ -188,16 +247,25 @@ class Helm {
   /// SkipCrds skips custom resource definition installation step (Helm's --skip-crds)
   skipCrds: Boolean?
 
+  /// SkipSchemaValidation skips JSON schema validation (Helm's --skip-schema-validation)
+  skipSchemaValidation: Boolean?
+
+  /// SkipTests skips test manifest installation step (Helm's --skip-tests).
+  skipTests: Boolean?
+
   /// ValuesFiles is a list of Helm value files to use when generating a template
   valueFiles: Listing<String>?
 
-  /// Values specifies Helm values to be passed to helm template, typically defined as a block
+  /// Values specifies Helm values to be passed to helm template, typically defined as a block.
+  /// ValuesObject takes precedence over Values, so use one or the other.
   values: String?
+
+  /// ValuesObject specifies Helm values to be passed to helm template, defined as a map. This takes
+  /// precedence over Values.
+  valuesObject: Dynamic?
 
   /// Version is the Helm version to use for templating ("3")
   version: String?
-
-  valuesObject: Dynamic?
 }
 
 /// HelmFileParameter is a file parameter that's passed to helm template during manifest generation
@@ -210,7 +278,7 @@ class FileParameter {
 }
 
 /// HelmParameter is a parameter that's passed to helm template during manifest generation
-class HelmParameter {
+class SourceHelmParameter {
   /// ForceString determines whether to tell Helm to interpret booleans and numbers as strings
   forceString: Boolean?
 
@@ -222,7 +290,12 @@ class HelmParameter {
 }
 
 /// Kustomize holds kustomize specific options
-class Kustomize {
+class SourceKustomize {
+  /// APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating
+  /// manifests. By default, Argo CD uses the API versions of the target cluster. The format is
+  /// [group/]version/kind.
+  apiVersions: Listing<String>?
+
   /// CommonAnnotations is a list of additional annotations to add to rendered manifests
   commonAnnotations: Mapping<String, String>?
 
@@ -233,6 +306,9 @@ class Kustomize {
   /// CommonLabels is a list of additional labels to add to rendered manifests
   commonLabels: Mapping<String, String>?
 
+  /// Components specifies a list of kustomize components to add to the kustomization before building
+  components: Listing<String>?
+
   /// ForceCommonAnnotations specifies whether to force applying common annotations to resources for
   /// Kustomize apps
   forceCommonAnnotations: Boolean?
@@ -240,8 +316,22 @@ class Kustomize {
   /// ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps
   forceCommonLabels: Boolean?
 
+  /// IgnoreMissingComponents prevents kustomize from failing when components do not exist locally by not
+  /// appending them to kustomization file
+  ignoreMissingComponents: Boolean?
+
   /// Images is a list of Kustomize image override specifications
   images: Listing<String>?
+
+  /// KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By
+  /// default, Argo CD uses the Kubernetes version of the target cluster.
+  kubeVersion: String?
+
+  /// LabelIncludeTemplates specifies whether to apply common labels to resource templates or not
+  labelIncludeTemplates: Boolean?
+
+  /// LabelWithoutSelector specifies whether to apply common labels to resource selectors or not
+  labelWithoutSelector: Boolean?
 
   /// NamePrefix is a prefix appended to resources for Kustomize apps
   namePrefix: String?
@@ -252,10 +342,39 @@ class Kustomize {
   /// Namespace sets the namespace that Kustomize adds to all resources
   namespace: String?
 
+  /// Patches is a list of Kustomize patches
+  patches: Listing<Patch>?
+
   /// Replicas is a list of Kustomize Replicas override specifications
   replicas: Listing<Replica>?
 
   /// Version controls which version of Kustomize to use for rendering manifests
+  version: String?
+}
+
+class Patch {
+  options: Mapping<String, Boolean>?
+
+  patch: String?
+
+  path: String?
+
+  target: Target?
+}
+
+class Target {
+  annotationSelector: String?
+
+  group: String?
+
+  kind: String?
+
+  labelSelector: String?
+
+  name: String?
+
+  namespace: String?
+
   version: String?
 }
 
@@ -268,13 +387,13 @@ class Replica {
 }
 
 /// Plugin holds config management plugin specific options
-class Plugin {
+class SourcePlugin {
   /// Env is a list of environment variable entries
   env: Listing<Env>?
 
   name: String?
 
-  parameters: Listing<Parameter>?
+  parameters: Listing<PluginParameter>?
 }
 
 /// EnvEntry represents an entry in the application's environment
@@ -286,7 +405,7 @@ class Env {
   value: String
 }
 
-class Parameter {
+class PluginParameter {
   /// Array is the value of an array type parameter.
   array: Listing<String>?
 
@@ -301,25 +420,29 @@ class Parameter {
 }
 
 /// ApplicationSource contains all required information about the source of an application
-class ApplicationSource {
+class ComparedToSource {
   /// Chart is a Helm chart name, and must be specified for applications sourced from a Helm repo.
   chart: String?
 
   /// Directory holds path/directory specific options
-  directory: Directory?
+  directory: SourceDirectory?
 
   /// Helm holds helm specific options
-  helm: Helm?
+  helm: SourceHelm?
 
   /// Kustomize holds kustomize specific options
-  kustomize: Kustomize?
+  kustomize: SourceKustomize?
+
+  /// Name is used to refer to a source and is displayed in the UI. It is used in multi-source
+  /// Applications.
+  name: String?
 
   /// Path is a directory path within the Git repository, and is only valid for applications sourced from
   /// Git.
   path: String?
 
   /// Plugin holds config management plugin specific options
-  plugin: Plugin?
+  plugin: SourcePlugin?
 
   /// Ref is reference to another source within sources field. This field will not be used if used with a
   /// `source` tag.
@@ -335,23 +458,23 @@ class ApplicationSource {
 }
 
 /// SyncStrategy describes how to perform the sync
-class SyncStrategy {
+class SyncSyncStrategy {
   /// Apply will perform a `kubectl apply` to perform the sync.
-  apply: Apply?
+  apply: SyncStrategyApply?
 
   /// Hook will submit any referenced resources to perform the sync. This is the default strategy
-  hook: Hook?
+  hook: SyncStrategyHook?
 }
 
 /// Apply will perform a `kubectl apply` to perform the sync.
-class Apply {
+class SyncStrategyApply {
   /// Force indicates whether or not to supply the --force flag to `kubectl apply`. The --force flag
   /// deletes and re-create the resource, when PATCH encounters conflict and has retried for 5 times.
   force: Boolean?
 }
 
 /// Hook will submit any referenced resources to perform the sync. This is the default strategy
-class Hook {
+class SyncStrategyHook {
   /// Force indicates whether or not to supply the --force flag to `kubectl apply`. The --force flag
   /// deletes and re-create the resource, when PATCH encounters conflict and has retried for 5 times.
   force: Boolean?
@@ -364,7 +487,7 @@ class Spec {
   destination: Destination
 
   /// IgnoreDifferences is a list of resources and their fields which should be ignored during comparison
-  ignoreDifferences: Listing<IgnoreDifference>?
+  ignoreDifferences: Listing<ComparedToIgnoreDifference>?
 
   /// Info contains a list of information (URLs, email addresses, and plain text) that relates to the
   /// application
@@ -382,10 +505,14 @@ class Spec {
   revisionHistoryLimit: Int?
 
   /// Source is a reference to the location of the application's manifests or chart
-  source: Source?
+  source: SpecSource?
+
+  /// SourceHydrator provides a way to push hydrated manifests back to git before syncing them to the
+  /// cluster.
+  sourceHydrator: SourceHydrator?
 
   /// Sources is a reference to the location of the application's manifests or chart
-  sources: Listing<Source>?
+  sources: Listing<ComparedToSource>?
 
   /// SyncPolicy controls when and how a sync will be performed
   syncPolicy: SyncPolicy?
@@ -393,20 +520,22 @@ class Spec {
 
 /// Destination is a reference to the target Kubernetes server and namespace
 class Destination {
-  /// Name is an alternate way of specifying the target cluster by its symbolic name
+  /// Name is an alternate way of specifying the target cluster by its symbolic name. This must be set if
+  /// Server is not set.
   name: String?
 
   /// Namespace specifies the target namespace for the application's resources. The namespace will only
   /// be set for namespace-scoped resources that have not set a value for .metadata.namespace
   namespace: String?
 
-  /// Server specifies the URL of the target cluster and must be set to the Kubernetes control plane API
+  /// Server specifies the URL of the target cluster's Kubernetes control plane API. This must be set if
+  /// Name is not set.
   server: String?
 }
 
 /// ResourceIgnoreDifferences contains resource filter and list of json paths which should be ignored
 /// during comparison with live state.
-class IgnoreDifference {
+class ComparedToIgnoreDifference {
   group: String?
 
   jqPathExpressions: Listing<String>?
@@ -424,6 +553,247 @@ class IgnoreDifference {
   namespace: String?
 }
 
+/// Source is a reference to the location of the application's manifests or chart
+class SpecSource {
+  /// Chart is a Helm chart name, and must be specified for applications sourced from a Helm repo.
+  chart: String?
+
+  /// Directory holds path/directory specific options
+  directory: SourceDirectory?
+
+  /// Helm holds helm specific options
+  helm: SourceHelm?
+
+  /// Kustomize holds kustomize specific options
+  kustomize: SourceKustomize?
+
+  /// Name is used to refer to a source and is displayed in the UI. It is used in multi-source
+  /// Applications.
+  name: String?
+
+  /// Path is a directory path within the Git repository, and is only valid for applications sourced from
+  /// Git.
+  path: String?
+
+  /// Plugin holds config management plugin specific options
+  plugin: SourcePlugin?
+
+  /// Ref is reference to another source within sources field. This field will not be used if used with a
+  /// `source` tag.
+  ref: String?
+
+  /// RepoURL is the URL to the repository (Git or Helm) that contains the application manifests
+  repoURL: String
+
+  /// TargetRevision defines the revision of the source to sync the application to. In case of Git, this
+  /// can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver
+  /// tag for the Chart's version.
+  targetRevision: String?
+}
+
+/// SourceHydrator provides a way to push hydrated manifests back to git before syncing them to the
+/// cluster.
+class SourceHydrator {
+  /// DrySource specifies where the dry "don't repeat yourself" manifest source lives.
+  drySource: DrySource
+
+  /// HydrateTo specifies an optional "staging" location to push hydrated manifests to. An external
+  /// system would then have to move manifests to the SyncSource, e.g. by pull request.
+  hydrateTo: HydrateTo?
+
+  /// SyncSource specifies where to sync hydrated manifests from.
+  syncSource: SourceHydratorSyncSource
+}
+
+/// DrySource specifies where the dry "don't repeat yourself" manifest source lives.
+class DrySource {
+  /// Directory specifies path/directory specific options
+  directory: DrySourceDirectory?
+
+  /// Helm specifies helm specific options
+  helm: DrySourceHelm?
+
+  /// Kustomize specifies kustomize specific options
+  kustomize: DrySourceKustomize?
+
+  /// Path is a directory path within the Git repository where the manifests are located
+  path: String
+
+  /// Plugin specifies config management plugin specific options
+  plugin: DrySourcePlugin?
+
+  /// RepoURL is the URL to the git repository that contains the application manifests
+  repoURL: String
+
+  /// TargetRevision defines the revision of the source to hydrate
+  targetRevision: String
+}
+
+/// Directory specifies path/directory specific options
+class DrySourceDirectory {
+  /// Exclude contains a glob pattern to match paths against that should be explicitly excluded from
+  /// being used during manifest generation
+  exclude: String?
+
+  /// Include contains a glob pattern to match paths against that should be explicitly included during
+  /// manifest generation
+  include: String?
+
+  /// Jsonnet holds options specific to Jsonnet
+  jsonnet: Jsonnet?
+
+  /// Recurse specifies whether to scan a directory recursively for manifests
+  recurse: Boolean?
+}
+
+/// Helm specifies helm specific options
+class DrySourceHelm {
+  /// APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating
+  /// manifests. By default, Argo CD uses the API versions of the target cluster. The format is
+  /// [group/]version/kind.
+  apiVersions: Listing<String>?
+
+  /// FileParameters are file parameters to the helm template
+  fileParameters: Listing<FileParameter>?
+
+  /// IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by
+  /// not appending them to helm template --values
+  ignoreMissingValueFiles: Boolean?
+
+  /// KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By
+  /// default, Argo CD uses the Kubernetes version of the target cluster.
+  kubeVersion: String?
+
+  /// Namespace is an optional namespace to template with. If left empty, defaults to the app's
+  /// destination namespace.
+  namespace: String?
+
+  /// Parameters is a list of Helm parameters which are passed to the helm template command upon manifest
+  /// generation
+  parameters: Listing<SourceHelmParameter>?
+
+  /// PassCredentials pass credentials to all domains (Helm's --pass-credentials)
+  passCredentials: Boolean?
+
+  /// ReleaseName is the Helm release name to use. If omitted it will use the application name
+  releaseName: String?
+
+  /// SkipCrds skips custom resource definition installation step (Helm's --skip-crds)
+  skipCrds: Boolean?
+
+  /// SkipSchemaValidation skips JSON schema validation (Helm's --skip-schema-validation)
+  skipSchemaValidation: Boolean?
+
+  /// SkipTests skips test manifest installation step (Helm's --skip-tests).
+  skipTests: Boolean?
+
+  /// ValuesFiles is a list of Helm value files to use when generating a template
+  valueFiles: Listing<String>?
+
+  /// Values specifies Helm values to be passed to helm template, typically defined as a block.
+  /// ValuesObject takes precedence over Values, so use one or the other.
+  values: String?
+
+  /// ValuesObject specifies Helm values to be passed to helm template, defined as a map. This takes
+  /// precedence over Values.
+  valuesObject: Dynamic?
+
+  /// Version is the Helm version to use for templating ("3")
+  version: String?
+}
+
+/// Kustomize specifies kustomize specific options
+class DrySourceKustomize {
+  /// APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating
+  /// manifests. By default, Argo CD uses the API versions of the target cluster. The format is
+  /// [group/]version/kind.
+  apiVersions: Listing<String>?
+
+  /// CommonAnnotations is a list of additional annotations to add to rendered manifests
+  commonAnnotations: Mapping<String, String>?
+
+  /// CommonAnnotationsEnvsubst specifies whether to apply env variables substitution for annotation
+  /// values
+  commonAnnotationsEnvsubst: Boolean?
+
+  /// CommonLabels is a list of additional labels to add to rendered manifests
+  commonLabels: Mapping<String, String>?
+
+  /// Components specifies a list of kustomize components to add to the kustomization before building
+  components: Listing<String>?
+
+  /// ForceCommonAnnotations specifies whether to force applying common annotations to resources for
+  /// Kustomize apps
+  forceCommonAnnotations: Boolean?
+
+  /// ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps
+  forceCommonLabels: Boolean?
+
+  /// IgnoreMissingComponents prevents kustomize from failing when components do not exist locally by not
+  /// appending them to kustomization file
+  ignoreMissingComponents: Boolean?
+
+  /// Images is a list of Kustomize image override specifications
+  images: Listing<String>?
+
+  /// KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By
+  /// default, Argo CD uses the Kubernetes version of the target cluster.
+  kubeVersion: String?
+
+  /// LabelIncludeTemplates specifies whether to apply common labels to resource templates or not
+  labelIncludeTemplates: Boolean?
+
+  /// LabelWithoutSelector specifies whether to apply common labels to resource selectors or not
+  labelWithoutSelector: Boolean?
+
+  /// NamePrefix is a prefix appended to resources for Kustomize apps
+  namePrefix: String?
+
+  /// NameSuffix is a suffix appended to resources for Kustomize apps
+  nameSuffix: String?
+
+  /// Namespace sets the namespace that Kustomize adds to all resources
+  namespace: String?
+
+  /// Patches is a list of Kustomize patches
+  patches: Listing<Patch>?
+
+  /// Replicas is a list of Kustomize Replicas override specifications
+  replicas: Listing<Replica>?
+
+  /// Version controls which version of Kustomize to use for rendering manifests
+  version: String?
+}
+
+/// Plugin specifies config management plugin specific options
+class DrySourcePlugin {
+  /// Env is a list of environment variable entries
+  env: Listing<Env>?
+
+  name: String?
+
+  parameters: Listing<PluginParameter>?
+}
+
+/// HydrateTo specifies an optional "staging" location to push hydrated manifests to. An external system
+/// would then have to move manifests to the SyncSource, e.g. by pull request.
+class HydrateTo {
+  /// TargetBranch is the branch to which hydrated manifests should be committed
+  targetBranch: String
+}
+
+/// SyncSource specifies where to sync hydrated manifests from.
+class SourceHydratorSyncSource {
+  /// Path is a directory path within the git repository where hydrated manifests should be committed to
+  /// and synced from. The Path should never point to the root of the repo. If hydrateTo is set, this is
+  /// just the path from which hydrated manifests will be synced.
+  path: String(!isEmpty, matches(Regex("^.{2,}|[^./]$")))
+
+  /// TargetBranch is the branch from which hydrated manifests will be synced. If HydrateTo is not set,
+  /// this is also the branch to which hydrated manifests are committed.
+  targetBranch: String
+}
+
 /// SyncPolicy controls when and how a sync will be performed
 class SyncPolicy {
   /// Automated will keep an application synced to the target revision
@@ -433,7 +803,7 @@ class SyncPolicy {
   managedNamespaceMetadata: ManagedNamespaceMetadata?
 
   /// Retry controls failed sync retry behavior
-  retry: Retry?
+  retry: SyncPolicyRetry?
 
   /// Options allow you to specify whole app sync-options
   syncOptions: Listing<String>?
@@ -444,11 +814,14 @@ class Automated {
   /// AllowEmpty allows apps have zero live resources (default: false)
   allowEmpty: Boolean?
 
+  /// Enable allows apps to explicitly control automated sync
+  enabled: Boolean?
+
   /// Prune specifies whether to delete resources from the cluster that are not found in the sources
   /// anymore as part of automated sync (default: false)
   prune: Boolean?
 
-  /// SelfHeal specifes whether to revert resources back to their desired state upon modification in the
+  /// SelfHeal specifies whether to revert resources back to their desired state upon modification in the
   /// cluster (default: false)
   selfHeal: Boolean?
 }
@@ -460,10 +833,27 @@ class ManagedNamespaceMetadata {
   labels: Mapping<String, String>?
 }
 
+/// Retry controls failed sync retry behavior
+class SyncPolicyRetry {
+  /// Backoff controls how to backoff on subsequent retries of failed syncs
+  backoff: Backoff?
+
+  /// Limit is the maximum number of attempts for retrying a failed sync. If set to 0, no retries will be
+  /// performed.
+  limit: Int?
+
+  /// Refresh indicates if the latest revision should be used on retry instead of the initial one
+  /// (default: false)
+  refresh: Boolean?
+}
+
 /// ApplicationStatus contains status information for the application
 class Status {
   /// Conditions is a list of currently observed application conditions
   conditions: Listing<Condition>?
+
+  /// ControllerNamespace indicates the namespace in which the application controller is located
+  controllerNamespace: String?
 
   /// Health contains information about the application's current health status
   health: Health?
@@ -486,7 +876,10 @@ class Status {
   resourceHealthSource: String?
 
   /// Resources is a list of Kubernetes resources managed by this application
-  resources: Listing<ResourceStatus>?
+  resources: Listing<StatusResource>?
+
+  /// SourceHydrator stores information about the current state of source hydration
+  sourceHydrator: StatusSourceHydrator?
 
   /// SourceType specifies the type of this application
   sourceType: String?
@@ -501,7 +894,7 @@ class Status {
   sync: Sync?
 }
 
-/// ApplicationCondition contains details about an application condition, which is usally an error or
+/// ApplicationCondition contains details about an application condition, which is usually an error or
 /// warning
 class Condition {
   /// LastTransitionTime is the time the condition was last observed
@@ -516,10 +909,15 @@ class Condition {
 
 /// Health contains information about the application's current health status
 class Health {
+  /// LastTransitionTime is the time the HealthStatus was set or updated
+  lastTransitionTime: String?
+
   /// Message is a human-readable informational message describing the health status
+  ///
+  /// Deprecated: this field is not used and will be removed in a future release.
   message: String?
 
-  /// Status holds the status code of the application or resource
+  /// Status holds the status code of the application
   status: String?
 }
 
@@ -534,6 +932,9 @@ class History {
   /// ID is an auto incrementing identifier of the RevisionHistory
   id: Int
 
+  /// InitiatedBy contains information about who initiated the operations
+  initiatedBy: InitiatedBy?
+
   /// Revision holds the revision the sync was performed against
   revision: String?
 
@@ -541,32 +942,36 @@ class History {
   revisions: Listing<String>?
 
   /// Source is a reference to the application source used for the sync operation
-  source: Source?
+  source: HistorySource?
 
   /// Sources is a reference to the application sources used for the sync operation
-  sources: Listing<Source>?
+  sources: Listing<ComparedToSource>?
 }
 
 /// Source is a reference to the application source used for the sync operation
-class Source {
+class HistorySource {
   /// Chart is a Helm chart name, and must be specified for applications sourced from a Helm repo.
   chart: String?
 
   /// Directory holds path/directory specific options
-  directory: Directory?
+  directory: SourceDirectory?
 
   /// Helm holds helm specific options
-  helm: Helm?
+  helm: SourceHelm?
 
   /// Kustomize holds kustomize specific options
-  kustomize: Kustomize?
+  kustomize: SourceKustomize?
+
+  /// Name is used to refer to a source and is displayed in the UI. It is used in multi-source
+  /// Applications.
+  name: String?
 
   /// Path is a directory path within the Git repository, and is only valid for applications sourced from
   /// Git.
   path: String?
 
   /// Plugin holds config management plugin specific options
-  plugin: Plugin?
+  plugin: SourcePlugin?
 
   /// Ref is reference to another source within sources field. This field will not be used if used with a
   /// `source` tag.
@@ -590,7 +995,7 @@ class OperationState {
   message: String?
 
   /// Operation is the original requested operation
-  operation: Operation
+  operation: OperationStateOperation
 
   /// Phase is the current phase of the operation
   phase: String
@@ -605,10 +1010,28 @@ class OperationState {
   syncResult: SyncResult?
 }
 
+/// Operation is the original requested operation
+class OperationStateOperation {
+  /// Info is a list of informational items for this operation
+  info: Listing<Info>?
+
+  /// InitiatedBy contains information about who initiated the operations
+  initiatedBy: InitiatedBy?
+
+  /// Retry controls the strategy to apply if a sync fails
+  retry: OperationRetry?
+
+  /// Sync contains parameters for the operation
+  sync: OperationSync?
+}
+
 /// SyncResult is the result of a Sync operation
 class SyncResult {
+  /// ManagedNamespaceMetadata contains the current sync state of managed namespace metadata
+  managedNamespaceMetadata: SyncResultManagedNamespaceMetadata?
+
   /// Resources contains a list of sync result items for each individual resource in a sync operation
-  resources: Listing<ResourceStatus>?
+  resources: Listing<Resource>?
 
   /// Revision holds the revision this sync operation was performed to
   revision: String
@@ -618,14 +1041,21 @@ class SyncResult {
   revisions: Listing<String>?
 
   /// Source records the application source information of the sync, used for comparing auto-sync
-  source: Source?
+  source: SyncResultSource?
 
   /// Source records the application source information of the sync, used for comparing auto-sync
-  sources: Listing<Source>?
+  sources: Listing<ComparedToSource>?
+}
+
+/// ManagedNamespaceMetadata contains the current sync state of managed namespace metadata
+class SyncResultManagedNamespaceMetadata {
+  annotations: Mapping<String, String>?
+
+  labels: Mapping<String, String>?
 }
 
 /// ResourceResult holds the operation result details of a specific resource
-class ResourceResult {
+class Resource {
   /// Group specifies the API group of the resource
   group: String
 
@@ -635,6 +1065,9 @@ class ResourceResult {
 
   /// HookType specifies the type of the hook. Empty for non-hook resources
   hookType: String?
+
+  /// Images contains the images related to the ResourceResult
+  images: Listing<String>?
 
   /// Kind specifies the API kind of the resource
   kind: String
@@ -659,31 +1092,154 @@ class ResourceResult {
   version: String
 }
 
-/// ResourceStatus holds the current sync and health status of a resource TODO: describe members of this
-/// type
-class ResourceStatus {
-  group: String?
+/// Source records the application source information of the sync, used for comparing auto-sync
+class SyncResultSource {
+  /// Chart is a Helm chart name, and must be specified for applications sourced from a Helm repo.
+  chart: String?
 
-  /// HealthStatus contains information about the currently observed health state of an application or
-  /// resource
-  health: Health?
+  /// Directory holds path/directory specific options
+  directory: SourceDirectory?
 
-  hook: Boolean?
+  /// Helm holds helm specific options
+  helm: SourceHelm?
 
-  kind: String?
+  /// Kustomize holds kustomize specific options
+  kustomize: SourceKustomize?
 
+  /// Name is used to refer to a source and is displayed in the UI. It is used in multi-source
+  /// Applications.
   name: String?
 
+  /// Path is a directory path within the Git repository, and is only valid for applications sourced from
+  /// Git.
+  path: String?
+
+  /// Plugin holds config management plugin specific options
+  plugin: SourcePlugin?
+
+  /// Ref is reference to another source within sources field. This field will not be used if used with a
+  /// `source` tag.
+  ref: String?
+
+  /// RepoURL is the URL to the repository (Git or Helm) that contains the application manifests
+  repoURL: String
+
+  /// TargetRevision defines the revision of the source to sync the application to. In case of Git, this
+  /// can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver
+  /// tag for the Chart's version.
+  targetRevision: String?
+}
+
+/// ResourceStatus holds the current synchronization and health status of a Kubernetes resource.
+class StatusResource {
+  /// Group represents the API group of the resource (e.g., "apps" for Deployments).
+  group: String?
+
+  /// Health indicates the health status of the resource (e.g., Healthy, Degraded, Progressing).
+  health: ResourceHealth?
+
+  /// Hook is true if the resource is used as a lifecycle hook in an Argo CD application.
+  hook: Boolean?
+
+  /// Kind specifies the type of the resource (e.g., "Deployment", "Service").
+  kind: String?
+
+  /// Name is the unique name of the resource within the namespace.
+  name: String?
+
+  /// Namespace defines the Kubernetes namespace where the resource is located.
   namespace: String?
 
+  /// RequiresDeletionConfirmation is true if the resource requires explicit user confirmation before
+  /// deletion.
+  requiresDeletionConfirmation: Boolean?
+
+  /// RequiresPruning is true if the resource needs to be pruned (deleted) as part of synchronization.
   requiresPruning: Boolean?
 
-  /// SyncStatusCode is a type which represents possible comparison results
+  /// Status represents the synchronization state of the resource (e.g., Synced, OutOfSync).
   status: String?
 
+  /// SyncWave determines the order in which resources are applied during a sync operation. Lower values
+  /// are applied first.
   syncWave: Int?
 
+  /// Version indicates the API version of the resource (e.g., "v1", "v1beta1").
   version: String?
+}
+
+/// Health indicates the health status of the resource (e.g., Healthy, Degraded, Progressing).
+class ResourceHealth {
+  /// LastTransitionTime is the time the HealthStatus was set or updated
+  ///
+  /// Deprecated: this field is not used and will be removed in a future release.
+  lastTransitionTime: String?
+
+  /// Message is a human-readable informational message describing the health status
+  message: String?
+
+  /// Status holds the status code of the resource
+  status: String?
+}
+
+/// SourceHydrator stores information about the current state of source hydration
+class StatusSourceHydrator {
+  /// CurrentOperation holds the status of the hydrate operation
+  currentOperation: CurrentOperation?
+
+  /// LastSuccessfulOperation holds info about the most recent successful hydration
+  lastSuccessfulOperation: LastSuccessfulOperation?
+}
+
+/// CurrentOperation holds the status of the hydrate operation
+class CurrentOperation {
+  /// DrySHA holds the resolved revision (sha) of the dry source as of the most recent reconciliation
+  drySHA: String?
+
+  /// FinishedAt indicates when the hydrate operation finished
+  finishedAt: String?
+
+  /// HydratedSHA holds the resolved revision (sha) of the hydrated source as of the most recent
+  /// reconciliation
+  hydratedSHA: String?
+
+  /// Message contains a message describing the current status of the hydrate operation
+  message: String
+
+  /// Phase indicates the status of the hydrate operation
+  phase: "Hydrating" | "Failed" | "Hydrated"
+
+  /// SourceHydrator holds the hydrator config used for the hydrate operation
+  sourceHydrator: LastSuccessfulOperationSourceHydrator?
+
+  /// StartedAt indicates when the hydrate operation started
+  startedAt: String?
+}
+
+/// SourceHydrator holds the hydrator config used for the hydrate operation
+class LastSuccessfulOperationSourceHydrator {
+  /// DrySource specifies where the dry "don't repeat yourself" manifest source lives.
+  drySource: DrySource
+
+  /// HydrateTo specifies an optional "staging" location to push hydrated manifests to. An external
+  /// system would then have to move manifests to the SyncSource, e.g. by pull request.
+  hydrateTo: HydrateTo?
+
+  /// SyncSource specifies where to sync hydrated manifests from.
+  syncSource: SourceHydratorSyncSource
+}
+
+/// LastSuccessfulOperation holds info about the most recent successful hydration
+class LastSuccessfulOperation {
+  /// DrySHA holds the resolved revision (sha) of the dry source as of the most recent reconciliation
+  drySHA: String?
+
+  /// HydratedSHA holds the resolved revision (sha) of the hydrated source as of the most recent
+  /// reconciliation
+  hydratedSHA: String?
+
+  /// SourceHydrator holds the hydrator config used for the hydrate operation
+  sourceHydrator: LastSuccessfulOperationSourceHydrator?
 }
 
 /// Summary contains a list of URLs and container images used by this application
@@ -696,7 +1252,7 @@ class Summary {
 }
 
 /// Sync contains information about the application's current sync status
-class SyncStatus {
+class Sync {
   /// ComparedTo contains information about what has been compared
   comparedTo: ComparedTo?
 
@@ -714,11 +1270,67 @@ class SyncStatus {
 /// ComparedTo contains information about what has been compared
 class ComparedTo {
   /// Destination is a reference to the application's destination used for comparison
-  destination: Destination
+  destination: ComparedToDestination
+
+  /// IgnoreDifferences is a reference to the application's ignored differences used for comparison
+  ignoreDifferences: Listing<ComparedToIgnoreDifference>?
 
   /// Source is a reference to the application's source used for comparison
   source: Source?
 
   /// Sources is a reference to the application's multiple sources used for comparison
-  sources: Listing<Source>?
+  sources: Listing<ComparedToSource>?
+}
+
+/// Destination is a reference to the application's destination used for comparison
+class ComparedToDestination {
+  /// Name is an alternate way of specifying the target cluster by its symbolic name. This must be set if
+  /// Server is not set.
+  name: String?
+
+  /// Namespace specifies the target namespace for the application's resources. The namespace will only
+  /// be set for namespace-scoped resources that have not set a value for .metadata.namespace
+  namespace: String?
+
+  /// Server specifies the URL of the target cluster's Kubernetes control plane API. This must be set if
+  /// Name is not set.
+  server: String?
+}
+
+/// Source is a reference to the application's source used for comparison
+class Source {
+  /// Chart is a Helm chart name, and must be specified for applications sourced from a Helm repo.
+  chart: String?
+
+  /// Directory holds path/directory specific options
+  directory: SourceDirectory?
+
+  /// Helm holds helm specific options
+  helm: SourceHelm?
+
+  /// Kustomize holds kustomize specific options
+  kustomize: SourceKustomize?
+
+  /// Name is used to refer to a source and is displayed in the UI. It is used in multi-source
+  /// Applications.
+  name: String?
+
+  /// Path is a directory path within the Git repository, and is only valid for applications sourced from
+  /// Git.
+  path: String?
+
+  /// Plugin holds config management plugin specific options
+  plugin: SourcePlugin?
+
+  /// Ref is reference to another source within sources field. This field will not be used if used with a
+  /// `source` tag.
+  ref: String?
+
+  /// RepoURL is the URL to the repository (Git or Helm) that contains the application manifests
+  repoURL: String
+
+  /// TargetRevision defines the revision of the source to sync the application to. In case of Git, this
+  /// can be commit, tag, or branch. If omitted, will equal to HEAD. In case of Helm, this is a semver
+  /// tag for the Chart's version.
+  targetRevision: String?
 }

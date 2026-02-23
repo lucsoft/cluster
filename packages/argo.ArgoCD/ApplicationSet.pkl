@@ -1,5 +1,5 @@
 /// This module was generated from the CustomResourceDefinition at
-/// <https://raw.githubusercontent.com/argoproj/argo-cd/v2.7.2/manifests/install.yaml>.
+/// <https://raw.githubusercontent.com/argoproj/argo-cd/v3.3.2/manifests/crds/kustomization.yaml>.
 module io.argoproj.v1alpha1.ApplicationSet
 
 extends "@k8s/K8sResource.pkl"
@@ -20,17 +20,25 @@ spec: Spec
 status: Status?
 
 class Spec {
+  applyNestedSelectors: Boolean?
+
   generators: Listing<Generator>
 
   goTemplate: Boolean?
+
+  goTemplateOptions: Listing<String>?
+
+  ignoreApplicationDifferences: Listing<IgnoreApplicationDifference>?
 
   preservedFields: PreservedFields?
 
   strategy: Strategy?
 
-  syncPolicy: SyncPolicy?
+  syncPolicy: SpecSyncPolicy?
 
-  template: Template
+  template: SpecTemplate
+
+  templatePatch: String?
 }
 
 class Generator {
@@ -45,6 +53,8 @@ class Generator {
   matrix: Matrix?
 
   merge: Merge?
+
+  plugin: Plugin?
 
   pullRequest: PullRequest?
 
@@ -62,7 +72,7 @@ class ClusterDecisionResource {
 
   requeueAfterSeconds: Int?
 
-  template: Template?
+  template: SpecTemplate?
 
   values: Mapping<String, String>?
 }
@@ -81,13 +91,13 @@ class MatchExpression {
   values: Listing<String>?
 }
 
-class Template {
-  metadata: Metadata
+class SpecTemplate {
+  metadata: TemplateMetadata
 
-  spec: Spec
+  spec: SpecTemplateSpec
 }
 
-class Metadata {
+class TemplateMetadata {
   annotations: Mapping<String, String>?
 
   finalizers: Listing<String>?
@@ -99,10 +109,10 @@ class Metadata {
   namespace: String?
 }
 
-class Spec {
-  destination: Destination
+class SpecTemplateSpec {
+  destination: SpecDestination
 
-  ignoreDifferences: Listing<IgnoreDifference>?
+  ignoreDifferences: Listing<SpecIgnoreDifference>?
 
   info: Listing<Env>?
 
@@ -110,14 +120,16 @@ class Spec {
 
   revisionHistoryLimit: Int?
 
-  source: Source?
+  source: SpecSource?
 
-  sources: Listing<Source>?
+  sourceHydrator: SpecSourceHydrator?
 
-  syncPolicy: SyncPolicy?
+  sources: Listing<SpecSource>?
+
+  syncPolicy: TemplateSpecSyncPolicy?
 }
 
-class Destination {
+class SpecDestination {
   name: String?
 
   namespace: String?
@@ -125,7 +137,7 @@ class Destination {
   server: String?
 }
 
-class IgnoreDifference {
+class SpecIgnoreDifference {
   group: String?
 
   jqPathExpressions: Listing<String>?
@@ -147,18 +159,20 @@ class Env {
   value: String
 }
 
-class Source {
+class SpecSource {
   chart: String?
 
-  directory: Directory?
+  directory: SourceDirectory?
 
-  helm: Helm?
+  helm: SourceHelm?
 
-  kustomize: Kustomize?
+  kustomize: SourceKustomize?
+
+  name: String?
 
   path: String?
 
-  plugin: Plugin?
+  plugin: SourcePlugin?
 
   ref: String?
 
@@ -167,17 +181,17 @@ class Source {
   targetRevision: String?
 }
 
-class Directory {
+class SourceDirectory {
   exclude: String?
 
   include: String?
 
-  jsonnet: Jsonnet?
+  jsonnet: DirectoryJsonnet?
 
   recurse: Boolean?
 }
 
-class Jsonnet {
+class DirectoryJsonnet {
   extVars: Listing<Tla>?
 
   libs: Listing<String>?
@@ -193,12 +207,18 @@ class Tla {
   value: String
 }
 
-class Helm {
-  fileParameters: Listing<FileParameter>?
+class SourceHelm {
+  apiVersions: Listing<String>?
+
+  fileParameters: Listing<HelmFileParameter>?
 
   ignoreMissingValueFiles: Boolean?
 
-  parameters: Listing<Parameter>?
+  kubeVersion: String?
+
+  namespace: String?
+
+  parameters: Listing<SourceHelmParameter>?
 
   passCredentials: Boolean?
 
@@ -206,20 +226,26 @@ class Helm {
 
   skipCrds: Boolean?
 
+  skipSchemaValidation: Boolean?
+
+  skipTests: Boolean?
+
   valueFiles: Listing<String>?
 
   values: String?
 
+  valuesObject: Dynamic?
+
   version: String?
 }
 
-class FileParameter {
+class HelmFileParameter {
   name: String?
 
   path: String?
 }
 
-class Parameter {
+class SourceHelmParameter {
   forceString: Boolean?
 
   name: String?
@@ -227,18 +253,30 @@ class Parameter {
   value: String?
 }
 
-class Kustomize {
+class SourceKustomize {
+  apiVersions: Listing<String>?
+
   commonAnnotations: Mapping<String, String>?
 
   commonAnnotationsEnvsubst: Boolean?
 
   commonLabels: Mapping<String, String>?
 
+  components: Listing<String>?
+
   forceCommonAnnotations: Boolean?
 
   forceCommonLabels: Boolean?
 
+  ignoreMissingComponents: Boolean?
+
   images: Listing<String>?
+
+  kubeVersion: String?
+
+  labelIncludeTemplates: Boolean?
+
+  labelWithoutSelector: Boolean?
 
   namePrefix: String?
 
@@ -246,26 +284,54 @@ class Kustomize {
 
   namespace: String?
 
-  replicas: Listing<Replica>?
+  patches: Listing<KustomizePatch>?
+
+  replicas: Listing<KustomizeReplica>?
 
   version: String?
 }
 
-class Replica {
+class KustomizePatch {
+  options: Mapping<String, Boolean>?
+
+  patch: String?
+
+  path: String?
+
+  target: PatchTarget?
+}
+
+class PatchTarget {
+  annotationSelector: String?
+
+  group: String?
+
+  kind: String?
+
+  labelSelector: String?
+
+  name: String?
+
+  namespace: String?
+
+  version: String?
+}
+
+class KustomizeReplica {
   count: Int | String
 
   name: String
 }
 
-class Plugin {
+class SourcePlugin {
   env: Listing<Env>?
 
   name: String?
 
-  parameters: Listing<Parameter>?
+  parameters: Listing<PluginParameter>?
 }
 
-class Parameter {
+class PluginParameter {
   array: Listing<String>?
 
   map: Mapping<String, String>?
@@ -275,37 +341,75 @@ class Parameter {
   string: String?
 }
 
-class SyncPolicy {
-  automated: Automated?
+class SpecSourceHydrator {
+  drySource: SourceHydratorDrySource
 
-  managedNamespaceMetadata: ManagedNamespaceMetadata?
+  hydrateTo: SourceHydratorHydrateTo?
 
-  retry: Retry?
+  syncSource: SourceHydratorSyncSource
+}
+
+class SourceHydratorDrySource {
+  directory: SourceDirectory?
+
+  helm: SourceHelm?
+
+  kustomize: SourceKustomize?
+
+  path: String
+
+  plugin: SourcePlugin?
+
+  repoURL: String
+
+  targetRevision: String
+}
+
+class SourceHydratorHydrateTo {
+  targetBranch: String
+}
+
+class SourceHydratorSyncSource {
+  path: String(!isEmpty, matches(Regex("^.{2,}|[^./]$")))
+
+  targetBranch: String
+}
+
+class TemplateSpecSyncPolicy {
+  automated: SyncPolicyAutomated?
+
+  managedNamespaceMetadata: SyncPolicyManagedNamespaceMetadata?
+
+  retry: SyncPolicyRetry?
 
   syncOptions: Listing<String>?
 }
 
-class Automated {
+class SyncPolicyAutomated {
   allowEmpty: Boolean?
+
+  enabled: Boolean?
 
   prune: Boolean?
 
   selfHeal: Boolean?
 }
 
-class ManagedNamespaceMetadata {
+class SyncPolicyManagedNamespaceMetadata {
   annotations: Mapping<String, String>?
 
   labels: Mapping<String, String>?
 }
 
-class Retry {
-  backoff: Backoff?
+class SyncPolicyRetry {
+  backoff: RetryBackoff?
 
   limit: Int?
+
+  refresh: Boolean?
 }
 
-class Backoff {
+class RetryBackoff {
   duration: String?
 
   factor: Int?
@@ -314,15 +418,17 @@ class Backoff {
 }
 
 class Clusters {
+  flatList: Boolean?
+
   selector: Selector?
 
-  template: Template?
+  template: SpecTemplate?
 
   values: Mapping<String, String>?
 }
 
 class Git {
-  directories: Listing<Directory>?
+  directories: Listing<File>?
 
   files: Listing<File>?
 
@@ -334,34 +440,32 @@ class Git {
 
   revision: String
 
-  template: Template?
+  template: SpecTemplate?
+
+  values: Mapping<String, String>?
 }
 
-class Directory {
+class File {
   exclude: Boolean?
 
   path: String
 }
 
-class File {
-  path: String
-}
-
 class List {
-  elements: Listing<Any>
+  elements: Listing<Null>?
 
   elementsYaml: String?
 
-  template: Template?
+  template: SpecTemplate?
 }
 
 class Matrix {
-  generators: Listing<Generator>
+  generators: Listing<MergeGenerator>
 
-  template: Template?
+  template: SpecTemplate?
 }
 
-class Generator {
+class MergeGenerator {
   clusterDecisionResource: ClusterDecisionResource?
 
   clusters: Clusters?
@@ -370,9 +474,11 @@ class Generator {
 
   list: List?
 
-  matrix: Any?
+  matrix: Null?
 
-  merge: Any?
+  merge: Null?
+
+  plugin: Plugin?
 
   pullRequest: PullRequest?
 
@@ -381,61 +487,137 @@ class Generator {
   selector: Selector?
 }
 
-class PullRequest {
-  bitbucketServer: BitbucketServer?
+class Plugin {
+  configMapRef: ConfigMapRef
 
-  filters: Listing<Filter>?
-
-  gitea: Gitea?
-
-  github: Github?
-
-  gitlab: Gitlab?
+  input: Input?
 
   requeueAfterSeconds: Int?
 
-  template: Template?
+  template: SpecTemplate?
+
+  values: Mapping<String, String>?
 }
 
-class BitbucketServer {
+class ConfigMapRef {
+  name: String
+}
+
+class Input {
+  parameters: Mapping<String, Null>?
+}
+
+class PullRequest {
+  azuredevops: Azuredevops?
+
+  bitbucket: GeneratorPullRequestBitbucket?
+
+  bitbucketServer: GeneratorPullRequestBitbucketServer?
+
+  continueOnRepoNotFoundError: Boolean?
+
+  filters: Listing<GeneratorPullRequestFilter>?
+
+  gitea: GeneratorPullRequestGitea?
+
+  github: GeneratorPullRequestGithub?
+
+  gitlab: GeneratorPullRequestGitlab?
+
+  requeueAfterSeconds: Int?
+
+  template: SpecTemplate?
+
+  values: Mapping<String, String>?
+}
+
+class Azuredevops {
+  api: String?
+
+  labels: Listing<String>?
+
+  organization: String
+
+  project: String
+
+  repo: String
+
+  tokenRef: GitlabTokenRef?
+}
+
+class GitlabTokenRef {
+  key: String
+
+  secretName: String
+}
+
+class GeneratorPullRequestBitbucket {
+  api: String?
+
+  basicAuth: BasicAuth?
+
+  bearerToken: BearerToken?
+
+  owner: String
+
+  repo: String
+}
+
+class BasicAuth {
+  passwordRef: GitlabTokenRef
+
+  username: String
+}
+
+class BearerToken {
+  tokenRef: GitlabTokenRef
+}
+
+class GeneratorPullRequestBitbucketServer {
   api: String
 
   basicAuth: BasicAuth?
+
+  bearerToken: BearerToken?
+
+  caRef: GitlabCaRef?
+
+  insecure: Boolean?
 
   project: String
 
   repo: String
 }
 
-class BasicAuth {
-  passwordRef: TokenRef
+class GitlabCaRef {
+  configMapName: String
 
-  username: String
-}
-
-class TokenRef {
   key: String
-
-  secretName: String
 }
 
-class Filter {
+class GeneratorPullRequestFilter {
   branchMatch: String?
+
+  targetBranchMatch: String?
+
+  titleMatch: String?
 }
 
-class Gitea {
+class GeneratorPullRequestGitea {
   api: String
 
   insecure: Boolean?
+
+  labels: Listing<String>?
 
   owner: String
 
   repo: String
 
-  tokenRef: TokenRef?
+  tokenRef: GitlabTokenRef?
 }
 
-class Github {
+class GeneratorPullRequestGithub {
   api: String?
 
   appSecretName: String?
@@ -446,11 +628,15 @@ class Github {
 
   repo: String
 
-  tokenRef: TokenRef?
+  tokenRef: GitlabTokenRef?
 }
 
-class Gitlab {
+class GeneratorPullRequestGitlab {
   api: String?
+
+  caRef: GitlabCaRef?
+
+  insecure: Boolean?
 
   labels: Listing<String>?
 
@@ -458,33 +644,53 @@ class Gitlab {
 
   pullRequestState: String?
 
-  tokenRef: TokenRef?
+  tokenRef: GitlabTokenRef?
 }
 
 class ScmProvider {
+  awsCodeCommit: AwsCodeCommit?
+
   azureDevOps: AzureDevOps?
 
-  bitbucket: Bitbucket?
+  bitbucket: ScmProviderBitbucket?
 
-  bitbucketServer: BitbucketServer?
+  bitbucketServer: ScmProviderBitbucketServer?
 
   cloneProtocol: String?
 
-  filters: Listing<Filter>?
+  filters: Listing<ScmProviderFilter>?
 
-  gitea: Gitea?
+  gitea: ScmProviderGitea?
 
-  github: Github?
+  github: ScmProviderGithub?
 
-  gitlab: Gitlab?
+  gitlab: ScmProviderGitlab?
 
   requeueAfterSeconds: Int?
 
-  template: Template?
+  template: SpecTemplate?
+
+  values: Mapping<String, String>?
+}
+
+class AwsCodeCommit {
+  allBranches: Boolean?
+
+  region: String?
+
+  role: String?
+
+  tagFilters: Listing<TagFilter>?
+}
+
+class TagFilter {
+  key: String
+
+  value: String?
 }
 
 class AzureDevOps {
-  accessTokenRef: TokenRef
+  accessTokenRef: GitlabTokenRef
 
   allBranches: Boolean?
 
@@ -495,27 +701,33 @@ class AzureDevOps {
   teamProject: String
 }
 
-class Bitbucket {
+class ScmProviderBitbucket {
   allBranches: Boolean?
 
-  appPasswordRef: TokenRef
+  appPasswordRef: GitlabTokenRef
 
   owner: String
 
   user: String
 }
 
-class BitbucketServer {
+class ScmProviderBitbucketServer {
   allBranches: Boolean?
 
   api: String
 
   basicAuth: BasicAuth?
 
+  bearerToken: BearerToken?
+
+  caRef: GitlabCaRef?
+
+  insecure: Boolean?
+
   project: String
 }
 
-class Filter {
+class ScmProviderFilter {
   branchMatch: String?
 
   labelMatch: String?
@@ -527,7 +739,7 @@ class Filter {
   repositoryMatch: String?
 }
 
-class Gitea {
+class ScmProviderGitea {
   allBranches: Boolean?
 
   api: String
@@ -536,10 +748,10 @@ class Gitea {
 
   owner: String
 
-  tokenRef: TokenRef?
+  tokenRef: GitlabTokenRef?
 }
 
-class Github {
+class ScmProviderGithub {
   allBranches: Boolean?
 
   api: String?
@@ -548,34 +760,54 @@ class Github {
 
   organization: String
 
-  tokenRef: TokenRef?
+  tokenRef: GitlabTokenRef?
 }
 
-class Gitlab {
+class ScmProviderGitlab {
   allBranches: Boolean?
 
   api: String?
 
+  caRef: GitlabCaRef?
+
   group: String
+
+  includeSharedProjects: Boolean?
 
   includeSubgroups: Boolean?
 
-  tokenRef: TokenRef?
+  insecure: Boolean?
+
+  tokenRef: GitlabTokenRef?
+
+  topic: String?
 }
 
 class Merge {
-  generators: Listing<Generator>
+  generators: Listing<MergeGenerator>
 
   mergeKeys: Listing<String>
 
-  template: Template?
+  template: SpecTemplate?
+}
+
+class IgnoreApplicationDifference {
+  jqPathExpressions: Listing<String>?
+
+  jsonPointers: Listing<String>?
+
+  name: String?
 }
 
 class PreservedFields {
   annotations: Listing<String>?
+
+  labels: Listing<String>?
 }
 
 class Strategy {
+  deletionOrder: String?
+
   rollingSync: RollingSync?
 
   type: String?
@@ -586,12 +818,12 @@ class RollingSync {
 }
 
 class Step {
-  matchExpressions: Listing<MatchExpression>?
+  matchExpressions: Listing<StepMatchExpression>?
 
   maxUpdate: (Int | String)?
 }
 
-class MatchExpression {
+class StepMatchExpression {
   key: String?
 
   operator: String?
@@ -599,7 +831,9 @@ class MatchExpression {
   values: Listing<String>?
 }
 
-class SyncPolicy {
+class SpecSyncPolicy {
+  applicationsSync: ("create-only" | "create-update" | "create-delete" | "sync")?
+
   preserveResourcesOnDeletion: Boolean?
 }
 
@@ -607,6 +841,10 @@ class Status {
   applicationStatus: Listing<ApplicationStatu>?
 
   conditions: Listing<Condition>?
+
+  resources: Listing<Resource>?
+
+  resourcesCount: Int?
 }
 
 class ApplicationStatu {
@@ -619,6 +857,8 @@ class ApplicationStatu {
   status: String
 
   step: String
+
+  targetRevisions: Listing<String>
 }
 
 class Condition {
@@ -631,4 +871,36 @@ class Condition {
   status: String
 
   type: String
+}
+
+class Resource {
+  group: String?
+
+  health: Health?
+
+  hook: Boolean?
+
+  kind: String?
+
+  name: String?
+
+  namespace: String?
+
+  requiresDeletionConfirmation: Boolean?
+
+  requiresPruning: Boolean?
+
+  status: String?
+
+  syncWave: Int?
+
+  version: String?
+}
+
+class Health {
+  lastTransitionTime: String?
+
+  message: String?
+
+  status: String?
 }
