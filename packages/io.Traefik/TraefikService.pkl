@@ -37,13 +37,13 @@ class Spec {
 /// HighestRandomWeight defines the highest random weight service configuration.
 class HighestRandomWeight {
   /// Services defines the list of Kubernetes Service and/or TraefikService to load-balance, with weight.
-  services: Listing<Service>?
+  services: Listing<WeightedService>?
 }
 
 /// Service defines an upstream HTTP service to proxy traffic to.
-class Service {
+class WeightedService {
   /// Healthcheck defines health checks for ExternalName services.
-  healthCheck: HealthCheck?
+  healthCheck: ServiceHealthCheck?
 
   /// Kind defines the kind of the Service.
   kind: ("Service" | "TraefikService")?
@@ -71,14 +71,14 @@ class Service {
   passHostHeader: Boolean?
 
   /// PassiveHealthCheck defines passive health checks for ExternalName services.
-  passiveHealthCheck: PassiveHealthCheck?
+  passiveHealthCheck: ServicePassiveHealthCheck?
 
   /// Port defines the port of a Kubernetes Service. This can be a reference to a named port.
   port: (Int | String)?
 
   /// ResponseForwarding defines how Traefik forwards the response from the upstream Kubernetes Service
   /// to the client.
-  responseForwarding: ResponseForwarding?
+  responseForwarding: ServiceResponseForwarding?
 
   /// Scheme defines the scheme to use for the request to the upstream Kubernetes Service. It defaults to
   /// https when Kubernetes Service port is 443, http otherwise.
@@ -90,7 +90,7 @@ class Service {
 
   /// Sticky defines the sticky sessions configuration. More info:
   /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/load-balancing/service/#sticky-sessions
-  sticky: Sticky?
+  sticky: ServiceSticky?
 
   /// Strategy defines the load balancing strategy between the servers. Supported values are: wrr
   /// (Weighed round-robin), p2c (Power of two choices), hrw (Highest Random Weight), and leasttime
@@ -103,7 +103,7 @@ class Service {
 }
 
 /// Healthcheck defines health checks for ExternalName services.
-class HealthCheck {
+class ServiceHealthCheck {
   /// FollowRedirects defines whether redirects should be followed during the health check calls.
   /// Default: true
   followRedirects: Boolean?
@@ -146,7 +146,7 @@ class HealthCheck {
 }
 
 /// PassiveHealthCheck defines passive health checks for ExternalName services.
-class PassiveHealthCheck {
+class ServicePassiveHealthCheck {
   /// FailureWindow defines the time window during which the failed attempts must occur for the server to
   /// be marked as unhealthy. It also defines for how long the server will be considered unhealthy.
   failureWindow: (Int | String)?
@@ -158,7 +158,7 @@ class PassiveHealthCheck {
 
 /// ResponseForwarding defines how Traefik forwards the response from the upstream Kubernetes Service to
 /// the client.
-class ResponseForwarding {
+class ServiceResponseForwarding {
   /// FlushInterval defines the interval, in milliseconds, in between flushes to the client while copying
   /// the response body. A negative value means to flush immediately after each write to the client. This
   /// configuration is ignored when ReverseProxy recognizes a response as a streaming response; for such
@@ -168,7 +168,7 @@ class ResponseForwarding {
 
 /// Sticky defines the sticky sessions configuration. More info:
 /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/load-balancing/service/#sticky-sessions
-class Sticky {
+class ServiceSticky {
   /// Cookie defines the sticky cookie configuration.
   cookie: Cookie?
 }
@@ -206,7 +206,7 @@ class Cookie {
 /// Mirroring defines the Mirroring service configuration.
 class Mirroring {
   /// Healthcheck defines health checks for ExternalName services.
-  healthCheck: HealthCheck?
+  healthCheck: ServiceHealthCheck?
 
   /// Kind defines the kind of the Service.
   kind: ("Service" | "TraefikService")?
@@ -244,14 +244,14 @@ class Mirroring {
   passHostHeader: Boolean?
 
   /// PassiveHealthCheck defines passive health checks for ExternalName services.
-  passiveHealthCheck: PassiveHealthCheck?
+  passiveHealthCheck: ServicePassiveHealthCheck?
 
   /// Port defines the port of a Kubernetes Service. This can be a reference to a named port.
   port: (Int | String)?
 
   /// ResponseForwarding defines how Traefik forwards the response from the upstream Kubernetes Service
   /// to the client.
-  responseForwarding: ResponseForwarding?
+  responseForwarding: ServiceResponseForwarding?
 
   /// Scheme defines the scheme to use for the request to the upstream Kubernetes Service. It defaults to
   /// https when Kubernetes Service port is 443, http otherwise.
@@ -263,7 +263,7 @@ class Mirroring {
 
   /// Sticky defines the sticky sessions configuration. More info:
   /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/load-balancing/service/#sticky-sessions
-  sticky: Sticky?
+  sticky: ServiceSticky?
 
   /// Strategy defines the load balancing strategy between the servers. Supported values are: wrr
   /// (Weighed round-robin), p2c (Power of two choices), hrw (Highest Random Weight), and leasttime
@@ -278,7 +278,7 @@ class Mirroring {
 /// MirrorService holds the mirror configuration.
 class Mirror {
   /// Healthcheck defines health checks for ExternalName services.
-  healthCheck: HealthCheck?
+  healthCheck: ServiceHealthCheck?
 
   /// Kind defines the kind of the Service.
   kind: ("Service" | "TraefikService")?
@@ -306,7 +306,7 @@ class Mirror {
   passHostHeader: Boolean?
 
   /// PassiveHealthCheck defines passive health checks for ExternalName services.
-  passiveHealthCheck: PassiveHealthCheck?
+  passiveHealthCheck: ServicePassiveHealthCheck?
 
   /// Percent defines the part of the traffic to mirror. Supported values: 0 to 100.
   percent: Int?
@@ -316,7 +316,7 @@ class Mirror {
 
   /// ResponseForwarding defines how Traefik forwards the response from the upstream Kubernetes Service
   /// to the client.
-  responseForwarding: ResponseForwarding?
+  responseForwarding: ServiceResponseForwarding?
 
   /// Scheme defines the scheme to use for the request to the upstream Kubernetes Service. It defaults to
   /// https when Kubernetes Service port is 443, http otherwise.
@@ -328,7 +328,7 @@ class Mirror {
 
   /// Sticky defines the sticky sessions configuration. More info:
   /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/load-balancing/service/#sticky-sessions
-  sticky: Sticky?
+  sticky: ServiceSticky?
 
   /// Strategy defines the load balancing strategy between the servers. Supported values are: wrr
   /// (Weighed round-robin), p2c (Power of two choices), hrw (Highest Random Weight), and leasttime
@@ -343,7 +343,7 @@ class Mirror {
 /// Weighted defines the Weighted Round Robin configuration.
 class Weighted {
   /// Services defines the list of Kubernetes Service and/or TraefikService to load-balance, with weight.
-  services: Listing<Service>?
+  services: Listing<WeightedService>?
 
   /// Sticky defines whether sticky sessions are enabled. More info:
   /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/kubernetes/crd/http/traefikservice/#stickiness-and-load-balancing

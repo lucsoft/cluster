@@ -1,4 +1,4 @@
-amends "package://pkg.pkl-lang.org/pkl-pantry/k8s.contrib.crd@1.0.13#/generate.pkl"
+amends "package://pkg.pkl-lang.org/pkl-pantry/k8s.contrib.crd@4.2.1#/generate.pkl"
 import "pkl:yaml"
 
 local version = "v39.0.1"

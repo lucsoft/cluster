@@ -99,7 +99,7 @@ class Spec {
 
   /// Plugin defines the middleware plugin configuration. More info:
   /// https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/middlewares/overview/#community-middlewares
-  plugin: Mapping<String, Any>?
+  plugin: Mapping<String, Null>?
 
   /// RateLimit holds the rate limit configuration. This middleware ensures that services will receive a
   /// fair amount of requests, and allows one to define what fair is. More info:
@@ -699,7 +699,7 @@ class InFlightReq {
 class SourceCriterion {
   /// IPStrategy holds the IP strategy configuration used by Traefik to determine the client IP. More
   /// info: https://doc.traefik.io/traefik/v3.6/middlewares/http/ipallowlist/#ipstrategy
-  ipStrategy: IpStrategy?
+  ipStrategy: SourceCriterionIpStrategy?
 
   /// RequestHeaderName defines the name of the header used to group incoming requests.
   requestHeaderName: String?
@@ -710,7 +710,7 @@ class SourceCriterion {
 
 /// IPStrategy holds the IP strategy configuration used by Traefik to determine the client IP. More info:
 /// https://doc.traefik.io/traefik/v3.6/middlewares/http/ipallowlist/#ipstrategy
-class IpStrategy {
+class SourceCriterionIpStrategy {
   /// Depth tells Traefik to use the X-Forwarded-For header and take the IP located at the depth position
   /// (starting from the right).
   depth: Int(isPositive)?
@@ -729,7 +729,7 @@ class IpStrategy {
 class IpAllowList {
   /// IPStrategy holds the IP strategy configuration used by Traefik to determine the client IP. More
   /// info: https://doc.traefik.io/traefik/v3.6/middlewares/http/ipallowlist/#ipstrategy
-  ipStrategy: IpStrategy?
+  ipStrategy: SourceCriterionIpStrategy?
 
   /// RejectStatusCode defines the HTTP status code used for refused requests. If not set, the default is
   /// 403 (Forbidden).
@@ -743,7 +743,7 @@ class IpAllowList {
 class IpWhiteList {
   /// IPStrategy holds the IP strategy configuration used by Traefik to determine the client IP. More
   /// info: https://doc.traefik.io/traefik/v3.6/middlewares/http/ipallowlist/#ipstrategy
-  ipStrategy: IpStrategy?
+  ipStrategy: SourceCriterionIpStrategy?
 
   /// SourceRange defines the set of allowed IPs (or ranges of allowed IPs by using CIDR notation).
   /// Required.
@@ -863,7 +863,7 @@ class RateLimit {
   /// SourceCriterion defines what criterion is used to group requests as originating from a common
   /// source. If several strategies are defined at the same time, an error will be raised. If none are
   /// set, the default is to use the request's remote address field (as an ipStrategy).
-  sourceCriterion: SourceCriterion?
+  sourceCriterion: RateLimitSourceCriterion?
 }
 
 /// Redis hold the configs of Redis as bucket in rate limiter.
@@ -900,7 +900,7 @@ class Redis {
 
   /// TLS defines TLS-specific configurations, including the CA, certificate, and key, which can be
   /// provided as a file path or file content.
-  tls: Tls?
+  tls: RedisTls?
 
   /// WriteTimeout defines the timeout for socket write operations. Default value is 3 seconds.
   writeTimeout: (Int | String)?
@@ -908,7 +908,7 @@ class Redis {
 
 /// TLS defines TLS-specific configurations, including the CA, certificate, and key, which can be
 /// provided as a file path or file content.
-class Tls {
+class RedisTls {
   /// CASecret is the name of the referenced Kubernetes Secret containing the CA to validate the server
   /// certificate. The CA certificate is extracted from key `tls.ca` or `ca.crt`.
   caSecret: String?
@@ -924,10 +924,10 @@ class Tls {
 /// SourceCriterion defines what criterion is used to group requests as originating from a common source.
 /// If several strategies are defined at the same time, an error will be raised. If none are set, the
 /// default is to use the request's remote address field (as an ipStrategy).
-class SourceCriterion {
+class RateLimitSourceCriterion {
   /// IPStrategy holds the IP strategy configuration used by Traefik to determine the client IP. More
   /// info: https://doc.traefik.io/traefik/v3.6/middlewares/http/ipallowlist/#ipstrategy
-  ipStrategy: IpStrategy?
+  ipStrategy: SourceCriterionIpStrategy?
 
   /// RequestHeaderName defines the name of the header used to group incoming requests.
   requestHeaderName: String?
