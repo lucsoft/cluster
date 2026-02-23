@@ -23,4 +23,11 @@ sourceContents =
     ).map((item) -> (new yaml.Parser {}.parse(read("\(baseUrl)/\(item)")) as Dynamic)),
   )
 
-converters {}
+converters {
+  ["clusterissuers.cert-manager.io"] {
+    [List("spec", "acme", "solvers", "[]", "dns01", "webhook", "config")] = Dynamic
+  }
+  ["issuers.cert-manager.io"] {
+    [List("spec", "acme", "solvers", "[]", "dns01", "webhook", "config")] = Dynamic
+  }
+}

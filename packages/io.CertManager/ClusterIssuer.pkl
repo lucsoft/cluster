@@ -9,6 +9,7 @@ module io.`cert-manager`.v1.ClusterIssuer
 extends "@k8s/K8sResource.pkl"
 
 import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+import "pkl:base"
 
 fixed apiVersion: "cert-manager.io/v1"
 
@@ -523,7 +524,7 @@ class Webhook {
   /// stanza. If secret values are needed (e.g., credentials for a DNS service), you should use a
   /// SecretKeySelector to reference a Secret resource. For details on the schema of this field, consult
   /// the webhook provider implementation's documentation.
-  config: Null?
+  config: base.Dynamic?
 
   /// The API group name that should be used when POSTing ChallengePayload resources to the webhook
   /// apiserver. This should be the same as the GroupName specified in the webhook provider
