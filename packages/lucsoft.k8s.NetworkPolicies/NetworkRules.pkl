@@ -1,0 +1,35 @@
+import "pkl:json"
+
+import "./NetworkRule.pkl"
+
+allowEgressToDNS: NetworkRule.NetRule = new {
+  to {
+    namespaceSelector {}
+    podSelector {
+      matchLabels {
+        ["k8s-app"] = "kube-dns"
+      }
+    }
+  }
+  ports {
+    new {
+      port = 53
+      protocol = "UDP"
+    }
+  }
+}
+
+allowEgressToFastlyCDN: NetworkRule.NetRule = new {
+  toMany {
+    // noinspection UnresolvedElement
+    for (
+      fastlyIp in new json.Parser {}.parse(read("https://api.fastly.com/public-ip-list")).addresses
+    ) {
+      new {
+        ipBlock {
+          cidr = fastlyIp
+        }
+      }
+    }
+  }
+}

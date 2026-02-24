@@ -18,6 +18,6 @@ dependencies {
     uri = "package://pkl-pkgs.lucsoft.de/packages/io.Fission@0.1.2"
   }
   ["Resource"] {
-    uri = "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Resource@0.2.2"
+    uri = "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Resource@0.2.6"
   }
 }

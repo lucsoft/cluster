@@ -1,0 +1,75 @@
+import "@k8s/api/networking/v1/NetworkPolicy.pkl"
+import "@k8s/apimachinery/pkg/apis/meta/v1/LabelSelector.pkl"
+
+typealias IngressRule = NetworkPolicy.NetworkPolicyIngressRule
+typealias EgressRule = NetworkPolicy.NetworkPolicyEgressRule
+
+local typealias NetworkPolicyRule = IngressRule | EgressRule
+
+hidden denyByDefault: Boolean = true
+
+hidden targetPod: LabelSelector(matchLabels != null || matchExpressions != null)
+
+hidden netRules: Listing<NetRule>
+
+hidden rules: Listing<NetworkPolicyRule> = new {
+  for (netRule in netRules) {
+    when (netRule.from != null || netRule.fromMany != null) {
+      new IngressRule {
+        from {
+          when (netRule.from != null) {
+            (netRule.from as NetworkPolicy.NetworkPolicyPeer)
+          }
+          ...(netRule.fromMany ?? new Listing<NetworkPolicy.NetworkPolicyPeer> {})
+        }
+        ports = netRule.ports
+      }
+    } else {
+      new EgressRule {
+        to {
+          when (netRule.to != null) {
+            (netRule.to as NetworkPolicy.NetworkPolicyPeer)
+          }
+          ...(netRule.toMany ?? new Listing<NetworkPolicy.NetworkPolicyPeer> {})
+        }
+        ports = netRule.ports
+      }
+    }
+  }
+}
+
+class NetRule {
+  from: NetworkPolicy.NetworkPolicyPeer?
+  fromMany: Listing<NetworkPolicy.NetworkPolicyPeer>?
+  to: NetworkPolicy.NetworkPolicyPeer?
+  toMany: Listing<NetworkPolicy.NetworkPolicyPeer>?
+  ports: Listing<NetworkPolicy.NetworkPolicyPort>?
+}
+
+networkPolicy: NetworkPolicy = new {
+  spec {
+    podSelector = targetPod
+    policyTypes {
+      when (rules.any((rule) -> rule is IngressRule) || denyByDefault) {
+        "Ingress"
+      }
+      when (rules.any((rule) -> rule is EgressRule) || denyByDefault) {
+        "Egress"
+      }
+    }
+    when (rules.any((rule) -> rule is IngressRule) || denyByDefault) {
+      ingress {
+        for (role in rules.toList().filter((rule) -> rule is IngressRule)) {
+          (role as IngressRule)
+        }
+      }
+    }
+    when (rules.any((rule) -> rule is EgressRule) || denyByDefault) {
+      egress {
+        for (role in rules.toList().filter((rule) -> rule is EgressRule)) {
+          (role as EgressRule)
+        }
+      }
+    }
+  }
+}

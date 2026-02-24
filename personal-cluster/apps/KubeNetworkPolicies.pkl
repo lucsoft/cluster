@@ -1,0 +1,54 @@
+amends "@Resource/Entrypoint.pkl"
+import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.deepToTyped@1.2.0#/deepToTyped.pkl"
+import "pkl:yaml"
+
+import "@k8s/api/apps/v1/DaemonSet.pkl"
+import "@k8s/api/core/v1/ServiceAccount.pkl"
+import "@k8s/api/rbac/v1/ClusterRole.pkl"
+import "@k8s/api/rbac/v1/ClusterRoleBinding.pkl"
+import "@k8s/K8sResource.pkl"
+
+// noinspection UnresolvedElement
+local parsePatch =
+  (
+    new yaml.Parser {}.parseAll(
+      read(
+        "https://raw.githubusercontent.com/kubernetes-sigs/kube-network-policies/v1.0.0/install.yaml"
+      ),
+    )
+  )
+    .toList()
+    .filterNonNull()
+
+// noinspection UnresolvedElement
+resources = new {
+  for (item in parsePatch) {
+    when (item.kind == "ServiceAccount") {
+      (deepToTyped.apply(ServiceAccount.getClass(), item) as ServiceAccount)
+    }
+    when (item.kind == "ClusterRoleBinding") {
+      (deepToTyped.apply(ClusterRoleBinding.getClass(), item) as ClusterRoleBinding)
+    }
+    when (item.kind == "ClusterRole") {
+      (deepToTyped.apply(ClusterRole.getClass(), item) as ClusterRole)
+    }
+    when (item.kind == "DaemonSet") {
+      ((deepToTyped.apply(DaemonSet.getClass(), item) as DaemonSet)) {
+        spec {
+          template {
+            spec {
+              containers {
+                [0] {
+                  image = "registry.k8s.io/networking/kube-network-policies:v1.0.0"
+                  args {
+                    [2] = "--v=0"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
