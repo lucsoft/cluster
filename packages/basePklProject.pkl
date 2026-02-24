@@ -17,7 +17,7 @@ local packageName: String = findRootModule(myModule).relativePathTo(module).last
 
 package {
   name = packageName
-  version = "0.2.9"
+  version = "0.3.0"
   baseUri = "package://pkl-pkgs.lucsoft.de/packages/\(name)"
   packageZipUrl = "https://pkl-pkgs.lucsoft.de/packages/\(name)@\(version)/\(name)@\(version).zip"
   license = "MIT"

@@ -7,6 +7,20 @@
       "checksums": {
         "sha256": "1d948c9fc41e188fcd18ebb656b5d9ddc5f377cb16158bb421be7752bb913926"
       }
+    },
+    "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Resource@0": {
+      "type": "remote",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Resource@0.2.8",
+      "checksums": {
+        "sha256": "75c537654c231210f7086bd1797a7c8395770e8251b64fb15a5979a9b1488116"
+      }
+    },
+    "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.NetworkPolicies@0": {
+      "type": "remote",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.NetworkPolicies@0.2.9",
+      "checksums": {
+        "sha256": "23f1b7f113867693de6b3a6292392a67fba25f5c6b7959dc9097dcb86d48b893"
+      }
     }
   }
 }

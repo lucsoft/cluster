@@ -1,3 +1,5 @@
+extends "@Resource/Resource.pkl"
+
 import "@k8s/api/apps/v1/Deployment.pkl"
 import "@k8s/api/apps/v1/StatefulSet.pkl"
 import "@k8s/api/core/v1/PodSpec.pkl"
@@ -6,37 +8,47 @@ import "@k8s/api/rbac/v1/PolicyRule.pkl"
 import "@k8s/api/rbac/v1/Role.pkl"
 import "@k8s/api/rbac/v1/RoleBinding.pkl"
 import "@k8s/K8sResource.pkl"
+import "@NetPol/NetworkRule.pkl"
 
-name: String
-namespace: String = "default"
-spec: PodSpec
-type: "Deployment" | "StatefulSet" = "Deployment"
-useServiceAccount: Boolean = false
+hidden name: String
+
+hidden namespace: String = "default"
+
+hidden spec: PodSpec
+
+hidden type: "Deployment" | "StatefulSet" = "Deployment"
+
+hidden useServiceAccount: Boolean = false
+
+hidden forceNetworkPolicy: Boolean = false
 
 local moduleThis = this
 
-statefulSet: StatefulSet = new StatefulSet {
+local prefixLabel = "app.kubernetes.io/name"
+
+hidden statefulSet: StatefulSet = new StatefulSet {
   metadata {
     name = moduleThis.name
     namespace = moduleThis.namespace
     labels {
-      ["app"] = moduleThis.name
+      [prefixLabel] = moduleThis.name
     }
   }
   spec {
     selector {
       matchLabels {
-        ["app"] = moduleThis.name
+        [prefixLabel] = moduleThis.name
       }
     }
     serviceName = moduleThis.name
     template {
       metadata {
         labels {
-          ["app"] = moduleThis.name
+          [prefixLabel] = moduleThis.name
         }
       }
       spec = (moduleThis.spec) {
+        enableServiceLinks = false
         automountServiceAccountToken = useServiceAccount
         when (useServiceAccount) {
           serviceAccountName = moduleThis.name
@@ -46,27 +58,28 @@ statefulSet: StatefulSet = new StatefulSet {
   }
 }
 
-deployment: Deployment = new Deployment {
+hidden deployment: Deployment = new Deployment {
   metadata {
     name = moduleThis.name
     namespace = moduleThis.namespace
     labels {
-      ["app"] = moduleThis.name
+      [prefixLabel] = moduleThis.name
     }
   }
   spec {
     selector {
       matchLabels {
-        ["app"] = moduleThis.name
+        [prefixLabel] = moduleThis.name
       }
     }
     template {
       metadata {
         labels {
-          ["app"] = moduleThis.name
+          [prefixLabel] = moduleThis.name
         }
       }
       spec = (moduleThis.spec) {
+        enableServiceLinks = false
         automountServiceAccountToken = useServiceAccount
         when (useServiceAccount) {
           serviceAccountName = moduleThis.name
@@ -82,16 +95,36 @@ class RuleDefinition {
   rules: Listing<PolicyRule> = new {}
 }
 
-policies: Listing<RuleDefinition> = new {}
+hidden policies: Listing<RuleDefinition> = new {}
 
-serviceAccount: ServiceAccount = new ServiceAccount {
+hidden netRules: Listing<NetworkRule.NetRule> = new {}
+
+hidden serviceAccount: ServiceAccount = new ServiceAccount {
   metadata {
     name = moduleThis.name
     namespace = moduleThis.namespace
   }
 }
 
+hidden networkRules: NetworkRule = new {
+  networkPolicy {
+    metadata {
+      name = moduleThis.name
+      namespace = moduleThis.namespace
+    }
+  }
+  targetPod {
+    matchLabels {
+      [prefixLabel] = moduleThis.name
+    }
+  }
+  netRules = moduleThis.netRules ?? new Listing<NetworkRule.NetRule> {}
+}
+
 resources: Listing<K8sResource> = new {
+  when (!netRules.isEmpty || forceNetworkPolicy) {
+    networkRules.networkPolicy
+  }
   when (useServiceAccount) {
     serviceAccount
   }
