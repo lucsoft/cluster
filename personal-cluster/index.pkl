@@ -1,0 +1,29 @@
+amends "@Resource/Entrypoint.pkl"
+
+import "@ArgoCD/App.pkl"
+
+local apps: Listing<App> = new {
+  new {
+    name = "infra-hetzner-index"
+    namespace = "argocd"
+    source {
+      repoURL = "https://github.com/lucsoft/cluster"
+      targetRevision = "main"
+      path = "personal-cluster"
+      plugin {
+        parameters {
+          new {
+            name = "path"
+            string = "index.pkl"
+          }
+        }
+      }
+    }
+  }
+}
+
+resources {
+  for (app in apps) {
+    app.application
+  }
+}
