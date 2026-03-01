@@ -1,20 +1,19 @@
-import "@ArgoCD/App.pkl"
+amends "@ArgoCD/App.pkl"
 
-app = new App {
-  name = "infra-cert-manager"
-  namespace = "cert-manager"
-  autoSync = false
-  source {
-    repoURL = "https://charts.jetstack.io"
-    chart = "cert-manager"
-    // renovate: datasource=helm registryUrl=https://charts.jetstack.io packageName=cert-manager
-    targetRevision = "v1.16.1"
-    helm {
-      releaseName = "cert-manager"
-      valuesObject {
-        crds {
-          enabled = true
-        }
+name = "infra-cert-manager"
+namespace = "cert-manager"
+autoSync = false
+
+source {
+  repoURL = "https://charts.jetstack.io"
+  chart = "cert-manager"
+  // renovate: datasource=helm registryUrl=https://charts.jetstack.io packageName=cert-manager
+  targetRevision = "v1.16.1"
+  helm {
+    releaseName = "cert-manager"
+    valuesObject {
+      crds {
+        enabled = true
       }
     }
   }

@@ -2,6 +2,11 @@ amends "@Resource/Entrypoint.pkl"
 
 import "@ArgoCD/App.pkl"
 
+import "./apps/ArgoCD.pkl"
+import "./apps/InfraCertManager.pkl"
+import "./apps/InfraIngressController.pkl"
+import "./apps/Satisfactory.pkl"
+
 local apps: Listing<App> = new {
   new {
     name = "infra-hetzner-index"
@@ -20,6 +25,10 @@ local apps: Listing<App> = new {
       }
     }
   }
+  ArgoCD
+  InfraCertManager
+  InfraIngressController
+  Satisfactory
 }
 
 resources {

@@ -1,0 +1,80 @@
+import "@itzg.minecraft/McRouter.pkl"
+import "@itzg.minecraft/McServer.pkl"
+import "@k8s/api/core/v1/Namespace.pkl"
+
+local mcServers: Listing<McServer> = new {
+  new {
+    eula = true
+    type = "VANILLA"
+    workload {
+      name = "main"
+      namespace = "minecraft"
+    }
+  }
+  new {
+    type = "AUTO_CURSEFORGE"
+    eula = true
+    workload {
+      name = "atm10"
+      namespace = "minecraft"
+    }
+    motd = "Running: All The Mods 10"
+    memory = 8.gb
+    modpackSlug = "all-the-mods-10"
+    curseforgeApiKey = read("../cfapikey.txt").text
+    curseforgeProjects {
+      "distant-horizons"
+      "bluemap"
+      "chunky-pregenerator-forge"
+      "ftb-chunks-for-bluemap"
+      "minecolonies-bluemap-integration"
+    }
+  }
+  new {
+    eula = true
+    type = "FABRIC"
+    modrinthProjects {
+      "fabric-api:0.138.3+1.21.10"
+      "create-fly:1.21.10-6.0.8-4"
+      "distanthorizons:2.3.6-b-1.21.10"
+    }
+    motd = "Running: Create Mod"
+    workload {
+      name = "vanilla-create"
+      namespace = "minecraft"
+    }
+  }
+}
+
+local mcRouter = new McRouter {
+  workload {
+    deployment {
+      spec {
+        strategy {
+          type = "Recreate"
+        }
+      }
+    }
+    namespace = "minecraft"
+  }
+  servers {
+    for (server in mcServers) {
+      [server.workload.name + ".lucsoft.de"] = server.address
+    }
+  }
+}
+
+resources {
+  new Namespace {
+    metadata {
+      name = "minecraft"
+      labels {
+        ["pod-security.kubernetes.io/enforce"] = "privileged"
+      }
+    }
+  }
+  ...mcRouter.resources
+  for (mcServer in mcServers) {
+    ...mcServer.resources
+  }
+}

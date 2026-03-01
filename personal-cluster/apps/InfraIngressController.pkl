@@ -1,55 +1,54 @@
-import "@ArgoCD/App.pkl"
+amends "@ArgoCD/App.pkl"
 
-app = new App {
-  name = "infra-ingress-controller"
-  namespace = "traefik-system"
-  autoSync = false
-  source {
-    chart = "traefik"
-    repoURL = "ghcr.io/traefik/helm"
-    targetRevision = "33.2.1"
-    helm {
-      releaseName = "traefik"
-      valuesObject {
-        podSecurityContext {
-          sysctls {
-            new {
-              name = "net.ipv4.ip_unprivileged_port_start"
-              value = "0"
-            }
+name = "infra-ingress-controller"
+namespace = "traefik-system"
+autoSync = false
+
+source {
+  chart = "traefik"
+  repoURL = "ghcr.io/traefik/helm"
+  targetRevision = "33.2.1"
+  helm {
+    releaseName = "traefik"
+    valuesObject {
+      podSecurityContext {
+        sysctls {
+          new {
+            name = "net.ipv4.ip_unprivileged_port_start"
+            value = "0"
           }
         }
-        deployment {
-          replicas = 2
+      }
+      deployment {
+        replicas = 2
+      }
+      additionalArguments {
+        "--providers.kubernetesingress.ingressendpoint.publishedservice=traefik-system/traefik"
+        "--api.insecure=true"
+        "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+        "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+        "--entrypoints.web.http.redirections.entrypoint.priority=1"
+      }
+      providers {
+        kubernetesCRD {
+          allowEmptyServices = true
+          allowCrossNamespace = true
+          allowExternalNameServices = true
         }
-        additionalArguments {
-          "--providers.kubernetesingress.ingressendpoint.publishedservice=traefik-system/traefik"
-          "--api.insecure=true"
-          "--entrypoints.web.http.redirections.entrypoint.to=websecure"
-          "--entrypoints.web.http.redirections.entrypoint.scheme=https"
-          "--entrypoints.web.http.redirections.entrypoint.priority=1"
+        kubernetesIngress {
+          enabled = true
+          allowEmptyServices = true
+          allowExternalNameServices = true
         }
-        providers {
-          kubernetesCRD {
-            allowEmptyServices = true
-            allowCrossNamespace = true
-            allowExternalNameServices = true
-          }
-          kubernetesIngress {
+      }
+      ports {
+        web {
+          port = 80
+        }
+        websecure {
+          port = 443
+          http3 {
             enabled = true
-            allowEmptyServices = true
-            allowExternalNameServices = true
-          }
-        }
-        ports {
-          web {
-            port = 80
-          }
-          websecure {
-            port = 443
-            http3 {
-              enabled = true
-            }
           }
         }
       }

@@ -1,58 +1,54 @@
-amends "@Resource/Entrypoint.pkl"
-import "@ArgoCD/App.pkl"
+amends "@ArgoCD/App.pkl"
 
-resources {
-  new App {
-    name = "argo"
-    namespace = "argocd"
-    autoSync = false
-    source {
-      repoURL = "https://argoproj.github.io/argo-helm"
-      chart = "argo-cd"
-      // renovate: datasource=helm registryUrl=https://argoproj.github.io/argo-helm packageName=argo-cd
-      targetRevision = "v9.4.3"
-      helm {
-        releaseName = "argocd"
-        valuesObject {
-          redis {
-            serviceAccount {
-              create = true
-            }
+name = "argo"
+namespace = "argocd"
+autoSync = false
+
+source {
+  repoURL = "https://argoproj.github.io/argo-helm"
+  chart = "argo-cd"
+  // renovate: datasource=helm registryUrl=https://argoproj.github.io/argo-helm packageName=argo-cd
+  targetRevision = "v9.4.3"
+  helm {
+    releaseName = "argocd"
+    valuesObject {
+      redis {
+        serviceAccount {
+          create = true
+        }
+      }
+      repoServer {
+        volumes {
+          new {
+            name = "pkl-temp"
+            emptyDir {}
           }
-          repoServer {
-            volumes {
-              new {
-                name = "pkl-temp"
-                emptyDir {}
-              }
+        }
+        extraContainers {
+          new {
+            name = "pkl"
+            image = "ghcr.io/lucsoft/argo-pkl-plugin:latest"
+            securityContext {
+              runAsNonRoot = true
+              runAsUser = 999
             }
-            extraContainers {
+            volumeMounts {
               new {
-                name = "pkl"
-                image = "ghcr.io/lucsoft/argo-pkl-plugin:latest"
-                securityContext {
-                  runAsNonRoot = true
-                  runAsUser = 999
-                }
-                volumeMounts {
-                  new {
-                    mountPath = "/var/run/argocd"
-                    name = "var-files"
-                  }
-                  new {
-                    mountPath = "/home/argocd/cmp-server/plugins"
-                    name = "plugins"
-                  }
-                  new {
-                    mountPath = "/tmp"
-                    name = "pkl-temp"
-                  }
-                }
+                mountPath = "/var/run/argocd"
+                name = "var-files"
+              }
+              new {
+                mountPath = "/home/argocd/cmp-server/plugins"
+                name = "plugins"
+              }
+              new {
+                mountPath = "/tmp"
+                name = "pkl-temp"
               }
             }
           }
         }
       }
     }
-  }.application
+  }
 }
