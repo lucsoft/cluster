@@ -3,7 +3,7 @@ from alpine:3.22.0
 copy plugin.yaml /home/argocd/cmp-server/config/plugin.yaml
 
 # renovate: datasource=github-releases depName=pkl packageName=apple/pkl
-env PKL_VERSION=0.30.0
+env PKL_VERSION=0.31.0
 
 run <<-EOF
     apk add --no-cache curl gcompat
