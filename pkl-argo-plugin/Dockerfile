@@ -1,10 +1,13 @@
-from alpine
+from alpine:3.22.0
 
 copy plugin.yaml /home/argocd/cmp-server/config/plugin.yaml
 
+# renovate: datasource=github-releases depName=pkl packageName=apple/pkl
+env PKL_VERSION=0.30.0
+
 run <<-EOF
     apk add --no-cache curl gcompat
-    curl -L -o pkl 'https://github.com/apple/pkl/releases/download/0.30.0/pkl-linux-amd64'
+    curl -L -o pkl "https://github.com/apple/pkl/releases/download/${PKL_VERSION}/pkl-linux-amd64"
     chmod +x pkl
     mv pkl /usr/local/bin/
     apk del --no-cache curl
