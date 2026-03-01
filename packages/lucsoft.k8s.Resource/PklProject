@@ -2,6 +2,6 @@ amends "../basePklProject.pkl"
 
 dependencies {
   ["k8s"] {
-    uri = "package://pkg.pkl-lang.org/pkl-k8s/k8s@1.3.0"
+    uri = "package://pkg.pkl-lang.org/pkl-k8s/k8s@1.4.0"
   }
 }
