@@ -2,7 +2,7 @@ amends "../basePklProject.pkl"
 
 dependencies {
   ["Resource"] {
-    uri = "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Resource@0.2.8"
+    uri = "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Resource@0.3.0"
   }
   ["NetPol"] {
     uri = "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.NetworkPolicies@0.2.9"
