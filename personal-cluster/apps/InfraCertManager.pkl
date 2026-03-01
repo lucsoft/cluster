@@ -2,7 +2,23 @@ amends "@ArgoCD/App.pkl"
 
 name = "infra-cert-manager"
 namespace = "cert-manager"
-autoSync = false
+
+ignoreDifferences {
+  new {
+    group = "admissionregistration.k8s.io"
+    kind = "MutatingWebhookConfiguration"
+    jqPathExpressions {
+      ".webhooks[]?.clientConfig.caBundle"
+    }
+  }
+  new {
+    group = "admissionregistration.k8s.io"
+    kind = "ValidatingWebhookConfiguration"
+    jqPathExpressions {
+      ".webhooks[]?.clientConfig.caBundle"
+    }
+  }
+}
 
 source {
   repoURL = "https://charts.jetstack.io"

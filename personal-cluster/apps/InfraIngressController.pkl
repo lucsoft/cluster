@@ -7,7 +7,7 @@ autoSync = false
 source {
   chart = "traefik"
   repoURL = "ghcr.io/traefik/helm"
-  targetRevision = "33.2.1"
+  targetRevision = "37.3.0"
   helm {
     releaseName = "traefik"
     valuesObject {
