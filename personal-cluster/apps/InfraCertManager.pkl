@@ -1,9 +1,10 @@
 amends "@ArgoCD/App.pkl"
+import "@ArgoCD/Application.pkl"
 
 name = "infra-cert-manager"
 namespace = "cert-manager"
 
-ignoreDifferences {
+ignoreDifferences = new Listing<Application.ComparedToIgnoreDifference> {
   new {
     group = "admissionregistration.k8s.io"
     kind = "MutatingWebhookConfiguration"

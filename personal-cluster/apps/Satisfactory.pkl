@@ -17,3 +17,11 @@ source {
     }
   }
 }
+
+application {
+  metadata {
+    annotations {
+      ["argocd.argoproj.io/compare-options"] = "ServerSideDiff=false"
+    }
+  }
+}
