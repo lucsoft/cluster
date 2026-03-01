@@ -7,7 +7,6 @@ app = new App {
   source {
     chart = "traefik"
     repoURL = "ghcr.io/traefik/helm"
-    // renovate: datasource=helm registryUrl=https://ghcr.io/traefik/helm packageName=traefik
     targetRevision = "33.2.1"
     helm {
       releaseName = "traefik"
