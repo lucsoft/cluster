@@ -1,6 +1,21 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
-  ]
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "config:recommended"
+    ],
+    "customManagers": [
+        {
+            "customType": "regex",
+            "managerFilePatterns": [
+                "/^PklProject$/",
+                "/\\.pkl$/"
+            ],
+            "matchStrings": [
+                "/package:\/\/(?<registryUrl>.*)\/(?<packageName>.*?)@(?<currentValue>.*?)(#.*)?/"
+            ],
+            "registryUrlTemplate": "https://github.com/",
+            "packageNameTemplate": "{{#if (equals registryUrl 'pkl-pkgs.lucsoft.de/packages')}}lucsoft/cluster{{else}}{{{replace 'pkg\\.pkl-lang\\.org' 'apple' registryUrl}}}{{/if}}",
+            "datasourceTemplate": "{{#if (equals registryUrl 'pkl-pkgs.lucsoft.de/packages')}}github-tags{{else}}github-releases{{/if}}"
+        }
+    ]
 }
