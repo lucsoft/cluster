@@ -14,7 +14,7 @@ dependencies {
     uri = "package://pkl-pkgs.lucsoft.de/packages/argo.ArgoCD@0.3.0"
   }
   ["Fission"] {
-    uri = "package://pkl-pkgs.lucsoft.de/packages/io.Fission@0.1.2"
+    uri = "package://pkl-pkgs.lucsoft.de/packages/io.Fission@0.3.0"
   }
   ["Resource"] {
     uri = "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Resource@0.2.6"
