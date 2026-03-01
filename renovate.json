@@ -14,6 +14,16 @@
     "customManagers": [
         {
             "customType": "regex",
+            "description": "Update static variables in pkl files",
+            "managerFilePatterns": [
+                "/\\.pkl$/"
+            ],
+            "matchStrings": [
+                "\\/\\/ renovate: datasource=(?<datasource>[a-z-]+?)(?: registryUrl=(?<registryUrl>.+?))?(?: depName=(?<depName>.+?))? packageName=(?<packageName>.+?)(?: versioning=(?<versioning>[a-z-]+?))?\\s.+?= ?\"(?<currentValue>.+?)\"\\s"
+            ]
+        },
+        {
+            "customType": "regex",
             "description": "Update _VERSION variables in Dockerfiles",
             "managerFilePatterns": [
                 "/(^|/|\\.)Dockerfile$/",
