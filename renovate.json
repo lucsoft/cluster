@@ -3,6 +3,14 @@
     "extends": [
         "config:recommended"
     ],
+    "packageRules": [
+        {
+            "groupName": "mono-repo packages",
+            "matchFileNames": [
+                "/packages/**/*"
+            ]
+        }
+    ],
     "customManagers": [
         {
             "customType": "regex",
