@@ -11,11 +11,12 @@
                 "/\\.pkl$/"
             ],
             "matchStrings": [
-                "\"package:\/\/(?<registryUrl>.*)\/(?<packageName>.*?)@(?<currentValue>.*?)(#.*)?\""
+                "\"package:\/\/(?<registryUrl>.*)\/(?<depName>.*?)@(?<currentValue>.*?)(#.*)?\""
             ],
             "registryUrlTemplate": "https://github.com/",
             "packageNameTemplate": "{{#if (equals registryUrl 'pkl-pkgs.lucsoft.de/packages')}}lucsoft/cluster{{else}}{{{replace 'pkg\\.pkl-lang\\.org' 'apple' registryUrl}}}{{/if}}",
-            "datasourceTemplate": "{{#if (equals registryUrl 'pkl-pkgs.lucsoft.de/packages')}}github-tags{{else}}github-releases{{/if}}"
+            "datasourceTemplate": "{{#if (equals registryUrl 'pkl-pkgs.lucsoft.de/packages')}}github-tags{{else}}github-releases{{/if}}",
+            "extractVersionTemplate": "{{#if (equals registryUrl 'pkl-pkgs.lucsoft.de/packages')}}(?<version>.*){{else}}{{depName}}@(?<version>.*){{/if}}"
         }
     ]
 }
