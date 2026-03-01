@@ -7,7 +7,7 @@
         {
             "customType": "regex",
             "managerFilePatterns": [
-                "/^PklProject$/",
+                "/(^|/)PklProject$/",
                 "/\\.pkl$/"
             ],
             "matchStrings": [
