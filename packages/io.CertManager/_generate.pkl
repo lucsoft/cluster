@@ -2,7 +2,7 @@ amends "package://pkg.pkl-lang.org/pkl-pantry/k8s.contrib.crd@4.2.1#/generate.pk
 import "pkl:yaml"
 
 // renovate: datasource=github-releases packageName=cert-manager/cert-manager
-local version = "v1.19.3"
+local version = "v1.19.4"
 local baseUrl = "https://raw.githubusercontent.com/cert-manager/cert-manager/\(version)/deploy/crds"
 // noinspection UnresolvedElement
 local kustomize: Listing<String> =
