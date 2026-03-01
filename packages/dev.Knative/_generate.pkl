@@ -1,4 +1,4 @@
-amends "package://pkg.pkl-lang.org/pkl-pantry/k8s.contrib.crd@1.0.13#/generate.pkl"
+amends "package://pkg.pkl-lang.org/pkl-pantry/k8s.contrib.crd@1.0.14#/generate.pkl"
 import "pkl:yaml"
 
 import "@k8s/api/apps/v1/Deployment.pkl"
