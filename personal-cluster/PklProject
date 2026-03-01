@@ -8,7 +8,7 @@ dependencies {
     uri = "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Workload@0.3.0"
   }
   ["itzg.minecraft"] {
-    uri = "package://pkl-pkgs.lucsoft.de/packages/itzg.minecraft@0.1.2"
+    uri = "package://pkl-pkgs.lucsoft.de/packages/itzg.minecraft@0.3.0"
   }
   ["ArgoCD"] {
     uri = "package://pkl-pkgs.lucsoft.de/packages/argo.ArgoCD@0.3.0"
