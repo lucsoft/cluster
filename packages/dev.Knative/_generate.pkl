@@ -5,8 +5,6 @@ import "@k8s/api/apps/v1/Deployment.pkl"
 import "@k8s/api/core/v1/PodSpec.pkl"
 import "@k8s/api/core/v1/Service.pkl"
 
-import "./_common.pkl"
-
 local version = "knative-v1.21.0"
 local baseUrl = "https://raw.githubusercontent.com/knative/operator/\(version)/config/crd"
 // noinspection UnresolvedElement
@@ -28,7 +26,7 @@ sourceContents =
 
 converters {
   ["knativeservings.operator.knative.dev"] {
-    [List("spec", "deployments")] = _common.Deployments
-    [List("spec", "services")] = _common.Services
+    [List("spec", "deployments", "[]")] = Deployment
+    [List("spec", "services", "[]")] = Service
   }
 }

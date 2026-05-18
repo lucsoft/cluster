@@ -6,8 +6,8 @@ module dev.knative.operator.v1beta1.KnativeServing
 
 extends "@k8s/K8sResource.pkl"
 
-import "file:///Users/lucsoft/Developer/infra-hmsys-sys/packages/dev.Knative/_common.pkl"
-
+import "@k8s/api/apps/v1/Deployment.pkl"
+import "@k8s/api/core/v1/Service.pkl"
 import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
 
 fixed apiVersion: "operator.knative.dev/v1beta1"
@@ -46,10 +46,10 @@ class Spec {
   namespace: Namespace?
 
   /// A mapping of deployment name to override
-  deployments: _common.Deployments?
+  deployments: Listing<Deployment>?
 
   /// A mapping of service name to override
-  services: _common.Services?
+  services: Listing<Service>?
 
   /// A mapping of podDisruptionBudget name to override
   podDisruptionBudgets: Listing<PodDisruptionBudget>?
@@ -488,7 +488,7 @@ class PodAffinity {
   /// if the node has pods which matches the corresponding podAffinityTerm; the node(s) with the highest
   /// sum are the most preferred.
   preferredDuringSchedulingIgnoredDuringExecution: Listing<
-    PreferredDuringSchedulingIgnoredDuringExecution,
+    PodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution,
   >?
 
   /// If the affinity requirements specified by this field are not met at scheduling time, the pod will
@@ -497,24 +497,24 @@ class PodAffinity {
   /// try to eventually evict the pod from its node. When there are multiple elements, the lists of nodes
   /// corresponding to each podAffinityTerm are intersected, i.e. all terms must be satisfied.
   requiredDuringSchedulingIgnoredDuringExecution: Listing<
-    RequiredDuringSchedulingIgnoredDuringExecution,
+    PodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution,
   >?
 }
 
 /// The weights of all of the matched WeightedPodAffinityTerm fields are added per-node to find the most
 /// preferred node(s)
-class PreferredDuringSchedulingIgnoredDuringExecution {
+class PodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution {
   /// Required. A pod affinity term, associated with the corresponding weight.
-  podAffinityTerm: PodAffinityTerm
+  podAffinityTerm: PreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm
 
   /// weight associated with matching the corresponding podAffinityTerm, in the range 1-100.
   weight: Int
 }
 
 /// Required. A pod affinity term, associated with the corresponding weight.
-class PodAffinityTerm {
+class PreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
   /// A label query over a set of resources, in this case pods.
-  labelSelector: LabelSelector?
+  labelSelector: RequiredDuringSchedulingIgnoredDuringExecutionLabelSelector?
 
   /// namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty
   /// list means "this pod's namespace"
@@ -528,7 +528,7 @@ class PodAffinityTerm {
 }
 
 /// A label query over a set of resources, in this case pods.
-class LabelSelector {
+class RequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
   /// matchExpressions is a list of label selector requirements. The requirements are ANDed.
   matchExpressions: Listing<MatchExpression>?
 
@@ -542,9 +542,9 @@ class LabelSelector {
 /// that this pod should be co-located (affinity) or not co-located (anti-affinity) with, where
 /// co-located is defined as running on a node whose value of the label with key <topologyKey> matches
 /// that of any node on which a pod of the set of pods is running
-class RequiredDuringSchedulingIgnoredDuringExecution {
+class PodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution {
   /// A label query over a set of resources, in this case pods.
-  labelSelector: LabelSelector?
+  labelSelector: RequiredDuringSchedulingIgnoredDuringExecutionLabelSelector?
 
   /// namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty
   /// list means "this pod's namespace"
@@ -568,7 +568,7 @@ class PodAntiAffinity {
   /// "weight" to the sum if the node has pods which matches the corresponding podAffinityTerm; the
   /// node(s) with the highest sum are the most preferred.
   preferredDuringSchedulingIgnoredDuringExecution: Listing<
-    PreferredDuringSchedulingIgnoredDuringExecution,
+    PodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution,
   >?
 
   /// If the anti-affinity requirements specified by this field are not met at scheduling time, the pod
@@ -578,7 +578,7 @@ class PodAntiAffinity {
   /// lists of nodes corresponding to each podAffinityTerm are intersected, i.e. all terms must be
   /// satisfied.
   requiredDuringSchedulingIgnoredDuringExecution: Listing<
-    RequiredDuringSchedulingIgnoredDuringExecution,
+    PodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution,
   >?
 }
 
@@ -657,19 +657,19 @@ class KnativeIngressGateway {
   selector: Mapping<String, String>?
 
   /// A list of server specifications.
-  servers: Listing<Server>?
+  servers: Listing<KnativeLocalGatewayServer>?
 }
 
-class Server {
+class KnativeLocalGatewayServer {
   /// One or more hosts exposed by this gateway.
   hosts: Listing<String>?
 
-  port: Port?
+  port: ServerPort?
 
-  tls: Tls?
+  tls: ServerTls?
 }
 
-class Port {
+class ServerPort {
   /// Label assigned to the port.
   name: String?
 
@@ -683,7 +683,7 @@ class Port {
   protocol: String?
 }
 
-class Tls {
+class ServerTls {
   /// TLS mode can be SIMPLE, MUTUAL, ISTIO_MUTUAL.
   mode: String?
 
@@ -701,7 +701,7 @@ class KnativeLocalGateway {
   selector: Mapping<String, String>?
 
   /// A list of server specifications.
-  servers: Listing<Server>?
+  servers: Listing<KnativeLocalGatewayServer>?
 }
 
 /// Kourier settings

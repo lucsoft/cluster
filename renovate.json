@@ -7,8 +7,28 @@
         {
             "groupName": "mono-repo packages",
             "matchFileNames": [
-                "/packages/**/*"
+                "packages/**"
             ]
+        },
+        {
+            "matchFileNames": ["packages/**"],
+            "matchDatasources": ["github-releases", "github-tags"],
+            "matchManagers": ["custom.regex"],
+            "postUpgradeTasks": {
+                "commands": ["pkl project resolve packages/*/"],
+                "fileFilters": ["packages/**/PklProject.deps.json"],
+                "executionMode": "branch"
+            }
+        },
+        {
+            "matchFileNames": ["personal-cluster/**"],
+            "matchDatasources": ["github-releases", "github-tags"],
+            "matchManagers": ["custom.regex"],
+            "postUpgradeTasks": {
+                "commands": ["pkl project resolve personal-cluster/"],
+                "fileFilters": ["personal-cluster/PklProject.deps.json"],
+                "executionMode": "branch"
+            }
         }
     ],
     "customManagers": [

@@ -1,5 +1,5 @@
 clusterName: hmsys.de
-talosVersion: v1.11.2
+talosVersion: v1.12.7
 kubernetesVersion: v1.34.2
 endpoint: https://49.13.88.50:6443
 allowSchedulingOnControlPlanes: true

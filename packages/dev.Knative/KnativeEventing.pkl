@@ -97,7 +97,7 @@ class Workload {
   annotations: Mapping<String, String>?
 
   /// Env overrides env vars for the containers.
-  env: Listing<Env>?
+  env: Listing<DeploymentEnv>?
 
   /// The number of replicas that HA parts of the control plane will be scaled to
   replicas: Int(isPositive)?
@@ -109,7 +109,7 @@ class Workload {
   readinessProbes: Listing<ReadinessProbe>?
 
   /// If specified, the pod's tolerations.
-  tolerations: Listing<Toleration>?
+  tolerations: Listing<DeploymentToleration>?
 
   /// Use the host's network namespace if true. Make sure to understand the security implications if you
   /// want to enable it. When hostNetwork is enabled, this will set dnsPolicy to ClusterFirstWithHostNet
@@ -117,7 +117,7 @@ class Workload {
   hostNetwork: Boolean?
 
   /// If specified, the pod's topology spread constraints.
-  topologySpreadConstraints: Listing<TopologySpreadConstraint>?
+  topologySpreadConstraints: Listing<DeploymentTopologySpreadConstraint>?
 
   /// Version the cluster should be on.
   version: String?
@@ -128,10 +128,10 @@ class Workload {
   volumeMounts: Listing<VolumeMount>?
 
   /// If specified, the pod's scheduling constraints.
-  affinity: Affinity?
+  affinity: DeploymentAffinity?
 
   /// If specified, the container's resources.
-  resources: Listing<Resource>?
+  resources: Listing<DeploymentResource>?
 }
 
 /// ProbesRequirementsOverride enables the user to override any container's env vars.
@@ -170,16 +170,16 @@ class ReadinessProbe {
   timeoutSeconds: Int?
 }
 
-class Env {
+class DeploymentEnv {
   /// The container name
   container: String
 
   /// The desired EnvVarRequirements
-  envVars: Listing<EnvVar>?
+  envVars: Listing<EnvEnvVar>?
 }
 
 /// EnvVar represents an environment variable present in a Container.
-class EnvVar {
+class EnvEnvVar {
   /// Name of the environment variable. Must be a C_IDENTIFIER.
   name: String
 
@@ -192,30 +192,30 @@ class EnvVar {
   value: String?
 
   /// Source for the environment variable's value. Cannot be used if value is not empty.
-  valueFrom: ValueFrom?
+  valueFrom: EnvVarValueFrom?
 }
 
 /// Source for the environment variable's value. Cannot be used if value is not empty.
-class ValueFrom {
+class EnvVarValueFrom {
   /// Selects a key of a ConfigMap.
-  configMapKeyRef: ConfigMapKeyRef?
+  configMapKeyRef: ValueFromConfigMapKeyRef?
 
   /// Selects a field of the pod: supports metadata.name, metadata.namespace, `metadata.labels['<KEY>']`,
   /// `metadata.annotations['<KEY>']`, spec.nodeName, spec.serviceAccountName, status.hostIP,
   /// status.podIP, status.podIPs.
-  fieldRef: FieldRef?
+  fieldRef: ValueFromFieldRef?
 
   /// Selects a resource of the container: only resources limits and requests (limits.cpu, limits.memory,
   /// limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are
   /// currently supported.
-  resourceFieldRef: ResourceFieldRef?
+  resourceFieldRef: ValueFromResourceFieldRef?
 
   /// Selects a key of a secret in the pod's namespace
-  secretKeyRef: SecretKeyRef?
+  secretKeyRef: ValueFromSecretKeyRef?
 }
 
 /// Selects a key of a ConfigMap.
-class ConfigMapKeyRef {
+class ValueFromConfigMapKeyRef {
   /// The key to select.
   key: String
 
@@ -231,7 +231,7 @@ class ConfigMapKeyRef {
 /// Selects a field of the pod: supports metadata.name, metadata.namespace, `metadata.labels['<KEY>']`,
 /// `metadata.annotations['<KEY>']`, spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP,
 /// status.podIPs.
-class FieldRef {
+class ValueFromFieldRef {
   /// Version of the schema the FieldPath is written in terms of, defaults to "v1".
   apiVersion: String?
 
@@ -242,7 +242,7 @@ class FieldRef {
 /// Selects a resource of the container: only resources limits and requests (limits.cpu, limits.memory,
 /// limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently
 /// supported.
-class ResourceFieldRef {
+class ValueFromResourceFieldRef {
   /// Container name: required for volumes, optional for env vars
   containerName: String?
 
@@ -254,7 +254,7 @@ class ResourceFieldRef {
 }
 
 /// Selects a key of a secret in the pod's namespace
-class SecretKeyRef {
+class ValueFromSecretKeyRef {
   /// The key of the secret to select from. Must be a valid secret key.
   key: String
 
@@ -269,7 +269,7 @@ class SecretKeyRef {
 
 /// The pod this Toleration is attached to tolerates any taint that matches the triple <key,value,effect>
 /// using the matching operator <operator>.
-class Toleration {
+class DeploymentToleration {
   /// Effect indicates the taint effect to match. Empty means match all taint effects. When specified,
   /// allowed values are NoSchedule, PreferNoSchedule and NoExecute.
   effect: String?
@@ -295,10 +295,10 @@ class Toleration {
 }
 
 /// TopologySpreadConstraint specifies how to spread matching pods among the given topology.
-class TopologySpreadConstraint {
+class DeploymentTopologySpreadConstraint {
   /// LabelSelector is used to find matching pods. Pods that match this label selector are counted to
   /// determine the number of pods in their corresponding topology domain.
-  labelSelector: LabelSelector?
+  labelSelector: TopologySpreadConstraintLabelSelector?
 
   /// MaxSkew describes the degree to which pods may be unevenly distributed. It's the maximum permitted
   /// difference between the number of matching pods in any two topology domains of a given topology
@@ -328,9 +328,9 @@ class TopologySpreadConstraint {
 
 /// LabelSelector is used to find matching pods. Pods that match this label selector are counted to
 /// determine the number of pods in their corresponding topology domain.
-class LabelSelector {
+class TopologySpreadConstraintLabelSelector {
   /// matchExpressions is a list of label selector requirements. The requirements are ANDed.
-  matchExpressions: Listing<MatchExpression>?
+  matchExpressions: Listing<LabelSelectorMatchExpression>?
 
   /// matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is
   /// equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and
@@ -340,7 +340,7 @@ class LabelSelector {
 
 /// A label selector requirement is a selector that contains values, a key, and an operator that relates
 /// the key and values.
-class MatchExpression {
+class LabelSelectorMatchExpression {
   /// key is the label key that the selector applies to.
   key: String
 
@@ -381,21 +381,21 @@ class VolumeMount {
 }
 
 /// If specified, the pod's scheduling constraints.
-class Affinity {
+class DeploymentAffinity {
   /// Describes node affinity scheduling rules for the pod.
-  nodeAffinity: NodeAffinity?
+  nodeAffinity: AffinityNodeAffinity?
 
   /// Describes pod affinity scheduling rules (e.g. co-locate this pod in the same node, zone, etc. as
   /// some other pod(s)).
-  podAffinity: PodAffinity?
+  podAffinity: AffinityPodAffinity?
 
   /// Describes pod anti-affinity scheduling rules (e.g. avoid putting this pod in the same node, zone,
   /// etc. as some other pod(s)).
-  podAntiAffinity: PodAntiAffinity?
+  podAntiAffinity: AffinityPodAntiAffinity?
 }
 
 /// Describes node affinity scheduling rules for the pod.
-class NodeAffinity {
+class AffinityNodeAffinity {
   /// The scheduler will prefer to schedule pods to nodes that satisfy the affinity expressions specified
   /// by this field, but it may choose a node that violates one or more of the expressions. The node that
   /// is most preferred is the one with the greatest sum of weights, i.e. for each node that meets all of
@@ -404,28 +404,28 @@ class NodeAffinity {
   /// if the node matches the corresponding matchExpressions; the node(s) with the highest sum are the
   /// most preferred.
   preferredDuringSchedulingIgnoredDuringExecution: Listing<
-    PreferredDuringSchedulingIgnoredDuringExecution,
+    NodeAffinityPreferredDuringSchedulingIgnoredDuringExecution,
   >?
 
   /// If the affinity requirements specified by this field are not met at scheduling time, the pod will
   /// not be scheduled onto the node. If the affinity requirements specified by this field cease to be
   /// met at some point during pod execution (e.g. due to an update), the system may or may not try to
   /// eventually evict the pod from its node.
-  requiredDuringSchedulingIgnoredDuringExecution: RequiredDuringSchedulingIgnoredDuringExecution?
+  requiredDuringSchedulingIgnoredDuringExecution: NodeAffinityRequiredDuringSchedulingIgnoredDuringExecution?
 }
 
 /// An empty preferred scheduling term matches all objects with implicit weight 0 (i.e. it's a no-op). A
 /// null preferred scheduling term matches no objects (i.e. is also a no-op).
-class PreferredDuringSchedulingIgnoredDuringExecution {
+class NodeAffinityPreferredDuringSchedulingIgnoredDuringExecution {
   /// A node selector term, associated with the corresponding weight.
-  preference: Preference
+  preference: PreferredDuringSchedulingIgnoredDuringExecutionPreference
 
   /// Weight associated with matching the corresponding nodeSelectorTerm, in the range 1-100.
   weight: Int
 }
 
 /// A node selector term, associated with the corresponding weight.
-class Preference {
+class PreferredDuringSchedulingIgnoredDuringExecutionPreference {
   /// A list of node selector requirements by node's labels.
   matchExpressions: Listing<MatchField>?
 
@@ -454,14 +454,14 @@ class MatchField {
 /// be scheduled onto the node. If the affinity requirements specified by this field cease to be met at
 /// some point during pod execution (e.g. due to an update), the system may or may not try to eventually
 /// evict the pod from its node.
-class RequiredDuringSchedulingIgnoredDuringExecution {
+class NodeAffinityRequiredDuringSchedulingIgnoredDuringExecution {
   /// Required. A list of node selector terms. The terms are ORed.
-  nodeSelectorTerms: Listing<NodeSelectorTerm>
+  nodeSelectorTerms: Listing<RequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerm>
 }
 
 /// A null or empty node selector term matches no objects. The requirements of them are ANDed. The
 /// TopologySelectorTerm type implements a subset of the NodeSelectorTerm.
-class NodeSelectorTerm {
+class RequiredDuringSchedulingIgnoredDuringExecutionNodeSelectorTerm {
   /// A list of node selector requirements by node's labels.
   matchExpressions: Listing<MatchField>?
 
@@ -471,7 +471,7 @@ class NodeSelectorTerm {
 
 /// Describes pod affinity scheduling rules (e.g. co-locate this pod in the same node, zone, etc. as some
 /// other pod(s)).
-class PodAffinity {
+class AffinityPodAffinity {
   /// The scheduler will prefer to schedule pods to nodes that satisfy the affinity expressions specified
   /// by this field, but it may choose a node that violates one or more of the expressions. The node that
   /// is most preferred is the one with the greatest sum of weights, i.e. for each node that meets all of
@@ -480,7 +480,7 @@ class PodAffinity {
   /// if the node has pods which matches the corresponding podAffinityTerm; the node(s) with the highest
   /// sum are the most preferred.
   preferredDuringSchedulingIgnoredDuringExecution: Listing<
-    PreferredDuringSchedulingIgnoredDuringExecution,
+    PodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution,
   >?
 
   /// If the affinity requirements specified by this field are not met at scheduling time, the pod will
@@ -489,24 +489,24 @@ class PodAffinity {
   /// try to eventually evict the pod from its node. When there are multiple elements, the lists of nodes
   /// corresponding to each podAffinityTerm are intersected, i.e. all terms must be satisfied.
   requiredDuringSchedulingIgnoredDuringExecution: Listing<
-    RequiredDuringSchedulingIgnoredDuringExecution,
+    PodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution,
   >?
 }
 
 /// The weights of all of the matched WeightedPodAffinityTerm fields are added per-node to find the most
 /// preferred node(s)
-class PreferredDuringSchedulingIgnoredDuringExecution {
+class PodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution {
   /// Required. A pod affinity term, associated with the corresponding weight.
-  podAffinityTerm: PodAffinityTerm
+  podAffinityTerm: PreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm
 
   /// weight associated with matching the corresponding podAffinityTerm, in the range 1-100.
   weight: Int
 }
 
 /// Required. A pod affinity term, associated with the corresponding weight.
-class PodAffinityTerm {
+class PreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTerm {
   /// A label query over a set of resources, in this case pods.
-  labelSelector: LabelSelector?
+  labelSelector: RequiredDuringSchedulingIgnoredDuringExecutionLabelSelector?
 
   /// namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty
   /// list means "this pod's namespace"
@@ -520,9 +520,9 @@ class PodAffinityTerm {
 }
 
 /// A label query over a set of resources, in this case pods.
-class LabelSelector {
+class RequiredDuringSchedulingIgnoredDuringExecutionLabelSelector {
   /// matchExpressions is a list of label selector requirements. The requirements are ANDed.
-  matchExpressions: Listing<MatchExpression>?
+  matchExpressions: Listing<LabelSelectorMatchExpression>?
 
   /// matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is
   /// equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and
@@ -534,9 +534,9 @@ class LabelSelector {
 /// that this pod should be co-located (affinity) or not co-located (anti-affinity) with, where
 /// co-located is defined as running on a node whose value of the label with key <topologyKey> matches
 /// that of any node on which a pod of the set of pods is running
-class RequiredDuringSchedulingIgnoredDuringExecution {
+class PodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution {
   /// A label query over a set of resources, in this case pods.
-  labelSelector: LabelSelector?
+  labelSelector: RequiredDuringSchedulingIgnoredDuringExecutionLabelSelector?
 
   /// namespaces specifies which namespaces the labelSelector applies to (matches against); null or empty
   /// list means "this pod's namespace"
@@ -551,7 +551,7 @@ class RequiredDuringSchedulingIgnoredDuringExecution {
 
 /// Describes pod anti-affinity scheduling rules (e.g. avoid putting this pod in the same node, zone,
 /// etc. as some other pod(s)).
-class PodAntiAffinity {
+class AffinityPodAntiAffinity {
   /// The scheduler will prefer to schedule pods to nodes that satisfy the anti-affinity expressions
   /// specified by this field, but it may choose a node that violates one or more of the expressions. The
   /// node that is most preferred is the one with the greatest sum of weights, i.e. for each node that
@@ -560,7 +560,7 @@ class PodAntiAffinity {
   /// "weight" to the sum if the node has pods which matches the corresponding podAffinityTerm; the
   /// node(s) with the highest sum are the most preferred.
   preferredDuringSchedulingIgnoredDuringExecution: Listing<
-    PreferredDuringSchedulingIgnoredDuringExecution,
+    PodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecution,
   >?
 
   /// If the anti-affinity requirements specified by this field are not met at scheduling time, the pod
@@ -570,13 +570,13 @@ class PodAntiAffinity {
   /// lists of nodes corresponding to each podAffinityTerm are intersected, i.e. all terms must be
   /// satisfied.
   requiredDuringSchedulingIgnoredDuringExecution: Listing<
-    RequiredDuringSchedulingIgnoredDuringExecution,
+    PodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecution,
   >?
 }
 
 /// The pod this Resource is used to specify the requests and limits for a certain container based on the
 /// name.
-class Resource {
+class DeploymentResource {
   /// The name of the container
   container: String?
 
@@ -611,7 +611,7 @@ class Deployment {
   annotations: Mapping<String, String>?
 
   /// Env overrides env vars for the containers.
-  env: Listing<Env>?
+  env: Listing<DeploymentEnv>?
 
   /// LivenessProbes overrides liveness probes for the containers.
   livenessProbes: Listing<ReadinessProbe>?
@@ -626,7 +626,7 @@ class Deployment {
   readinessProbes: Listing<ReadinessProbe>?
 
   /// If specified, the pod's tolerations.
-  tolerations: Listing<Toleration>?
+  tolerations: Listing<DeploymentToleration>?
 
   /// Use the host's network namespace if true. Make sure to understand the security implications if you
   /// want to enable it. When hostNetwork is enabled, this will set dnsPolicy to ClusterFirstWithHostNet
@@ -634,13 +634,13 @@ class Deployment {
   hostNetwork: Boolean?
 
   /// If specified, the pod's topology spread constraints.
-  topologySpreadConstraints: Listing<TopologySpreadConstraint>?
+  topologySpreadConstraints: Listing<DeploymentTopologySpreadConstraint>?
 
   /// If specified, the pod's scheduling constraints.
-  affinity: Affinity?
+  affinity: DeploymentAffinity?
 
   /// If specified, the container's resources.
-  resources: Listing<Resource>?
+  resources: Listing<DeploymentResource>?
 }
 
 class Service {
