@@ -44,7 +44,8 @@ class Spec {
   /// Vault configures this issuer to sign certificates using a HashiCorp Vault PKI backend.
   vault: Vault?
 
-  /// Venafi configures this issuer to sign certificates using a Venafi TPP or Venafi Cloud policy zone.
+  /// Venafi configures this issuer to sign certificates using a CyberArk Certificate Manager Self-Hosted
+  /// or SaaS policy zone.
   venafi: Venafi?
 }
 
@@ -285,6 +286,16 @@ class AzureDNS {
   /// Auth: Azure Service Principal: The TenantID of the Azure Service Principal used to authenticate
   /// with Azure DNS. If set, ClientID and ClientSecret must also be set.
   tenantID: String?
+
+  /// ZoneType determines which type of Azure DNS zone to use.
+  ///
+  /// Valid values are: - AzurePublicZone (default): Use a public Azure DNS zone. - AzurePrivateZone: Use
+  /// an Azure Private DNS zone.
+  ///
+  /// If not specified, AzurePublicZone is used.
+  ///
+  /// Support for Azure Private DNS zones is currently experimental and may change in future releases.
+  zoneType: ("AzurePublicZone" | "AzurePrivateZone")?
 }
 
 /// Auth: Azure Service Principal: A reference to a Secret containing the password associated with the
@@ -374,7 +385,7 @@ class Digitalocean {
 /// to manage DNS01 challenge records.
 class Rfc2136 {
   /// The IP address or hostname of an authoritative DNS server supporting RFC2136 in the form host:port.
-  /// If the host is an IPv6 address it must be enclosed in square brackets (e.g [2001:db8::1]) ; port is
+  /// If the host is an IPv6 address it must be enclosed in square brackets (e.g [2001:db8::1]); port is
   /// optional. This field is required.
   nameserver: String
 
@@ -411,14 +422,14 @@ class TsigSecretSecretRef {
 /// Use the AWS Route53 API to manage DNS01 challenge records.
 class Route53 {
   /// The AccessKeyID is used for authentication. Cannot be set when SecretAccessKeyID is set. If neither
-  /// the Access Key nor Key ID are set, we fall-back to using env vars, shared credentials file or AWS
+  /// the Access Key nor Key ID are set, we fall back to using env vars, shared credentials file, or AWS
   /// Instance metadata, see:
   /// https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-credentials
   accessKeyID: String?
 
   /// The SecretAccessKey is used for authentication. If set, pull the AWS access key ID from a key
   /// within a Kubernetes Secret. Cannot be set when AccessKeyID is set. If neither the Access Key nor
-  /// Key ID are set, we fall-back to using env vars, shared credentials file or AWS Instance metadata,
+  /// Key ID are set, we fall back to using env vars, shared credentials file, or AWS Instance metadata,
   /// see:
   /// https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-credentials
   accessKeyIDSecretRef: AccessKeyIDSecretRef?
@@ -460,14 +471,14 @@ class Route53 {
   role: String?
 
   /// The SecretAccessKey is used for authentication. If neither the Access Key nor Key ID are set, we
-  /// fall-back to using env vars, shared credentials file or AWS Instance metadata, see:
+  /// fall back to using env vars, shared credentials file, or AWS Instance metadata, see:
   /// https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-credentials
   secretAccessKeySecretRef: SecretAccessKeySecretRef?
 }
 
 /// The SecretAccessKey is used for authentication. If set, pull the AWS access key ID from a key within
 /// a Kubernetes Secret. Cannot be set when AccessKeyID is set. If neither the Access Key nor Key ID are
-/// set, we fall-back to using env vars, shared credentials file or AWS Instance metadata, see:
+/// set, we fall back to using env vars, shared credentials file, or AWS Instance metadata, see:
 /// https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-credentials
 class AccessKeyIDSecretRef {
   /// The key of the entry in the Secret resource's `data` field to be used. Some instances of this field
@@ -507,8 +518,8 @@ class ServiceAccountRef {
   name: String
 }
 
-/// The SecretAccessKey is used for authentication. If neither the Access Key nor Key ID are set, we
-/// fall-back to using env vars, shared credentials file or AWS Instance metadata, see:
+/// The SecretAccessKey is used for authentication. If neither the Access Key nor Key ID are set, we fall
+/// back to using env vars, shared credentials file, or AWS Instance metadata, see:
 /// https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-credentials
 class SecretAccessKeySecretRef {
   /// The key of the entry in the Secret resource's `data` field to be used. Some instances of this field
@@ -1160,9 +1171,10 @@ class SpecToleration {
   /// is empty, operator must be Exists; this combination means to match all values and all keys.
   key: String?
 
-  /// Operator represents a key's relationship to the value. Valid operators are Exists and Equal.
-  /// Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all
-  /// taints of a particular category.
+  /// Operator represents a key's relationship to the value. Valid operators are Exists, Equal, Lt, and
+  /// Gt. Defaults to Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all
+  /// taints of a particular category. Lt and Gt perform numeric comparisons (requires feature gate
+  /// TaintTolerationComparisonOperators).
   operator: String?
 
   /// TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute,
@@ -1428,7 +1440,7 @@ class KubernetesSecretRef {
 /// bound tokens. To use this field, you must configure an RBAC rule to let cert-manager request a token.
 class KubernetesServiceAccountRef {
   /// TokenAudiences is an optional list of extra audiences to include in the token passed to Vault. The
-  /// default token consisting of the issuer's namespace and name is always included.
+  /// default audiences are always included in the token.
   audiences: Listing<String>?
 
   /// Name of the ServiceAccount used to request a token.
@@ -1485,30 +1497,33 @@ class ClientKeySecretRef {
   name: String
 }
 
-/// Venafi configures this issuer to sign certificates using a Venafi TPP or Venafi Cloud policy zone.
+/// Venafi configures this issuer to sign certificates using a CyberArk Certificate Manager Self-Hosted
+/// or SaaS policy zone.
 class Venafi {
-  /// Cloud specifies the Venafi cloud configuration settings. Only one of TPP or Cloud may be specified.
+  /// Cloud specifies the CyberArk Certificate Manager SaaS configuration settings. Only one of CyberArk
+  /// Certificate Manager may be specified.
   cloud: Cloud?
 
-  /// TPP specifies Trust Protection Platform configuration settings. Only one of TPP or Cloud may be
-  /// specified.
+  /// TPP specifies CyberArk Certificate Manager Self-Hosted configuration settings. Only one of CyberArk
+  /// Certificate Manager may be specified.
   tpp: Tpp?
 
-  /// Zone is the Venafi Policy Zone to use for this issuer. All requests made to the Venafi platform
-  /// will be restricted by the named zone policy. This field is required.
+  /// Zone is the Certificate Manager Policy Zone to use for this issuer. All requests made to the
+  /// Certificate Manager platform will be restricted by the named zone policy. This field is required.
   zone: String
 }
 
-/// Cloud specifies the Venafi cloud configuration settings. Only one of TPP or Cloud may be specified.
+/// Cloud specifies the CyberArk Certificate Manager SaaS configuration settings. Only one of CyberArk
+/// Certificate Manager may be specified.
 class Cloud {
-  /// APITokenSecretRef is a secret key selector for the Venafi Cloud API token.
+  /// APITokenSecretRef is a secret key selector for the CyberArk Certificate Manager SaaS API token.
   apiTokenSecretRef: CloudApiTokenSecretRef
 
-  /// URL is the base URL for Venafi Cloud. Defaults to "https://api.venafi.cloud/".
+  /// URL is the base URL for CyberArk Certificate Manager SaaS. Defaults to "https://api.venafi.cloud/".
   url: String?
 }
 
-/// APITokenSecretRef is a secret key selector for the Venafi Cloud API token.
+/// APITokenSecretRef is a secret key selector for the CyberArk Certificate Manager SaaS API token.
 class CloudApiTokenSecretRef {
   /// The key of the entry in the Secret resource's `data` field to be used. Some instances of this field
   /// may be defaulted, in others it may be required.
@@ -1519,34 +1534,37 @@ class CloudApiTokenSecretRef {
   name: String
 }
 
-/// TPP specifies Trust Protection Platform configuration settings. Only one of TPP or Cloud may be
-/// specified.
+/// TPP specifies CyberArk Certificate Manager Self-Hosted configuration settings. Only one of CyberArk
+/// Certificate Manager may be specified.
 class Tpp {
   /// Base64-encoded bundle of PEM CAs which will be used to validate the certificate chain presented by
-  /// the TPP server. Only used if using HTTPS; ignored for HTTP. If undefined, the certificate bundle in
-  /// the cert-manager controller container is used to validate the chain.
+  /// the CyberArk Certificate Manager Self-Hosted server. Only used if using HTTPS; ignored for HTTP. If
+  /// undefined, the certificate bundle in the cert-manager controller container is used to validate the
+  /// chain.
   caBundle: String?
 
   /// Reference to a Secret containing a base64-encoded bundle of PEM CAs which will be used to validate
-  /// the certificate chain presented by the TPP server. Only used if using HTTPS; ignored for HTTP.
-  /// Mutually exclusive with CABundle. If neither CABundle nor CABundleSecretRef is defined, the
-  /// certificate bundle in the cert-manager controller container is used to validate the TLS connection.
+  /// the certificate chain presented by the CyberArk Certificate Manager Self-Hosted server. Only used
+  /// if using HTTPS; ignored for HTTP. Mutually exclusive with CABundle. If neither CABundle nor
+  /// CABundleSecretRef is defined, the certificate bundle in the cert-manager controller container is
+  /// used to validate the TLS connection.
   caBundleSecretRef: TppCaBundleSecretRef?
 
-  /// CredentialsRef is a reference to a Secret containing the Venafi TPP API credentials. The secret
-  /// must contain the key 'access-token' for the Access Token Authentication, or two keys, 'username'
-  /// and 'password' for the API Keys Authentication.
+  /// CredentialsRef is a reference to a Secret containing the CyberArk Certificate Manager Self-Hosted
+  /// API credentials. The secret must contain the key 'access-token' for the Access Token
+  /// Authentication, or two keys, 'username' and 'password' for the API Keys Authentication.
   credentialsRef: CredentialsRef
 
-  /// URL is the base URL for the vedsdk endpoint of the Venafi TPP instance, for example:
-  /// "https://tpp.example.com/vedsdk".
+  /// URL is the base URL for the vedsdk endpoint of the CyberArk Certificate Manager Self-Hosted
+  /// instance, for example: "https://tpp.example.com/vedsdk".
   url: String
 }
 
 /// Reference to a Secret containing a base64-encoded bundle of PEM CAs which will be used to validate
-/// the certificate chain presented by the TPP server. Only used if using HTTPS; ignored for HTTP.
-/// Mutually exclusive with CABundle. If neither CABundle nor CABundleSecretRef is defined, the
-/// certificate bundle in the cert-manager controller container is used to validate the TLS connection.
+/// the certificate chain presented by the CyberArk Certificate Manager Self-Hosted server. Only used if
+/// using HTTPS; ignored for HTTP. Mutually exclusive with CABundle. If neither CABundle nor
+/// CABundleSecretRef is defined, the certificate bundle in the cert-manager controller container is used
+/// to validate the TLS connection.
 class TppCaBundleSecretRef {
   /// The key of the entry in the Secret resource's `data` field to be used. Some instances of this field
   /// may be defaulted, in others it may be required.
@@ -1557,9 +1575,9 @@ class TppCaBundleSecretRef {
   name: String
 }
 
-/// CredentialsRef is a reference to a Secret containing the Venafi TPP API credentials. The secret must
-/// contain the key 'access-token' for the Access Token Authentication, or two keys, 'username' and
-/// 'password' for the API Keys Authentication.
+/// CredentialsRef is a reference to a Secret containing the CyberArk Certificate Manager Self-Hosted API
+/// credentials. The secret must contain the key 'access-token' for the Access Token Authentication, or
+/// two keys, 'username' and 'password' for the API Keys Authentication.
 class CredentialsRef {
   /// Name of the resource being referred to. More info:
   /// https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
