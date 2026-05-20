@@ -1,7 +1,7 @@
 /// Application is a definition of Application resource.
 ///
 /// This module was generated from the CustomResourceDefinition at
-/// <https://raw.githubusercontent.com/argoproj/argo-cd/v3.3.2/manifests/crds/kustomization.yaml>.
+/// <https://raw.githubusercontent.com/argoproj/argo-cd/v3.4.2/manifests/crds/kustomization.yaml>.
 module io.argoproj.v1alpha1.Application
 
 extends "@k8s/K8sResource.pkl"
@@ -333,10 +333,10 @@ class SourceKustomize {
   /// LabelWithoutSelector specifies whether to apply common labels to resource selectors or not
   labelWithoutSelector: Boolean?
 
-  /// NamePrefix is a prefix appended to resources for Kustomize apps
+  /// NamePrefix overrides the namePrefix in the kustomization.yaml for Kustomize apps
   namePrefix: String?
 
-  /// NameSuffix is a suffix appended to resources for Kustomize apps
+  /// NameSuffix overrides the nameSuffix in the kustomization.yaml for Kustomize apps
   nameSuffix: String?
 
   /// Namespace sets the namespace that Kustomize adds to all resources
@@ -746,10 +746,10 @@ class DrySourceKustomize {
   /// LabelWithoutSelector specifies whether to apply common labels to resource selectors or not
   labelWithoutSelector: Boolean?
 
-  /// NamePrefix is a prefix appended to resources for Kustomize apps
+  /// NamePrefix overrides the namePrefix in the kustomization.yaml for Kustomize apps
   namePrefix: String?
 
-  /// NameSuffix is a suffix appended to resources for Kustomize apps
+  /// NameSuffix overrides the nameSuffix in the kustomization.yaml for Kustomize apps
   nameSuffix: String?
 
   /// Namespace sets the namespace that Kustomize adds to all resources
@@ -862,6 +862,7 @@ class Status {
   history: Listing<History>?
 
   /// ObservedAt indicates when the application state was updated without querying latest git state
+  ///
   /// Deprecated: controller no longer updates ObservedAt field
   observedAt: String?
 

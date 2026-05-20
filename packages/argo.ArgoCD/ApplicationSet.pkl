@@ -1,5 +1,5 @@
 /// This module was generated from the CustomResourceDefinition at
-/// <https://raw.githubusercontent.com/argoproj/argo-cd/v3.3.2/manifests/crds/kustomization.yaml>.
+/// <https://raw.githubusercontent.com/argoproj/argo-cd/v3.4.2/manifests/crds/kustomization.yaml>.
 module io.argoproj.v1alpha1.ApplicationSet
 
 extends "@k8s/K8sResource.pkl"
@@ -842,6 +842,8 @@ class Status {
 
   conditions: Listing<Condition>?
 
+  health: ResourceHealth?
+
   resources: Listing<Resource>?
 
   resourcesCount: Int?
@@ -873,10 +875,18 @@ class Condition {
   type: String
 }
 
+class ResourceHealth {
+  lastTransitionTime: String?
+
+  message: String?
+
+  status: String?
+}
+
 class Resource {
   group: String?
 
-  health: Health?
+  health: ResourceHealth?
 
   hook: Boolean?
 
@@ -895,12 +905,4 @@ class Resource {
   syncWave: Int?
 
   version: String?
-}
-
-class Health {
-  lastTransitionTime: String?
-
-  message: String?
-
-  status: String?
 }

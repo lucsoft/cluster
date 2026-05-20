@@ -4,7 +4,7 @@
 /// what they can do (RBAC policies) * automation access to these roles (JWT tokens)
 ///
 /// This module was generated from the CustomResourceDefinition at
-/// <https://raw.githubusercontent.com/argoproj/argo-cd/v3.3.2/manifests/crds/kustomization.yaml>.
+/// <https://raw.githubusercontent.com/argoproj/argo-cd/v3.4.2/manifests/crds/kustomization.yaml>.
 module io.argoproj.v1alpha1.AppProject
 
 extends "@k8s/K8sResource.pkl"
