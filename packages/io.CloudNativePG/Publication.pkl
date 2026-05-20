@@ -1,0 +1,102 @@
+/// Publication is the Schema for the publications API
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/v1.29.1/config/crd/kustomization.yaml>.
+module io.cnpg.postgresql.v1.Publication
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "postgresql.cnpg.io/v1"
+
+fixed kind: "Publication"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// PublicationSpec defines the desired state of Publication
+spec: Spec
+
+/// PublicationStatus defines the observed state of Publication
+status: Status?
+
+/// PublicationSpec defines the desired state of Publication
+class Spec {
+  /// The name of the PostgreSQL cluster that identifies the "publisher"
+  cluster: Cluster
+
+  /// The name of the database where the publication will be installed in the "publisher" cluster
+  dbname: String
+
+  /// The name of the publication inside PostgreSQL
+  name: String
+
+  /// Publication parameters part of the `WITH` clause as expected by PostgreSQL `CREATE PUBLICATION`
+  /// command
+  parameters: Mapping<String, String>?
+
+  /// The policy for end-of-life maintenance of this publication
+  publicationReclaimPolicy: ("delete" | "retain")?
+
+  /// Target of the publication as expected by PostgreSQL `CREATE PUBLICATION` command
+  target: Target
+}
+
+/// The name of the PostgreSQL cluster that identifies the "publisher"
+class Cluster {
+  /// Name of the referent. This field is effectively required, but due to backwards compatibility is
+  /// allowed to be empty. Instances of this type with an empty value here are almost certainly wrong.
+  /// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+  name: String?
+}
+
+/// Target of the publication as expected by PostgreSQL `CREATE PUBLICATION` command
+class Target {
+  /// Marks the publication as one that replicates changes for all tables in the database, including
+  /// tables created in the future. Corresponding to `FOR ALL TABLES` in PostgreSQL.
+  allTables: Boolean?
+
+  /// Just the following schema objects
+  objects: Listing<Object>(length <= 100000)?
+}
+
+/// PublicationTargetObject is an object to publish
+class Object {
+  /// Specifies a list of tables to add to the publication. Corresponding to `FOR TABLE` in PostgreSQL.
+  table: Table?
+
+  /// Marks the publication as one that replicates changes for all tables in the specified list of
+  /// schemas, including tables created in the future. Corresponding to `FOR TABLES IN SCHEMA` in
+  /// PostgreSQL.
+  tablesInSchema: String?
+}
+
+/// Specifies a list of tables to add to the publication. Corresponding to `FOR TABLE` in PostgreSQL.
+class Table {
+  /// The columns to publish
+  columns: Listing<String>?
+
+  /// The table name
+  name: String
+
+  /// Whether to limit to the table only or include all its descendants
+  only: Boolean?
+
+  /// The schema name
+  schema: String?
+}
+
+/// PublicationStatus defines the observed state of Publication
+class Status {
+  /// Applied is true if the publication was reconciled correctly
+  applied: Boolean?
+
+  /// Message is the reconciliation output message
+  message: String?
+
+  /// A sequence number representing the latest desired state that was synchronized
+  observedGeneration: Int?
+}

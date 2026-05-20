@@ -10,9 +10,9 @@
     },
     "package://pkg.pkl-lang.org/pkl-k8s/k8s@1": {
       "type": "remote",
-      "uri": "projectpackage://pkg.pkl-lang.org/pkl-k8s/k8s@1.4.0",
+      "uri": "projectpackage://pkg.pkl-lang.org/pkl-k8s/k8s@1.4.1",
       "checksums": {
-        "sha256": "7702d31d43269ca571fa98f8c6d53ba560c5c5a494b9b27e082a2d9fb573e0aa"
+        "sha256": "0520f82219c074d2f4b69ab9c57a4a1c1d0b3c4acc1e5d12749e72e0d567d9bf"
       }
     },
     "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Workload@0": {
@@ -49,6 +49,11 @@
       "checksums": {
         "sha256": "23f1b7f113867693de6b3a6292392a67fba25f5c6b7959dc9097dcb86d48b893"
       }
+    },
+    "package://pkl-pkgs.lucsoft.de/packages/io.CloudNativePG@0": {
+      "type": "local",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/io.CloudNativePG@0.3.0",
+      "path": "../packages/io.CloudNativePG"
     }
   }
 }

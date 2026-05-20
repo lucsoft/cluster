@@ -1,0 +1,104 @@
+/// ClusterImageCatalog is the Schema for the clusterimagecatalogs API
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/v1.29.1/config/crd/kustomization.yaml>.
+module io.cnpg.postgresql.v1.ClusterImageCatalog
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "postgresql.cnpg.io/v1"
+
+fixed kind: "ClusterImageCatalog"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// Specification of the desired behavior of the ClusterImageCatalog. More info:
+/// https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status
+spec: Spec
+
+/// Specification of the desired behavior of the ClusterImageCatalog. More info:
+/// https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status
+class Spec {
+  /// List of CatalogImages available in the catalog
+  images: Listing<Image>(length.isBetween(1, 8))
+}
+
+/// CatalogImage defines the image and major version
+class Image {
+  /// The configuration of the extensions to be added
+  extensions: Listing<Extension>?
+
+  /// The image reference
+  image: String
+
+  /// The PostgreSQL major version of the image. Must be unique within the catalog.
+  major: Int(this >= 10)
+}
+
+/// ExtensionConfiguration is the configuration used to add PostgreSQL extensions to the Cluster.
+class Extension {
+  /// A list of directories within the image to be appended to the PostgreSQL process's `PATH`
+  /// environment variable.
+  bin_path: Listing<String>?
+
+  /// The list of directories inside the image which should be added to dynamic_library_path. If not
+  /// defined, defaults to "/lib".
+  dynamic_library_path: Listing<String>?
+
+  /// Env is a list of custom environment variables to be set in the PostgreSQL process for this
+  /// extension. It is the responsibility of the cluster administrator to ensure the variables are
+  /// correct for the specific extension. Note that changes to these variables require a manual cluster
+  /// restart to take effect.
+  env: Listing<Env>?
+
+  /// The list of directories inside the image which should be added to extension_control_path. If not
+  /// defined, defaults to "/share".
+  extension_control_path: Listing<String>?
+
+  /// The image containing the extension.
+  image: ExtensionImage?
+
+  /// The list of directories inside the image which should be added to ld_library_path.
+  ld_library_path: Listing<String>?
+
+  /// The name of the extension, required
+  name: String(!isEmpty, matches(Regex("^[a-z0-9]([-a-z0-9_]*[a-z0-9])?$")))
+}
+
+/// ExtensionEnvVar defines an environment variable for a specific extension image volume.
+class Env {
+  /// Name of the environment variable to be injected into the PostgreSQL process.
+  name: String(!isEmpty, matches(Regex("^[a-zA-Z_][a-zA-Z0-9_]*$")))
+
+  /// Value of the environment variable. CloudNativePG performs a direct replacement of this value, with
+  /// support for placeholder expansion. The ${`image_root`} placeholder resolves to the absolute mount
+  /// path of the extension's volume (e.g., `/extensions/my-extension`). This is particularly useful for
+  /// allowing applications or libraries to locate specific directories within the mounted image.
+  /// Unrecognized placeholders are rejected. To include a literal ${...} in the value, escape it as
+  /// $${...}.
+  value: String(!isEmpty)
+}
+
+/// The image containing the extension.
+class ExtensionImage {
+  /// Policy for pulling OCI objects. Possible values are: Always: the kubelet always attempts to pull
+  /// the reference. Container creation will fail If the pull fails. Never: the kubelet never pulls the
+  /// reference and only uses a local image or artifact. Container creation will fail if the reference
+  /// isn't present. IfNotPresent: the kubelet pulls if the reference isn't already present on disk.
+  /// Container creation will fail if the reference isn't present and the pull fails. Defaults to Always
+  /// if :latest tag is specified, or IfNotPresent otherwise.
+  pullPolicy: String?
+
+  /// Required: Image or artifact reference to be used. Behaves in the same way as
+  /// pod.spec.containers[*].image. Pull secrets will be assembled in the same way as for the container
+  /// image by looking up node credentials, SA image pull secrets, and pod spec image pull secrets. More
+  /// info: https://kubernetes.io/docs/concepts/containers/images This field is optional to allow higher
+  /// level config management to default or override container images in workload controllers like
+  /// Deployments and StatefulSets.
+  reference: String?
+}

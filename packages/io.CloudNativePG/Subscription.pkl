@@ -1,0 +1,75 @@
+/// Subscription is the Schema for the subscriptions API
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/v1.29.1/config/crd/kustomization.yaml>.
+module io.cnpg.postgresql.v1.Subscription
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "postgresql.cnpg.io/v1"
+
+fixed kind: "Subscription"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// SubscriptionSpec defines the desired state of Subscription
+spec: Spec
+
+/// SubscriptionStatus defines the observed state of Subscription
+status: Status?
+
+/// SubscriptionSpec defines the desired state of Subscription
+class Spec {
+  /// The name of the PostgreSQL cluster that identifies the "subscriber"
+  cluster: Cluster
+
+  /// The name of the database where the publication will be installed in the "subscriber" cluster
+  dbname: String
+
+  /// The name of the external cluster with the publication ("publisher")
+  externalClusterName: String
+
+  /// The name of the subscription inside PostgreSQL
+  name: String
+
+  /// Subscription parameters included in the `WITH` clause of the PostgreSQL `CREATE SUBSCRIPTION`
+  /// command. Most parameters cannot be changed after the subscription is created and will be ignored if
+  /// modified later, except for a limited set documented at:
+  /// https://www.postgresql.org/docs/current/sql-altersubscription.html#SQL-ALTERSUBSCRIPTION-PARAMS-SET
+  parameters: Mapping<String, String>?
+
+  /// The name of the database containing the publication on the external cluster. Defaults to the one in
+  /// the external cluster definition.
+  publicationDBName: String?
+
+  /// The name of the publication inside the PostgreSQL database in the "publisher"
+  publicationName: String
+
+  /// The policy for end-of-life maintenance of this subscription
+  subscriptionReclaimPolicy: ("delete" | "retain")?
+}
+
+/// The name of the PostgreSQL cluster that identifies the "subscriber"
+class Cluster {
+  /// Name of the referent. This field is effectively required, but due to backwards compatibility is
+  /// allowed to be empty. Instances of this type with an empty value here are almost certainly wrong.
+  /// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+  name: String?
+}
+
+/// SubscriptionStatus defines the observed state of Subscription
+class Status {
+  /// Applied is true if the subscription was reconciled correctly
+  applied: Boolean?
+
+  /// Message is the reconciliation output message
+  message: String?
+
+  /// A sequence number representing the latest desired state that was synchronized
+  observedGeneration: Int?
+}

@@ -1,0 +1,121 @@
+/// ScheduledBackup is the Schema for the scheduledbackups API
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/v1.29.1/config/crd/kustomization.yaml>.
+module io.cnpg.postgresql.v1.ScheduledBackup
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "postgresql.cnpg.io/v1"
+
+fixed kind: "ScheduledBackup"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// Specification of the desired behavior of the ScheduledBackup. More info:
+/// https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status
+spec: Spec
+
+/// Most recently observed status of the ScheduledBackup. This data may not be up to date. Populated by
+/// the system. Read-only. More info:
+/// https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status
+status: Status?
+
+/// Specification of the desired behavior of the ScheduledBackup. More info:
+/// https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status
+class Spec {
+  /// Indicates which ownerReference should be put inside the created backup resources.<br /> - none: no
+  /// owner reference for created backup objects (same behavior as before the field was introduced)<br />
+  /// - self: sets the Scheduled backup object as owner of the backup<br /> - cluster: set the cluster as
+  /// owner of the backup<br />
+  backupOwnerReference: ("none" | "self" | "cluster")?
+
+  /// The cluster to backup
+  cluster: Cluster
+
+  /// If the first backup has to be immediately start after creation or not
+  immediate: Boolean?
+
+  /// The backup method to be used, possible options are `barmanObjectStore`, `volumeSnapshot` or
+  /// `plugin`. Defaults to: `barmanObjectStore`.
+  method: ("barmanObjectStore" | "volumeSnapshot" | "plugin")?
+
+  /// Whether the default type of backup with volume snapshots is online/hot (`true`, default) or
+  /// offline/cold (`false`) Overrides the default setting specified in the cluster field
+  /// '.spec.backup.volumeSnapshot.online'
+  online: Boolean?
+
+  /// Configuration parameters to control the online/hot backup with volume snapshots Overrides the
+  /// default settings specified in the cluster '.backup.volumeSnapshot.onlineConfiguration' stanza
+  onlineConfiguration: OnlineConfiguration?
+
+  /// Configuration parameters passed to the plugin managing this backup
+  pluginConfiguration: PluginConfiguration?
+
+  /// The schedule does not follow the same format used in Kubernetes CronJobs as it includes an
+  /// additional seconds specifier, see
+  /// https://pkg.go.dev/github.com/robfig/cron#hdr-CRON_Expression_Format
+  schedule: String
+
+  /// If this backup is suspended or not
+  suspend: Boolean?
+
+  /// The policy to decide which instance should perform this backup. If empty, it defaults to
+  /// `cluster.spec.backup.target`. Available options are empty string, `primary` and `prefer-standby`.
+  /// `primary` to have backups run always on primary instances, `prefer-standby` to have backups run
+  /// preferably on the most updated standby, if available.
+  target: ("primary" | "prefer-standby")?
+}
+
+/// The cluster to backup
+class Cluster {
+  /// Name of the referent.
+  name: String
+}
+
+/// Configuration parameters to control the online/hot backup with volume snapshots Overrides the default
+/// settings specified in the cluster '.backup.volumeSnapshot.onlineConfiguration' stanza
+class OnlineConfiguration {
+  /// Control whether the I/O workload for the backup initial checkpoint will be limited, according to
+  /// the `checkpoint_completion_target` setting on the PostgreSQL server. If set to true, an immediate
+  /// checkpoint will be used, meaning PostgreSQL will complete the checkpoint as soon as possible.
+  /// `false` by default.
+  immediateCheckpoint: Boolean?
+
+  /// If false, the function will return immediately after the backup is completed, without waiting for
+  /// WAL to be archived. This behavior is only useful with backup software that independently monitors
+  /// WAL archiving. Otherwise, WAL required to make the backup consistent might be missing and make the
+  /// backup useless. By default, or when this parameter is true, pg_backup_stop will wait for WAL to be
+  /// archived when archiving is enabled. On a standby, this means that it will wait only when
+  /// archive_mode = always. If write activity on the primary is low, it may be useful to run
+  /// pg_switch_wal on the primary in order to trigger an immediate segment switch.
+  waitForArchive: Boolean?
+}
+
+/// Configuration parameters passed to the plugin managing this backup
+class PluginConfiguration {
+  /// Name is the name of the plugin managing this backup
+  name: String
+
+  /// Parameters are the configuration parameters passed to the backup plugin for this backup
+  parameters: Mapping<String, String>?
+}
+
+/// Most recently observed status of the ScheduledBackup. This data may not be up to date. Populated by
+/// the system. Read-only. More info:
+/// https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status
+class Status {
+  /// The latest time the schedule
+  lastCheckTime: String?
+
+  /// Information when was the last time that backup was successfully scheduled.
+  lastScheduleTime: String?
+
+  /// Next time we will run a backup
+  nextScheduleTime: String?
+}

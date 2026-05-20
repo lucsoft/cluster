@@ -1,0 +1,24 @@
+amends "package://pkg.pkl-lang.org/pkl-pantry/k8s.contrib.crd@4.2.1#/generate.pkl"
+import "pkl:yaml"
+
+// renovate: datasource=github-releases packageName=cloudnative-pg/cloudnative-pg
+local version = "v1.29.1"
+local baseUrl =
+  "https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/\(version)/config/crd"
+// noinspection UnresolvedElement
+local kustomize: Listing<String> =
+  new yaml.Parser {}.parse(read("\(baseUrl)/kustomization.yaml")).resources
+
+source = "\(baseUrl)/kustomization.yaml"
+baseApiGroup = "v1.postgresql.cnpg.io"
+
+k8sImportPath = "@k8s"
+
+sourceContents =
+  new YamlRenderer {
+    isStream = true
+  }.renderDocument(
+    kustomize
+      .toList()
+      .map((item) -> (new yaml.Parser {}.parse(read("\(baseUrl)/\(item)")) as Dynamic)),
+  )

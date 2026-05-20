@@ -1,0 +1,39 @@
+/// FailoverQuorum contains the information about the current failover quorum status of a PG cluster. It
+/// is updated by the instance manager of the primary node and reset to zero by the operator to trigger
+/// an update.
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/v1.29.1/config/crd/kustomization.yaml>.
+module io.cnpg.postgresql.v1.FailoverQuorum
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "postgresql.cnpg.io/v1"
+
+fixed kind: "FailoverQuorum"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// Most recently observed status of the failover quorum.
+status: Status?
+
+/// Most recently observed status of the failover quorum.
+class Status {
+  /// Contains the latest reported Method value.
+  method: String?
+
+  /// Primary is the name of the primary instance that updated this object the latest time.
+  primary: String?
+
+  /// StandbyNames is the list of potentially synchronous instance names.
+  standbyNames: Listing<String>?
+
+  /// StandbyNumber is the number of synchronous standbys that transactions need to wait for replies
+  /// from.
+  standbyNumber: Int?
+}

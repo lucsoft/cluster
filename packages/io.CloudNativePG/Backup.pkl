@@ -1,0 +1,361 @@
+/// A Backup resource is a request for a PostgreSQL backup by the user.
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/v1.29.1/config/crd/kustomization.yaml>.
+module io.cnpg.postgresql.v1.Backup
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "postgresql.cnpg.io/v1"
+
+fixed kind: "Backup"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// Specification of the desired behavior of the backup. More info:
+/// https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status
+spec: Spec
+
+/// Most recently observed status of the backup. This data may not be up to date. Populated by the
+/// system. Read-only. More info:
+/// https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status
+status: Status?
+
+/// Specification of the desired behavior of the backup. More info:
+/// https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status
+class Spec {
+  /// The cluster to backup
+  cluster: Cluster
+
+  /// The backup method to be used, possible options are `barmanObjectStore`, `volumeSnapshot` or
+  /// `plugin`. Defaults to: `barmanObjectStore`.
+  method: ("barmanObjectStore" | "volumeSnapshot" | "plugin")?
+
+  /// Whether the default type of backup with volume snapshots is online/hot (`true`, default) or
+  /// offline/cold (`false`) Overrides the default setting specified in the cluster field
+  /// '.spec.backup.volumeSnapshot.online'
+  online: Boolean?
+
+  /// Configuration parameters to control the online/hot backup with volume snapshots Overrides the
+  /// default settings specified in the cluster '.backup.volumeSnapshot.onlineConfiguration' stanza
+  onlineConfiguration: OnlineConfiguration?
+
+  /// Configuration parameters passed to the plugin managing this backup
+  pluginConfiguration: PluginConfiguration?
+
+  /// The policy to decide which instance should perform this backup. If empty, it defaults to
+  /// `cluster.spec.backup.target`. Available options are empty string, `primary` and `prefer-standby`.
+  /// `primary` to have backups run always on primary instances, `prefer-standby` to have backups run
+  /// preferably on the most updated standby, if available.
+  target: ("primary" | "prefer-standby")?
+}
+
+/// The cluster to backup
+class Cluster {
+  /// Name of the referent.
+  name: String
+}
+
+/// Configuration parameters to control the online/hot backup with volume snapshots Overrides the default
+/// settings specified in the cluster '.backup.volumeSnapshot.onlineConfiguration' stanza
+class OnlineConfiguration {
+  /// Control whether the I/O workload for the backup initial checkpoint will be limited, according to
+  /// the `checkpoint_completion_target` setting on the PostgreSQL server. If set to true, an immediate
+  /// checkpoint will be used, meaning PostgreSQL will complete the checkpoint as soon as possible.
+  /// `false` by default.
+  immediateCheckpoint: Boolean?
+
+  /// If false, the function will return immediately after the backup is completed, without waiting for
+  /// WAL to be archived. This behavior is only useful with backup software that independently monitors
+  /// WAL archiving. Otherwise, WAL required to make the backup consistent might be missing and make the
+  /// backup useless. By default, or when this parameter is true, pg_backup_stop will wait for WAL to be
+  /// archived when archiving is enabled. On a standby, this means that it will wait only when
+  /// archive_mode = always. If write activity on the primary is low, it may be useful to run
+  /// pg_switch_wal on the primary in order to trigger an immediate segment switch.
+  waitForArchive: Boolean?
+}
+
+/// Configuration parameters passed to the plugin managing this backup
+class PluginConfiguration {
+  /// Name is the name of the plugin managing this backup
+  name: String
+
+  /// Parameters are the configuration parameters passed to the backup plugin for this backup
+  parameters: Mapping<String, String>?
+}
+
+/// Most recently observed status of the backup. This data may not be up to date. Populated by the
+/// system. Read-only. More info:
+/// https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status
+class Status {
+  /// The credentials to use to upload data to Azure Blob Storage
+  azureCredentials: AzureCredentials?
+
+  /// The ID of the Barman backup
+  backupId: String?
+
+  /// Backup label file content as returned by Postgres in case of online (hot) backups
+  backupLabelFile: String?
+
+  /// The Name of the Barman backup
+  backupName: String?
+
+  /// The starting xlog
+  beginLSN: String?
+
+  /// The starting WAL
+  beginWal: String?
+
+  /// The backup command output in case of error
+  commandError: String?
+
+  /// Unused. Retained for compatibility with old versions.
+  commandOutput: String?
+
+  /// The path where to store the backup (i.e. s3://bucket/path/to/folder) this path, with different
+  /// destination folders, will be used for WALs and for data. This may not be populated in case of
+  /// errors.
+  destinationPath: String?
+
+  /// Encryption method required to S3 API
+  encryption: String?
+
+  /// The ending xlog
+  endLSN: String?
+
+  /// The ending WAL
+  endWal: String?
+
+  /// EndpointCA store the CA bundle of the barman endpoint. Useful when using self-signed certificates
+  /// to avoid errors with certificate issuer and barman-cloud-wal-archive.
+  endpointCA: EndpointCA?
+
+  /// Endpoint to be used to upload data to the cloud, overriding the automatic endpoint discovery
+  endpointURL: String?
+
+  /// The detected error
+  error: String?
+
+  /// The credentials to use to upload data to Google Cloud Storage
+  googleCredentials: GoogleCredentials?
+
+  /// Information to identify the instance where the backup has been taken from
+  instanceID: InstanceID?
+
+  /// The PostgreSQL major version that was running when the backup was taken.
+  majorVersion: Int?
+
+  /// The backup method being used
+  method: String?
+
+  /// Whether the backup was online/hot (`true`) or offline/cold (`false`)
+  online: Boolean?
+
+  /// The last backup status
+  phase: String?
+
+  /// A map containing the plugin metadata
+  pluginMetadata: Mapping<String, String>?
+
+  /// When the backup process was started by the operator
+  reconciliationStartedAt: String?
+
+  /// When the reconciliation was terminated by the operator (either successfully or not)
+  reconciliationTerminatedAt: String?
+
+  /// The credentials to use to upload data to S3
+  s3Credentials: S3Credentials?
+
+  /// The server name on S3, the cluster name is used if this parameter is omitted
+  serverName: String?
+
+  /// Status of the volumeSnapshot backup
+  snapshotBackupStatus: SnapshotBackupStatus?
+
+  /// When the backup execution was started by the backup tool
+  startedAt: String?
+
+  /// When the backup execution was terminated by the backup tool
+  stoppedAt: String?
+
+  /// Tablespace map file content as returned by Postgres in case of online (hot) backups
+  tablespaceMapFile: String?
+}
+
+/// The credentials to use to upload data to Azure Blob Storage
+class AzureCredentials {
+  /// The connection string to be used
+  connectionString: ConnectionString?
+
+  /// Use the Azure AD based authentication without providing explicitly the keys.
+  inheritFromAzureAD: Boolean?
+
+  /// The storage account where to upload data
+  storageAccount: StorageAccount?
+
+  /// The storage account key to be used in conjunction with the storage account name
+  storageKey: StorageKey?
+
+  /// A shared-access-signature to be used in conjunction with the storage account name
+  storageSasToken: StorageSasToken?
+
+  /// Use the default Azure authentication flow, which includes DefaultAzureCredential. This allows
+  /// authentication using environment variables and managed identities.
+  useDefaultAzureCredentials: Boolean?
+}
+
+/// The connection string to be used
+class ConnectionString {
+  /// The key to select
+  key: String
+
+  /// Name of the referent.
+  name: String
+}
+
+/// The storage account where to upload data
+class StorageAccount {
+  /// The key to select
+  key: String
+
+  /// Name of the referent.
+  name: String
+}
+
+/// The storage account key to be used in conjunction with the storage account name
+class StorageKey {
+  /// The key to select
+  key: String
+
+  /// Name of the referent.
+  name: String
+}
+
+/// A shared-access-signature to be used in conjunction with the storage account name
+class StorageSasToken {
+  /// The key to select
+  key: String
+
+  /// Name of the referent.
+  name: String
+}
+
+/// EndpointCA store the CA bundle of the barman endpoint. Useful when using self-signed certificates to
+/// avoid errors with certificate issuer and barman-cloud-wal-archive.
+class EndpointCA {
+  /// The key to select
+  key: String
+
+  /// Name of the referent.
+  name: String
+}
+
+/// The credentials to use to upload data to Google Cloud Storage
+class GoogleCredentials {
+  /// The secret containing the Google Cloud Storage JSON file with the credentials
+  applicationCredentials: ApplicationCredentials?
+
+  /// If set to true, will presume that it's running inside a GKE environment, default to false.
+  gkeEnvironment: Boolean?
+}
+
+/// The secret containing the Google Cloud Storage JSON file with the credentials
+class ApplicationCredentials {
+  /// The key to select
+  key: String
+
+  /// Name of the referent.
+  name: String
+}
+
+/// Information to identify the instance where the backup has been taken from
+class InstanceID {
+  /// The container ID
+  ContainerID: String?
+
+  /// The pod name
+  podName: String?
+
+  /// The instance manager session ID. This is a unique identifier generated at instance manager startup
+  /// and changes on every restart (including container reboots). Used to detect if the instance manager
+  /// was restarted during long-running operations like backups, which would terminate any running backup
+  /// process.
+  sessionID: String?
+}
+
+/// The credentials to use to upload data to S3
+class S3Credentials {
+  /// The reference to the access key id
+  accessKeyId: AccessKeyId?
+
+  /// Use the role based authentication without providing explicitly the keys.
+  inheritFromIAMRole: Boolean?
+
+  /// The reference to the secret containing the region name
+  region: Region?
+
+  /// The reference to the secret access key
+  secretAccessKey: SecretAccessKey?
+
+  /// The references to the session key
+  sessionToken: SessionToken?
+}
+
+/// The reference to the access key id
+class AccessKeyId {
+  /// The key to select
+  key: String
+
+  /// Name of the referent.
+  name: String
+}
+
+/// The reference to the secret containing the region name
+class Region {
+  /// The key to select
+  key: String
+
+  /// Name of the referent.
+  name: String
+}
+
+/// The reference to the secret access key
+class SecretAccessKey {
+  /// The key to select
+  key: String
+
+  /// Name of the referent.
+  name: String
+}
+
+/// The references to the session key
+class SessionToken {
+  /// The key to select
+  key: String
+
+  /// Name of the referent.
+  name: String
+}
+
+/// Status of the volumeSnapshot backup
+class SnapshotBackupStatus {
+  /// The elements list, populated with the gathered volume snapshots
+  elements: Listing<Element>?
+}
+
+/// BackupSnapshotElementStatus is a volume snapshot that is part of a volume snapshot method backup
+class Element {
+  /// Name is the snapshot resource name
+  name: String
+
+  /// TablespaceName is the name of the snapshotted tablespace. Only set when type is PG_TABLESPACE
+  tablespaceName: String?
+
+  /// Type is tho role of the snapshot in the cluster, such as PG_DATA, PG_WAL and PG_TABLESPACE
+  type: String
+}
