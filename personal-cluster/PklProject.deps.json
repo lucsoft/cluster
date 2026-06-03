@@ -49,11 +49,6 @@
       "checksums": {
         "sha256": "23f1b7f113867693de6b3a6292392a67fba25f5c6b7959dc9097dcb86d48b893"
       }
-    },
-    "package://pkl-pkgs.lucsoft.de/packages/io.CloudNativePG@0": {
-      "type": "local",
-      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/io.CloudNativePG@0.3.0",
-      "path": "../packages/io.CloudNativePG"
     }
   }
 }

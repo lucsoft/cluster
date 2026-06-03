@@ -1,0 +1,19 @@
+# Helm values for the throwaway ArgoCD that argocd-diff-preview installs.
+# These mirror the Pkl CMP sidecar from ../../apps/ArgoCD.pkl so the ephemeral
+repoServer:
+  volumes:
+    - name: pkl-temp
+      emptyDir: {}
+  extraContainers:
+    - name: pkl
+      image: ghcr.io/lucsoft/argo-pkl-plugin:latest
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+      volumeMounts:
+        - mountPath: /var/run/argocd
+          name: var-files
+        - mountPath: /home/argocd/cmp-server/plugins
+          name: plugins
+        - mountPath: /tmp
+          name: pkl-temp
