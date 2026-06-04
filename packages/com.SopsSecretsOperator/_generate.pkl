@@ -1,0 +1,21 @@
+amends "package://pkg.pkl-lang.org/pkl-pantry/k8s.contrib.crd@4.2.1#/generate.pkl"
+import "pkl:yaml"
+
+// renovate: datasource=github-releases packageName=isindir/sops-secrets-operator
+local version = "0.21.0"
+local baseUrl =
+  "https://raw.githubusercontent.com/isindir/sops-secrets-operator/\(version)/config/crd/bases"
+
+source = ""
+baseApiGroup = "v1alpha3.isindir.github.com"
+
+k8sImportPath = "@k8s"
+
+sourceContents =
+  new YamlRenderer {
+    isStream = true
+  }.renderDocument(
+    List(
+      "isindir.github.com_sopssecrets.yaml",
+    ).map((item) -> (new yaml.Parser {}.parse(read("\(baseUrl)/\(item)")) as Dynamic)),
+  )
