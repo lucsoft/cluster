@@ -1,6 +1,8 @@
 services:
   mc-router-scaler:
-    image: ghcr.io/lucsoft/mc-router-scaler:0.1.0
+    image: ghcr.io/lucsoft/mc-router-scaler:0.1.1
     build:
       context: tools/mc-router-scaler
       dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
