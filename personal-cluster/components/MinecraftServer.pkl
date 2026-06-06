@@ -80,6 +80,8 @@ local mcServers: Listing<McServer> = new {
   }
 }
 
+local voicePort = 24454
+
 local mcRouter = new McRouter {
   workload {
     deployment {
@@ -90,6 +92,33 @@ local mcRouter = new McRouter {
       }
     }
     namespace = "minecraft"
+    // svc-router routes Simple Voice Chat UDP; sidecar so it shares mc-router's node IP,
+    // fed by mc-router's connection webhook. https://github.com/JLSchuler99/svc-router
+    spec {
+      containers {
+        [0] {
+          env {
+            new {
+              name = "WEBHOOK_URL"
+              value = "http://localhost:8080/event"
+            }
+          }
+        }
+        new {
+          name = "svc-router"
+          // renovate: datasource=docker packageName=ghcr.io/jlschuler99/svc-router
+          image = "ghcr.io/jlschuler99/svc-router:v0.0.2"
+          ports {
+            new {
+              name = "svc-voice"
+              containerPort = voicePort
+              hostPort = voicePort
+              protocol = "UDP"
+            }
+          }
+        }
+      }
+    }
   }
   // renovate: datasource=docker packageName=itzg/mc-router
   image = "docker.io/itzg/mc-router:1.43.0"
@@ -185,7 +214,22 @@ resources {
   }
   ...mcRouter.resources
   for (mcServer in mcServers) {
-    ...mcServer.resources
+    // svc-router forwards voice UDP to "<server>.minecraft.svc:\(voicePort)"; expose it
+    // on each backend service. No-op for servers without the Simple Voice Chat mod.
+    ...(mcServer) {
+      service {
+        spec {
+          ports {
+            new {
+              name = "voice"
+              port = voicePort
+              targetPort = voicePort
+              protocol = "UDP"
+            }
+          }
+        }
+      }
+    }.resources
   }
   ...mcRouterScaler.resources
   includeSopsSecret.includeSopsSecret(read("../secrets/curseforge-apikey.sops.yaml"))
