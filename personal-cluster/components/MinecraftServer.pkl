@@ -3,6 +3,7 @@ amends "@Resource/Entrypoint.pkl"
 import "@itzg.minecraft/McRouter.pkl"
 import "@itzg.minecraft/McServer.pkl"
 import "@k8s/api/core/v1/Namespace.pkl"
+import "@k8s/api/core/v1/Service.pkl"
 import "@sops/includeSopsSecret.pkl"
 import "@Workload/Workload.pkl"
 
@@ -112,6 +113,12 @@ local mcRouterScaler = new Workload {
       new {
         name = "scaler"
         image = "ghcr.io/lucsoft/mc-router-scaler:0.1.1"
+        ports {
+          new {
+            name = "http"
+            containerPort = 8080
+          }
+        }
         env {
           new {
             name = "SCALE_MAP"
@@ -134,6 +141,24 @@ resources {
       name = "minecraft"
       labels {
         ["pod-security.kubernetes.io/enforce"] = "privileged"
+      }
+    }
+  }
+  new Service {
+    metadata {
+      name = mcRouterScaler.name
+      namespace = mcRouterScaler.namespace
+    }
+    spec {
+      selector {
+        ["app.kubernetes.io/name"] = mcRouterScaler.name
+      }
+      ports {
+        new {
+          name = "http"
+          port = 80
+          targetPort = "http"
+        }
       }
     }
   }
