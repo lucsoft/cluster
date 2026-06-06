@@ -2,19 +2,28 @@ amends "@ArgoCD/App.pkl"
 
 name = "infra-sops-operator"
 namespace = "sops"
-
-source {
-  repoURL = "https://isindir.github.io/sops-secrets-operator/"
-  chart = "sops-secrets-operator"
-  // renovate: datasource=helm registryUrl=https://isindir.github.io/sops-secrets-operator/ packageName=sops-secrets-operator
-  targetRevision = "0.27.1"
-  helm {
-    releaseName = "sops-secrets-operator"
-    valuesObject {
-      gcp {
-        enabled = true
-        existingSecretName = "sops-gcp-creds"
+sources {
+  new {
+    repoURL = "https://isindir.github.io/sops-secrets-operator/"
+    chart = "sops-secrets-operator"
+    // renovate: datasource=helm registryUrl=https://isindir.github.io/sops-secrets-operator/ packageName=sops-secrets-operator
+    targetRevision = "0.27.1"
+    helm {
+      releaseName = "sops-secrets-operator"
+      valuesObject {
+        gcp {
+          enabled = true
+          existingSecretName = "sops-gcp-creds"
+        }
       }
+    }
+  }
+  new {
+    repoURL = "https://github.com/lucsoft/cluster"
+    targetRevision = "main"
+    path = "personal-cluster/secrets"
+    directory {
+      include = "sops-gcp-creds.sops.yaml"
     }
   }
 }
