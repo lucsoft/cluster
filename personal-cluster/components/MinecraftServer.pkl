@@ -89,7 +89,7 @@ local mcRouter = new McRouter {
             }
             new {
               name = "AUTO_SCALE_DOWN_AFTER"
-              value = "1d"
+              value = "24h"
             }
           }
         }
