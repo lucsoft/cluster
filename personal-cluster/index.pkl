@@ -6,6 +6,7 @@ import "./apps/ArgoCD.pkl"
 import "./apps/InfraCertManager.pkl"
 import "./apps/InfraIngressController.pkl"
 import "./apps/InfraSopsOperator.pkl"
+import "./apps/MinecraftServer.pkl"
 import "./apps/Satisfactory.pkl"
 
 local apps: Listing<App> = new {
@@ -31,6 +32,7 @@ local apps: Listing<App> = new {
   InfraIngressController
   InfraSopsOperator
   Satisfactory
+  MinecraftServer
 }
 
 resources {

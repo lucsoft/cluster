@@ -3,9 +3,9 @@
   "resolvedDependencies": {
     "package://pkl-pkgs.lucsoft.de/packages/itzg.minecraft@0": {
       "type": "remote",
-      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/itzg.minecraft@0.3.0",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/itzg.minecraft@0.5.2",
       "checksums": {
-        "sha256": "8530410cbaab68030b7a9e6263bf5b031e70d3f2513feca270af42ba8cc17802"
+        "sha256": "af049a2084c2252217bfee3a17394db8d8232e6244398ac58904cda98e18939e"
       }
     },
     "package://pkg.pkl-lang.org/pkl-k8s/k8s@1": {
@@ -17,9 +17,9 @@
     },
     "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Workload@0": {
       "type": "remote",
-      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Workload@0.3.0",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Workload@0.5.0",
       "checksums": {
-        "sha256": "7f7a1e4a7e49b3bd43b0794af4c0b223c0e999dadba24130ae6032671ad06fd6"
+        "sha256": "a24716677a502c2e0f55363948ebe46b698c10a8544edc95a7d259ac3b6b52a9"
       }
     },
     "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Resource@0": {
@@ -27,6 +27,13 @@
       "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Resource@0.3.0",
       "checksums": {
         "sha256": "30531b38fe533c2a43338e3d24dc01480fdc082a674412bcb63e354cc7a3c579"
+      }
+    },
+    "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.NetworkPolicies@0": {
+      "type": "remote",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.NetworkPolicies@0.3.0",
+      "checksums": {
+        "sha256": "8366d0203bc4c0e373e59148f93e13d90196d0bed50d446920df7e2cbfe8258a"
       }
     },
     "package://pkl-pkgs.lucsoft.de/packages/argo.ArgoCD@0": {
@@ -41,13 +48,6 @@
       "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/io.Fission@0.3.0",
       "checksums": {
         "sha256": "c9e3fb1f81c1a81ec4503293a9a04f774fb9f9fa172212f14887a5ab77b057f6"
-      }
-    },
-    "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.NetworkPolicies@0": {
-      "type": "remote",
-      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.NetworkPolicies@0.2.9",
-      "checksums": {
-        "sha256": "23f1b7f113867693de6b3a6292392a67fba25f5c6b7959dc9097dcb86d48b893"
       }
     }
   }

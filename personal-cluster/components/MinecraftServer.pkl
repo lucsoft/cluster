@@ -1,3 +1,5 @@
+import "pkl:yaml"
+
 import "@itzg.minecraft/McRouter.pkl"
 import "@itzg.minecraft/McServer.pkl"
 import "@k8s/api/core/v1/Namespace.pkl"
@@ -21,7 +23,12 @@ local mcServers: Listing<McServer> = new {
     motd = "Running: All The Mods 10 (v2)"
     memory = 8.gb
     modpackSlug = "all-the-mods-10"
-    curseforgeApiKey = read("../cfapikey.txt").text
+    curseforgeApiKey {
+      secretKeyRef {
+        name = "curseforge-apikey"
+        key = "CF_API_KEY"
+      }
+    }
     curseforgeProjects {
       "distant-horizons"
       "bluemap"
@@ -77,4 +84,5 @@ resources {
   for (mcServer in mcServers) {
     ...mcServer.resources
   }
+  new yaml.Parser {}.parse(read("../secrets/curseforge-apikey.sops.yaml"))
 }
