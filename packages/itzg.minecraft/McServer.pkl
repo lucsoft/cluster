@@ -149,7 +149,7 @@ service: Service = new {
   }
   spec {
     selector {
-      ["app"] = workload.name
+      ["app.kubernetes.io/name"] = workload.name
     }
     ports {
       new {

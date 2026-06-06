@@ -8,6 +8,18 @@ servers: Mapping<String, String> = new {}
 
 local moduleThis = this
 
+// renovate: datasource=docker packageName=itzg/mc-router
+image: String = "docker.io/itzg/mc-router:1.43.0"
+
+class AutoScaleConfig {
+  scaleEndpoint: String
+  asleepMotd: String? = null
+  loadingMotd: String? = null
+  scaleDownAfter: Duration = 24.h
+}
+
+autoscale: AutoScaleConfig? = null
+
 fixed podSpec = new PodSpec {
   securityContext {
     runAsUser = 1000
@@ -32,6 +44,29 @@ fixed podSpec = new PodSpec {
           name = "MAPPING"
           value =
             servers.toMap().entries.map((element) -> "\(element.key)=\(element.value)").join("\n")
+        }
+
+        when (autoscale != null) {
+          new {
+            name = "AUTO_SCALE_WEBHOOK_URL"
+            value = autoscale.scaleEndpoint
+          }
+          when (autoscale.asleepMotd != null) {
+            new {
+              name = "AUTO_SCALE_ASLEEP_MOTD"
+              value = autoscale.asleepMotd
+            }
+          }
+          when (autoscale.loadingMotd != null) {
+            new {
+              name = "AUTO_SCALE_LOADING_MOTD"
+              value = autoscale.loadingMotd
+            }
+          }
+          new {
+            name = "AUTO_SCALE_DOWN_AFTER"
+            value = "\(autoscale.scaleDownAfter.toUnit("s"))s"
+          }
         }
       }
     }
