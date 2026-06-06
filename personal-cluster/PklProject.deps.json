@@ -36,6 +36,20 @@
         "sha256": "8366d0203bc4c0e373e59148f93e13d90196d0bed50d446920df7e2cbfe8258a"
       }
     },
+    "package://pkl-pkgs.lucsoft.de/packages/com.SopsSecretsOperator@0": {
+      "type": "remote",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/com.SopsSecretsOperator@0.5.3",
+      "checksums": {
+        "sha256": "0959cbff6142a3d24740622ecfd2fdadecaa70c603f36103512d3f095fde61c7"
+      }
+    },
+    "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.deepToTyped@1": {
+      "type": "remote",
+      "uri": "projectpackage://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.deepToTyped@1.2.0",
+      "checksums": {
+        "sha256": "84c7feb391f4ac273a99dc89b8fd51dbcd21dbda4ce640f6908527f83acdd4d6"
+      }
+    },
     "package://pkl-pkgs.lucsoft.de/packages/argo.ArgoCD@0": {
       "type": "remote",
       "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/argo.ArgoCD@0.3.0",

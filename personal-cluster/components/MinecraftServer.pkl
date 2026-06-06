@@ -1,9 +1,10 @@
-import "pkl:yaml"
+amends "@Resource/Entrypoint.pkl"
 
 import "@itzg.minecraft/McRouter.pkl"
 import "@itzg.minecraft/McServer.pkl"
 import "@k8s/api/core/v1/EnvVar.pkl"
 import "@k8s/api/core/v1/Namespace.pkl"
+import "@sops/includeSopsSecret.pkl"
 
 local mcServers: Listing<McServer> = new {
   new {
@@ -85,5 +86,5 @@ resources {
   for (mcServer in mcServers) {
     ...mcServer.resources
   }
-  new yaml.Parser {}.parse(read("../secrets/curseforge-apikey.sops.yaml"))
+  includeSopsSecret.includeSopsSecret(read("../secrets/curseforge-apikey.sops.yaml"))
 }
