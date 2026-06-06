@@ -9,6 +9,7 @@ import "@Workload/Workload.pkl"
 eula: Boolean
 
 type: "VANILLA" | "FABRIC" | "FORGE" | "MAGMA" | "PAPER" | "QUILT" | "AUTO_CURSEFORGE" = "VANILLA"
+version: String? = "LATEST"
 
 onlineMode: Boolean = true
 enforceSecureProfile: Boolean = true
@@ -60,6 +61,10 @@ fixed podSpec = new PodSpec {
         new {
           name = "TYPE"
           value = type
+        }
+        new {
+          name = "VERSION"
+          value = version
         }
         new {
           name = "ONLINE_MODE"
