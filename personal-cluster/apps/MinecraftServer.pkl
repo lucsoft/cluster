@@ -3,7 +3,6 @@ import "@ArgoCD/Application.pkl"
 
 name = "minecraft-server"
 namespace = "argocd"
-autoSync = false
 
 ignoreDifferences = new Listing<Application.ComparedToIgnoreDifference> {
   for (server in List("main", "atm10", "vanilla-create")) {
