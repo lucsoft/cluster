@@ -4,6 +4,7 @@
     "app": "pkl-packages"
   },
   "tasks": {
-    "diff-preview": "deno run -A personal-cluster/diff-preview/main.ts"
+    "diff-preview": "deno run -A personal-cluster/diff-preview/main.ts",
+    "bootstrap-secret": "deno run -A tools/bootstrap-secret/main.ts"
   }
 }
