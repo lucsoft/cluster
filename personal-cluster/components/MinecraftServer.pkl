@@ -20,6 +20,29 @@ local mcServers: Listing<McServer> = new {
     type = "AUTO_CURSEFORGE"
     eula = true
     workload {
+      name = "craftoria"
+      namespace = "minecraft"
+    }
+    motd = "Running: Craftoria"
+    memory = 8.gb
+    modpackSlug = "craftoria"
+    curseforgeApiKey {
+      secretKeyRef {
+        name = "curseforge-apikey"
+        key = "CF_API_KEY"
+      }
+    }
+    curseforgeProjects {
+      "distant-horizons"
+      "bluemap"
+      "chunky-pregenerator-forge"
+      "ftb-chunks-for-bluemap"
+    }
+  }
+  new {
+    type = "AUTO_CURSEFORGE"
+    eula = true
+    workload {
       name = "atm10"
       namespace = "minecraft"
     }
@@ -74,7 +97,7 @@ local mcRouter = new McRouter {
     scaleEndpoint = "http://mc-router-scaler/scale"
     asleepMotd = "Server is asleep. Join to wake it up!"
     loadingMotd = "Server is waking up. Please wait..."
-    scaleDownAfter = 24.h
+    scaleDownAfter = 15.min
   }
   servers {
     for (server in mcServers) {

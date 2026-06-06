@@ -5,7 +5,7 @@ name = "minecraft-server"
 namespace = "argocd"
 
 ignoreDifferences = new Listing<Application.ComparedToIgnoreDifference> {
-  for (server in List("main", "atm10", "vanilla-create")) {
+  for (server in List("main", "atm10", "vanilla-create", "craftoria")) {
     new {
       group = "apps"
       kind = "Deployment"
