@@ -4,6 +4,7 @@ import "@itzg.minecraft/McRouter.pkl"
 import "@itzg.minecraft/McServer.pkl"
 import "@k8s/api/core/v1/Namespace.pkl"
 import "@sops/includeSopsSecret.pkl"
+import "@Workload/Workload.pkl"
 
 local mcServers: Listing<McServer> = new {
   new {
@@ -80,6 +81,31 @@ local mcRouter = new McRouter {
   servers {
     for (server in mcServers) {
       [server.workload.name + ".lucsoft.de"] = server.address
+    }
+  }
+}
+
+local mcRouterScaler = new Workload {
+  name = "mc-router-scaler"
+  namespace = "minecraft"
+  type = "Deployment"
+  spec {
+    containers {
+      new {
+        name = "scaler"
+        image = "ghcr.io/lucsoft/minecraft-server-autoscaler:0.1.0"
+        env {
+          new {
+            name = "SCALE_MAP"
+            value =
+              new JsonRenderer {}.renderValue(new Mapping<String, String> {
+                for (server in mcServers) {
+                  [server.workload.name + ".lucsoft.de"] = server.workload.name
+                }
+              })
+          }
+        }
+      }
     }
   }
 }
