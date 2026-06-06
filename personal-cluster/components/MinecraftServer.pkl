@@ -51,6 +51,18 @@ local mcServers: Listing<McServer> = new {
     workload {
       name = "vanilla-create"
       namespace = "minecraft"
+      spec {
+        containers {
+          [0] {
+            env {
+              new {
+                name = "VERSION"
+                value = "1.21.10"
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
