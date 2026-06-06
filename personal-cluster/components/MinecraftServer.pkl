@@ -111,7 +111,7 @@ local mcRouterScaler = new Workload {
     containers {
       new {
         name = "scaler"
-        image = "ghcr.io/lucsoft/minecraft-server-autoscaler:0.1.0"
+        image = "ghcr.io/lucsoft/mc-router-scaler:0.1.0"
         env {
           new {
             name = "SCALE_MAP"
