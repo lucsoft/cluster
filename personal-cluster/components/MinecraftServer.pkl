@@ -2,7 +2,6 @@ amends "@Resource/Entrypoint.pkl"
 
 import "@itzg.minecraft/McRouter.pkl"
 import "@itzg.minecraft/McServer.pkl"
-import "@k8s/api/core/v1/EnvVar.pkl"
 import "@k8s/api/core/v1/Namespace.pkl"
 import "@sops/includeSopsSecret.pkl"
 
@@ -25,7 +24,7 @@ local mcServers: Listing<McServer> = new {
     motd = "Running: All The Mods 10"
     memory = 8.gb
     modpackSlug = "all-the-mods-10"
-    curseforgeApiKey = new EnvVar.EnvVarSource {
+    curseforgeApiKey {
       secretKeyRef {
         name = "curseforge-apikey"
         key = "CF_API_KEY"
