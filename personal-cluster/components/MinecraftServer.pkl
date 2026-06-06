@@ -49,21 +49,10 @@ local mcServers: Listing<McServer> = new {
       "distanthorizons:2.3.6-b-1.21.10"
     }
     motd = "Running: Create Mod"
+    version = "1.21.10"
     workload {
       name = "vanilla-create"
       namespace = "minecraft"
-      spec {
-        containers {
-          [0] {
-            env {
-              new {
-                name = "VERSION"
-                value = "1.21.10"
-              }
-            }
-          }
-        }
-      }
     }
   }
 }
@@ -78,32 +67,14 @@ local mcRouter = new McRouter {
       }
     }
     namespace = "minecraft"
-    spec {
-      containers {
-        [0] {
-          // renovate: datasource=docker packageName=itzg/mc-router
-          image = "docker.io/itzg/mc-router:1.43.0"
-          env {
-            new {
-              name = "AUTO_SCALE_WEBHOOK_URL"
-              value = "http://mc-router-scaler/scale"
-            }
-            new {
-              name = "AUTO_SCALE_ASLEEP_MOTD"
-              value = "Server is asleep. Join to wake it up!"
-            }
-            new {
-              name = "AUTO_SCALE_LOADING_MOTD"
-              value = "Server is waking up. Please wait..."
-            }
-            new {
-              name = "AUTO_SCALE_DOWN_AFTER"
-              value = "24h"
-            }
-          }
-        }
-      }
-    }
+  }
+  // renovate: datasource=docker packageName=itzg/mc-router
+  image = "docker.io/itzg/mc-router:1.43.0"
+  autoscale = new McRouter.AutoScaleConfig {
+    scaleEndpoint = "http://mc-router-scaler/scale"
+    asleepMotd = "Server is asleep. Join to wake it up!"
+    loadingMotd = "Server is waking up. Please wait..."
+    scaleDownAfter = 24.h
   }
   servers {
     for (server in mcServers) {
@@ -191,15 +162,7 @@ resources {
   }
   ...mcRouter.resources
   for (mcServer in mcServers) {
-    ...(mcServer) {
-      service {
-        spec {
-          selector = new {
-            ["app.kubernetes.io/name"] = mcServer.workload.name
-          }
-        }
-      }
-    }.resources
+    ...mcServer.resources
   }
   ...mcRouterScaler.resources
   includeSopsSecret.includeSopsSecret(read("../secrets/curseforge-apikey.sops.yaml"))
