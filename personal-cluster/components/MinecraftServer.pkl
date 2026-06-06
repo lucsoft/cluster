@@ -89,6 +89,14 @@ local mcRouter = new McRouter {
               value = "http://mc-router-scaler/scale"
             }
             new {
+              name = "AUTO_SCALE_ASLEEP_MOTD"
+              value = "Server is asleep. Join to wake it up!"
+            }
+            new {
+              name = "AUTO_SCALE_LOADING_MOTD"
+              value = "Server is waking up. Please wait..."
+            }
+            new {
               name = "AUTO_SCALE_DOWN_AFTER"
               value = "24h"
             }
