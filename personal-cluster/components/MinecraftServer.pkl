@@ -191,7 +191,15 @@ resources {
   }
   ...mcRouter.resources
   for (mcServer in mcServers) {
-    ...mcServer.resources
+    ...(mcServer) {
+      service {
+        spec {
+          selector = new {
+            ["app.kubernetes.io/name"] = mcServer.workload.name
+          }
+        }
+      }
+    }.resources
   }
   ...mcRouterScaler.resources
   includeSopsSecret.includeSopsSecret(read("../secrets/curseforge-apikey.sops.yaml"))
