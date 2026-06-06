@@ -16,7 +16,7 @@ autostop: Boolean = false
 modrinthProjects: Listing<String> = new {}
 modpackSlug: String? = null
 curseforgeProjects: Listing<String> = new {}
-curseforgeApiKey: EnvVar.EnvVarSource? = null
+curseforgeApiKey: EnvVar.EnvVarSource = new {}
 memory: DataSize = 2.gb
 motd: String? = null
 
@@ -94,7 +94,7 @@ fixed podSpec = new PodSpec {
           }
           new {
             name = "CF_API_KEY"
-            valueFrom = curseforgeApiKey!!
+            valueFrom = curseforgeApiKey
           }
           new {
             name = "CURSEFORGE_PROJECTS"
