@@ -141,6 +141,25 @@ local mcRouterScaler = new Workload {
       }
     }
   }
+  useServiceAccount = true
+  policies {
+    new {
+      name = "mc-router-scaler"
+      namespace = "minecraft"
+      rules {
+        new {
+          apiGroups { "apps" }
+          resources { "deployments" }
+          verbs { "get" }
+        }
+        new {
+          apiGroups { "apps" }
+          resources { "deployments/scale" }
+          verbs { "patch" }
+        }
+      }
+    }
+  }
 }
 
 resources {
