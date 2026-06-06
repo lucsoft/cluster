@@ -4,3 +4,4 @@ talos-test
 cfapikey.txt
 .pkl-lsp
 .out
+.decrypted~*

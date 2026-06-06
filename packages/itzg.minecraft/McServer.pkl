@@ -1,4 +1,5 @@
 module itzg.docker.McServer
+import "@k8s/api/core/v1/EnvVar.pkl"
 import "@k8s/api/core/v1/PersistentVolumeClaim.pkl"
 import "@k8s/api/core/v1/PodSpec.pkl"
 import "@k8s/api/core/v1/Service.pkl"
@@ -15,7 +16,7 @@ autostop: Boolean = false
 modrinthProjects: Listing<String> = new {}
 modpackSlug: String? = null
 curseforgeProjects: Listing<String> = new {}
-curseforgeApiKey: String? = null
+curseforgeApiKey: EnvVar.EnvVarSource? = null
 memory: DataSize = 2.gb
 motd: String? = null
 
@@ -93,7 +94,7 @@ fixed podSpec = new PodSpec {
           }
           new {
             name = "CF_API_KEY"
-            value = curseforgeApiKey!!
+            valueFrom = curseforgeApiKey!!
           }
           new {
             name = "CURSEFORGE_PROJECTS"

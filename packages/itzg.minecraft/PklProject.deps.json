@@ -10,23 +10,23 @@
     },
     "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Workload@0": {
       "type": "remote",
-      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Workload@0.3.0",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Workload@0.5.0",
       "checksums": {
-        "sha256": "7f7a1e4a7e49b3bd43b0794af4c0b223c0e999dadba24130ae6032671ad06fd6"
+        "sha256": "a24716677a502c2e0f55363948ebe46b698c10a8544edc95a7d259ac3b6b52a9"
       }
     },
     "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Resource@0": {
       "type": "remote",
-      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Resource@0.2.8",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Resource@0.3.0",
       "checksums": {
-        "sha256": "75c537654c231210f7086bd1797a7c8395770e8251b64fb15a5979a9b1488116"
+        "sha256": "30531b38fe533c2a43338e3d24dc01480fdc082a674412bcb63e354cc7a3c579"
       }
     },
     "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.NetworkPolicies@0": {
       "type": "remote",
-      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.NetworkPolicies@0.2.9",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.NetworkPolicies@0.3.0",
       "checksums": {
-        "sha256": "23f1b7f113867693de6b3a6292392a67fba25f5c6b7959dc9097dcb86d48b893"
+        "sha256": "8366d0203bc4c0e373e59148f93e13d90196d0bed50d446920df7e2cbfe8258a"
       }
     }
   }
