@@ -22,7 +22,7 @@ local mcServers: Listing<McServer> = new {
       name = "atm10"
       namespace = "minecraft"
     }
-    motd = "Running: All The Mods 10 (v2)"
+    motd = "Running: All The Mods 10"
     memory = 8.gb
     modpackSlug = "all-the-mods-10"
     curseforgeApiKey = new EnvVar.EnvVarSource {
