@@ -38,7 +38,8 @@ fixed podSpec = new PodSpec {
   containers {
     new {
       name = "mc-server"
-      image = "docker.io/itzg/minecraft-server"
+      // renovate: datasource=docker packageName=itzg/minecraft-server
+      image = "docker.io/itzg/minecraft-server:2026.5.4"
       securityContext {
         allowPrivilegeEscalation = false
       }

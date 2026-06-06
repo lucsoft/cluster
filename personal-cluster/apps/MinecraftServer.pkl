@@ -1,8 +1,22 @@
 amends "@ArgoCD/App.pkl"
+import "@ArgoCD/Application.pkl"
 
 name = "minecraft-server"
 namespace = "argocd"
 autoSync = false
+
+ignoreDifferences = new Listing<Application.ComparedToIgnoreDifference> {
+  for (server in List("main", "atm10", "vanilla-create")) {
+    new {
+      group = "apps"
+      kind = "Deployment"
+      name = server
+      jsonPointers {
+        "/spec/replicas"
+      }
+    }
+  }
+}
 
 source {
   repoURL = "https://github.com/lucsoft/cluster"

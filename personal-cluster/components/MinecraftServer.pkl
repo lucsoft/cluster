@@ -82,6 +82,16 @@ local mcRouter = new McRouter {
         [0] {
           // renovate: datasource=docker packageName=itzg/mc-router
           image = "docker.io/itzg/mc-router:1.43.0"
+          env {
+            new {
+              name = "AUTO_SCALE_WEBHOOK_URL"
+              value = "http://mc-router-scaler/scale"
+            }
+            new {
+              name = "AUTO_SCALE_DOWN_AFTER"
+              value = "1d"
+            }
+          }
         }
       }
     }
@@ -131,5 +141,6 @@ resources {
   for (mcServer in mcServers) {
     ...mcServer.resources
   }
+  ...mcRouterScaler.resources
   includeSopsSecret.includeSopsSecret(read("../secrets/curseforge-apikey.sops.yaml"))
 }
