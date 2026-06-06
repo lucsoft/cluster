@@ -107,7 +107,7 @@ local mcRouter = new McRouter {
         new {
           name = "svc-router"
           // renovate: datasource=docker packageName=ghcr.io/jlschuler99/svc-router
-          image = "ghcr.io/jlschuler99/svc-router:v0.0.2"
+          image = "ghcr.io/jlschuler99/svc-router:0.0.2"
           ports {
             new {
               name = "svc-voice"
