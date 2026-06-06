@@ -65,7 +65,7 @@ fixed podSpec = new PodSpec {
           }
           new {
             name = "AUTO_SCALE_DOWN_AFTER"
-            value = "\(autoscale.scaleDownAfter.toUnit("s"))s"
+            value = "\(autoscale.scaleDownAfter.toUnit("s").value)s"
           }
         }
       }
