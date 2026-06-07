@@ -43,7 +43,7 @@ local mcServers: Listing<McServer> = new {
       }
     }
     modrinthProjects {
-      "distanthorizons"
+      "distanthorizons:3.0.3-b-1.21.1"
     }
     // curseforgeProjects {
     //   "distant-horizons"
