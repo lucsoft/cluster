@@ -34,9 +34,9 @@ local mcServers: Listing<McServer> = new {
     }
     curseforgeProjects {
       "distant-horizons"
-      "bluemap"
-      "chunky-pregenerator-forge"
-      "ftb-chunks-for-bluemap"
+      //   "bluemap"
+      //   "chunky-pregenerator-forge"
+      //   "ftb-chunks-for-bluemap"
     }
   }
   new {
