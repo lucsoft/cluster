@@ -32,12 +32,15 @@ local mcServers: Listing<McServer> = new {
         key = "CF_API_KEY"
       }
     }
-    curseforgeProjects {
-      "distant-horizons"
-      //   "bluemap"
-      //   "chunky-pregenerator-forge"
-      //   "ftb-chunks-for-bluemap"
+    modrinthProjects {
+      "distanthorizons"
     }
+    // curseforgeProjects {
+    //   "distant-horizons"
+    //   "bluemap"
+    //   "chunky-pregenerator-forge"
+    //   "ftb-chunks-for-bluemap"
+    // }
   }
   new {
     type = "AUTO_CURSEFORGE"
