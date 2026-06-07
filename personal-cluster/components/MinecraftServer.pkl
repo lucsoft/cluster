@@ -22,6 +22,16 @@ local mcServers: Listing<McServer> = new {
     workload {
       name = "craftoria"
       namespace = "minecraft"
+      deployment {
+        spec {
+          strategy {
+            rollingUpdate {
+              maxUnavailable = "100%"
+              maxSurge = 0
+            }
+          }
+        }
+      }
     }
     motd = "Running: Craftoria"
     memory = 8.gb
