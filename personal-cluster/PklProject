@@ -20,6 +20,6 @@ dependencies {
     uri = "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Resource@0.3.0"
   }
   ["sops"] {
-    uri = "package://pkl-pkgs.lucsoft.de/packages/com.SopsSecretsOperator@0.5.3"
+    uri = "package://pkl-pkgs.lucsoft.de/packages/com.SopsSecretsOperator@0.5.7"
   }
 }
