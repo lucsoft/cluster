@@ -1,6 +1,9 @@
 amends "package://pkg.pkl-lang.org/pkl-pantry/k8s.contrib.crd@4.2.1#/generate.pkl"
 import "pkl:yaml"
 
+import "@k8s/api/core/v1/PodSpec.pkl"
+import "@k8s/api/core/v1/SecurityContext.pkl"
+
 // renovate: datasource=github-releases packageName=k3s-io/helm-controller
 local version = "v0.17.2"
 local baseUrl =
@@ -20,3 +23,11 @@ sourceContents =
       "helm.cattle.io_helmchartconfigs.yaml",
     ).map((item) -> (new yaml.Parser {}.parse(read("\(baseUrl)/\(item)")) as Dynamic)),
   )
+
+converters {
+  ["helmcharts.helm.cattle.io"] {
+    [List("spec", "values")] = Dynamic
+    [List("spec", "podSecurityContext")] = PodSpec.PodSecurityContext
+    [List("spec", "securityContext")] = SecurityContext
+  }
+}
