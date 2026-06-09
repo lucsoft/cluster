@@ -1,4 +1,5 @@
 import { assert } from "@std/assert";
+import { safeGet } from "./kv.ts";
 
 const repoUrl = "https://github.com/lucsoft/cluster";
 
@@ -13,7 +14,7 @@ function isCacheValid<T>(cached: CachedInfo<T> | null, maxAgeMs: number): cached
 }
 
 export async function getAllTags(kv: Deno.Kv): Promise<string[]> {
-    const cachedTags = await kv.get<CachedInfo<string[]>>([ "github", "tags" ]);
+    const cachedTags = await safeGet<CachedInfo<string[]>>(kv, [ "github", "tags" ]);
 
     if (isCacheValid(cachedTags.value, 2 * 60 * 1000)) {
         return cachedTags.value.value;
@@ -36,7 +37,7 @@ export async function getAllTags(kv: Deno.Kv): Promise<string[]> {
 
 
 export async function getAllPackages(kv: Deno.Kv, targetTag: string): Promise<string[]> {
-    const cachedPackages = await kv.get<CachedInfo<string[]>>([ "github", "packages", targetTag ]);
+    const cachedPackages = await safeGet<CachedInfo<string[]>>(kv, [ "github", "packages", targetTag ]);
     if (isCacheValid(cachedPackages.value, 60 * 60 * 1000)) {
         return cachedPackages.value.value;
     }

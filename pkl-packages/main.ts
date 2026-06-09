@@ -5,6 +5,7 @@ import { buildPackage } from "./build.ts";
 import { getAllPackages, getAllTags } from "./github.ts";
 import icon from "./icon.svg" with { type: "text" };
 import { respondHtml } from "./respondHtml.ts";
+import { safeGet } from "./kv.ts";
 
 const matching = /.out\/.*\/(?<fileName>.*)/;
 const fullPattern = new URLPattern({ pathname: "/packages/:packageName@:version/*?" });
@@ -41,7 +42,7 @@ Deno.serve(async (req: Request) => {
 
         parse(version);
 
-        const cachedResponse = await kv.get<{ output: string; }>([ "packages", packageName, version ]);
+        const cachedResponse = await safeGet<{ output: string; }>(kv, [ "packages", packageName, version ]);
         const output = cachedResponse.value?.output ?? await buildPackage(kv, version, packageName);
 
         const isRelativePath = fullPattern.exec(url)!.pathname.groups[ "0" ];
@@ -53,7 +54,7 @@ Deno.serve(async (req: Request) => {
 
         if (!fileName) return notFoundError;
 
-        const file = await kv.get<{ data: Uint8Array<ArrayBuffer>; }>([ "packages", packageName, version, fileName ]);
+        const file = await safeGet<{ data: Uint8Array<ArrayBuffer>; }>(kv, [ "packages", packageName, version, fileName ]);
         if (!file.value) return notFoundError;
 
         return new Response(file.value.data, {
