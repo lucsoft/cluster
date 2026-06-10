@@ -1,0 +1,151 @@
+amends "@Workload/Workload.pkl"
+
+import "@k8s/api/core/v1/Service.pkl"
+import "@k8s/api/core/v1/PersistentVolumeClaim.pkl"
+import "@k8s/api/networking/v1/Ingress.pkl"
+import "@k8s/K8sResource.pkl"
+
+local moduleThis = this
+local hostName = "pkl-pkgs.lucsoft.de"
+local httpPort = 8000
+local dataVolume = "kv-data"
+local dataPath = "/data"
+
+name = "pkl-packages"
+
+spec {
+  containers {
+    new {
+      name = moduleThis.name
+      image = "ghcr.io/lucsoft/pkl-packages:latest"
+      ports {
+        new {
+          name = "http"
+          containerPort = httpPort
+          protocol = "TCP"
+        }
+      }
+      env {
+        new {
+          name = "KV_PATH"
+          value = "\(dataPath)/kv.sqlite"
+        }
+      }
+      volumeMounts {
+        new {
+          name = dataVolume
+          mountPath = dataPath
+        }
+      }
+    }
+  }
+  volumes {
+    new {
+      name = dataVolume
+      persistentVolumeClaim {
+        claimName = dataVolume
+      }
+    }
+  }
+}
+
+deployment {
+  spec {
+    // Single replica on a ReadWriteOnce volume: tear down the old pod before
+    // starting the new one so they never contend for the PVC.
+    strategy {
+      type = "RollingUpdate"
+      rollingUpdate {
+        maxSurge = 0
+        maxUnavailable = "100%"
+      }
+    }
+  }
+}
+
+resources {
+  new PersistentVolumeClaim {
+    metadata {
+      name = dataVolume
+      namespace = moduleThis.namespace
+    }
+    spec {
+      accessModes {
+        "ReadWriteOnce"
+      }
+      resources {
+        requests {
+          ["storage"] = "1Gi"
+        }
+      }
+    }
+  }
+  new Service {
+    metadata {
+      name = moduleThis.name
+      namespace = moduleThis.namespace
+    }
+    spec {
+      selector {
+        ["app.kubernetes.io/name"] = moduleThis.name
+      }
+      ports {
+        new {
+          name = "http"
+          port = httpPort
+          targetPort = httpPort
+          protocol = "TCP"
+        }
+      }
+    }
+  }
+  new Ingress {
+    metadata {
+      name = moduleThis.name
+      namespace = moduleThis.namespace
+      annotations {
+        ["cert-manager.io/cluster-issuer"] = "lucsoft-allinkl"
+      }
+    }
+    spec {
+      ingressClassName = "traefik"
+      tls {
+        new {
+          hosts {
+            "*.lucsoft.de"
+            "lucsoft.de"
+          }
+          secretName = "lucsoft-tls"
+        }
+      }
+      rules {
+        new {
+          host = hostName
+          http {
+            paths {
+              new {
+                path = "/"
+                pathType = "Prefix"
+                backend {
+                  service {
+                    name = moduleThis.name
+                    port {
+                      number = httpPort
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+output {
+  value = resources
+  renderer = (K8sResource.output.renderer as YamlRenderer) {
+    isStream = true
+  }
+}

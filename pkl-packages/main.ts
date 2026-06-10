@@ -18,7 +18,7 @@ Deno.serve(async (req: Request) => {
     if (iconPattern.test(url))
         return new Response(icon, { headers: { "Content-Type": "image/svg+xml" } });
 
-    const kv = await Deno.openKv();
+    const kv = await Deno.openKv(Deno.env.get("KV_PATH"));
 
     const tags = await getAllTags(kv);
     const newestTag = tags

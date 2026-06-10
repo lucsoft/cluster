@@ -6,3 +6,10 @@ services:
       dockerfile: Dockerfile
       platforms:
         - linux/amd64
+  pkl-packages:
+    image: ghcr.io/lucsoft/pkl-packages:latest
+    build:
+      context: pkl-packages
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64

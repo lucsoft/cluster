@@ -1,40 +1,40 @@
-import { Sandbox } from "@deno/sandbox";
 import { assert } from "@std/assert";
 
 const repoUrl = "https://github.com/lucsoft/cluster";
 const matching = /.out\/.*\/(?<fileName>.*)/;
 
+async function run(cmd: string, args: string[], cwd: string): Promise<string> {
+    const { success, stdout, stderr } = await new Deno.Command(cmd, {
+        args,
+        cwd,
+        stdout: "piped",
+        stderr: "piped",
+    }).output();
+    const decoder = new TextDecoder();
+    assert(success, `${cmd} ${args.join(" ")} failed: ${decoder.decode(stderr)}`);
+    return decoder.decode(stdout);
+}
+
 export async function buildPackage(kv: Deno.Kv, version: string, packageName: string) {
-    await using sbx = await Sandbox.create({ org: "lucsoft" });
-    await sbx.fs.mkdir("/home/app/bin");
-    await sbx.fs.mkdir("/home/app/repo");
-    await sbx.sh`
-        git clone ${repoUrl} .
-        git switch --detach tags/${version}
-    `.cwd("./repo");
-    await sbx.sh`
-        export PATH="/home/app/bin:$PATH"
-        curl -L -o pkl 'https://github.com/apple/pkl/releases/download/0.30.2/pkl-linux-amd64'
-        chmod +x pkl
-        pkl --version
-    `.cwd("/home/app/bin");
+    const repoDir = await Deno.makeTempDir({ prefix: "pkl-packages-" });
+    try {
+        // Shallow-clone the repo at the requested tag.
+        await run("git", [ "clone", "--depth", "1", "--branch", version, repoUrl, repoDir ], ".");
 
+        const packageDir = `${repoDir}/packages/${packageName}`;
+        const output = (await run("pkl", [ "project", "package", "--skip-publish-check" ], packageDir)).trim();
 
-    await sbx.sh`/home/app/bin/pkl project package --skip-publish-check`
-        .cwd(`/home/app/repo/packages/${packageName}`);
+        await kv.set([ "packages", packageName, version ], { output });
 
-    const responding = await sbx.sh`cd /home/app/repo/packages/${packageName}; /home/app/bin/pkl project package --skip-publish-check`
-        .text();
+        for (const element of output.split("\n")) {
+            const realName = element.match(matching)?.groups?.fileName;
+            assert(realName, `Failed to extract file name from: ${element}`);
+            const data = await Deno.readFile(`${packageDir}/${element.trim()}`);
+            await kv.set([ "packages", packageName, version, realName ], { data });
+        }
 
-    const output = responding.trim();
-
-    await kv.set([ "packages", packageName, version ], { output });
-
-    for (const element of output.trim().split("\n")) {
-        const data = await sbx.fs.readFile(`./repo/packages/${packageName}/${element.trim()}`);
-        const realName = element.match(matching)?.groups?.fileName;
-        assert(realName, `Failed to extract file name from: ${element}`);
-        await kv.set([ "packages", packageName, version, realName ], { data });
+        return output;
+    } finally {
+        await Deno.remove(repoDir, { recursive: true });
     }
-    return output;
 }

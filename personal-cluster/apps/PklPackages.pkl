@@ -1,0 +1,19 @@
+amends "@ArgoCD/App.pkl"
+
+name = "pkl-packages"
+namespace = "argocd"
+autoSync = false
+
+source {
+  repoURL = "https://github.com/lucsoft/cluster"
+  targetRevision = "main"
+  path = "personal-cluster"
+  plugin {
+    parameters {
+      new {
+        name = "path"
+        string = "components/PklPackages.pkl"
+      }
+    }
+  }
+}
