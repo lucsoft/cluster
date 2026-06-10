@@ -11,7 +11,7 @@ dependencies {
     uri = "package://pkl-pkgs.lucsoft.de/packages/itzg.minecraft@0.5.5"
   }
   ["ArgoCD"] {
-    uri = "package://pkl-pkgs.lucsoft.de/packages/argo.ArgoCD@0.3.0"
+    uri = "package://pkl-pkgs.lucsoft.de/packages/argo.ArgoCD@0.5.7"
   }
   ["Fission"] {
     uri = "package://pkl-pkgs.lucsoft.de/packages/io.Fission@0.3.0"
