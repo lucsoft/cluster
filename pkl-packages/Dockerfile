@@ -1,7 +1,7 @@
 from denoland/deno:2.8.2
 
 # renovate: datasource=github-releases depName=pkl packageName=apple/pkl
-env PKL_VERSION=0.31.0
+env PKL_VERSION=0.31.1
 
 # git clones the cluster repo at a tag; pkl packages it (see build.ts).
 run <<-EOF
