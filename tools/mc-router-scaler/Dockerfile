@@ -1,5 +1,5 @@
 # kubectl binary (statically linked, copied into the distroless runtime below)
-from alpine:3.23.3 as kubectl
+from alpine:3.24.1 as kubectl
 arg TARGETARCH
 # renovate: datasource=github-releases depName=kubectl packageName=kubernetes/kubernetes
 env KUBECTL_VERSION=v1.36.1
