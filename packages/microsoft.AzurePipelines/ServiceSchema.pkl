@@ -1925,7 +1925,7 @@ typealias VariableEntry = *Variable | VariableGroup | VariableTemplate
 
 typealias Stages = Listing<StageEntry>
 
-typealias StageEntry = *Stage | StageTemplate
+typealias StageEntry = *Stage | StageTemplate | Insertion
 
 typealias Checks = Listing<Check>
 
@@ -1955,7 +1955,7 @@ typealias JobsTemplate = JobsTemplateAlternate0 | JobsTemplateAlternate1
 
 typealias Jobs = Listing<JobEntry>
 
-typealias JobEntry = *Job | DeploymentJob | JobTemplate
+typealias JobEntry = *Job | DeploymentJob | JobTemplate | Insertion
 
 /// Pool details
 typealias Pool = NonEmptyString | PoolAlternate1
@@ -1994,7 +1994,7 @@ typealias PhaseTargetMatrix = MappingOfStringString | NonEmptyString
 
 typealias Steps = Listing<Step>
 
-typealias StepExpression = Mapping<String, Listing>
+typealias Insertion = Mapping<String, Listing>
 
 typealias Step =
   *Task
@@ -2010,7 +2010,7 @@ typealias Step =
     | PublishStep
     | TemplateStep
     | ReviewAppStep
-    | StepExpression
+    | Insertion
 
 /// Step target
 typealias StepTarget = NonEmptyString | StepTargetAlternate1

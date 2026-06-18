@@ -379,14 +379,15 @@ local function refactorClasses(node: ModuleNode): ModuleNode =
 
 /// The rewritten unions, built from the keep tables so they always match the
 /// renamed classes.
-// `StepExpression` carries compile-time `${{ if/each … }}:` insertion blocks
-// (a mapping from the expression key to a nested step list) that the schema
-// can't model as a typed step.
+// `Insertion` carries compile-time `${{ if/elseif/else/each … }}:` blocks (a
+// mapping from the expression key to a nested list) that the schema can't model
+// as a typed entry. It's added to every list-element union so `Expressions.Conditional`
+// works in `steps`, `jobs` and `stages` alike.
 local stepUnion: String =
   """
-  typealias StepExpression = Mapping<String, Listing>
+  typealias Insertion = Mapping<String, Listing>
 
-  typealias Step = *Task | \(stepKeep.toMap().values.join(" | ")) | StepExpression
+  typealias Step = *Task | \(stepKeep.toMap().values.join(" | ")) | Insertion
   """
 local pipelineUnion: String = "typealias Pipeline = *" + pipelineKeep.toMap().values.join(" | ")
 local phaseUnion: String = "typealias Phase = *" + phaseKeep.toMap().values.join(" | ")
@@ -395,9 +396,11 @@ local phaseUnion: String = "typealias Phase = *" + phaseKeep.toMap().values.join
 local variableUnion: String =
   "typealias VariableEntry = *" + variableKeep.toMap().values.join(" | ")
 // `Stage`/`Job` unions renamed to `StageEntry`/`JobEntry`, freeing those names
-// for the main `Stage`/`Job` classes.
-local stageUnion: String = "typealias StageEntry = *" + stageKeep.toMap().values.join(" | ")
-local jobUnion: String = "typealias JobEntry = *" + jobKeep.toMap().values.join(" | ")
+// for the main `Stage`/`Job` classes. Both accept `Insertion` blocks too.
+local stageUnion: String =
+  "typealias StageEntry = *" + stageKeep.toMap().values.join(" | ") + " | Insertion"
+local jobUnion: String =
+  "typealias JobEntry = *" + jobKeep.toMap().values.join(" | ") + " | Insertion"
 
 /// Apply the fixups the upstream json_schema generator can't do itself, so the
 /// regenerated module evaluates and integrates with the typed tasks.

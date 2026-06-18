@@ -30,9 +30,16 @@ stages {
             otherwise {
               new ScriptStep { script = "echo not linux" }
             }
-          }.steps
+          }.entries
         }
       }
     }
   }
+  // The same `Conditional` also inserts whole stages.
+  ...new Expressions.Conditional {
+    condition = Expressions.equals(Expressions.parameter("env"), "prod")
+    then {
+      new Stage { stage = "Deploy" }
+    }
+  }.entries
 }

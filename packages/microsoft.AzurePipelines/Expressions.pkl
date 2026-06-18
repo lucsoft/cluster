@@ -133,30 +133,31 @@ function macro(name: String): String = "$(\(name))"
 // --- compile-time insertion -----------------------------------------------
 
 /// Declarative compile-time conditional, rendered as `${{ if }}` /
-/// `${{ elseif }}` / `${{ else }}:` insertion blocks. Spread its [steps] into a
-/// `steps` listing (Class-As-Function: declarative inputs, computed result):
+/// `${{ elseif }}` / `${{ else }}:` insertion blocks. Works anywhere Azure
+/// allows conditional insertion into a list — `steps`, `jobs`, `stages`,
+/// `variables`, … — by spreading its [entries] into that listing
+/// (Class-As-Function: declarative inputs, computed result):
 ///
 /// ```
-/// steps {
-///   new ScriptStep { script = "build" }
+/// stages {
 ///   ...new Expressions.Conditional {
-///     condition = Expressions.equals(Expressions.parameter("os"), "Linux")
-///     then { new BashStep { bash = "echo linux" } }
-///     otherwise { new ScriptStep { script = "echo other" } }
-///   }.steps
+///     condition = Expressions.equals(Expressions.parameter("env"), "prod")
+///     then { new Stage { stage = "Deploy" } }
+///     otherwise { new Stage { stage = "Preview" } }
+///   }.entries
 /// }
 /// ```
 class Conditional {
   /// The `${{ if }}` condition.
   condition: Expression
-  /// Steps inserted when [condition] holds.
+  /// Entries (steps/jobs/stages/…) inserted when [condition] holds.
   then: Listing
   /// Optional `${{ elseif }}` branches, keyed by their condition.
   elseifs: Mapping<Expression, Listing> = new {}
-  /// Optional `${{ else }}` steps.
+  /// Optional `${{ else }}` entries.
   otherwise: Listing?
-  /// The rendered insertion entries — spread these into a `steps` listing.
-  fixed steps: Listing = new {
+  /// The rendered insertion entries — spread these into the target listing.
+  fixed entries: Listing = new {
     new Mapping { ["${{ if \(condition.text) }}"] = then }
     for (elseifCondition, branch in elseifs) {
       new Mapping { ["${{ elseif \(elseifCondition.text) }}"] = branch }
@@ -168,21 +169,21 @@ class Conditional {
 }
 
 /// A compile-time `${{ if <condition> }}:` block (low-level; prefer [Conditional]).
-function ifSteps(condition: Expression, steps: Listing): Mapping = new Mapping {
-  ["${{ if \(condition.text) }}"] = steps
+function ifBlock(condition: Expression, entries: Listing): Mapping = new Mapping {
+  ["${{ if \(condition.text) }}"] = entries
 }
 
 /// A compile-time `${{ elseif <condition> }}:` branch.
-function elseifSteps(condition: Expression, steps: Listing): Mapping = new Mapping {
-  ["${{ elseif \(condition.text) }}"] = steps
+function elseifBlock(condition: Expression, entries: Listing): Mapping = new Mapping {
+  ["${{ elseif \(condition.text) }}"] = entries
 }
 
 /// A compile-time `${{ else }}:` branch.
-function elseSteps(steps: Listing): Mapping = new Mapping {
-  ["${{ else }}"] = steps
+function elseBlock(entries: Listing): Mapping = new Mapping {
+  ["${{ else }}"] = entries
 }
 
-/// A compile-time `${{ each <var> in <collection> }}:` loop over steps.
-function eachStep(variable: String, collection: Expression, steps: Listing): Mapping = new Mapping {
-  ["${{ each \(variable) in \(collection.text) }}"] = steps
+/// A compile-time `${{ each <var> in <collection> }}:` loop.
+function eachBlock(variable: String, collection: Expression, entries: Listing): Mapping = new Mapping {
+  ["${{ each \(variable) in \(collection.text) }}"] = entries
 }
