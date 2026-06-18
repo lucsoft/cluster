@@ -1,0 +1,170 @@
+/// Azure Pipelines expression helpers.
+///
+/// Expressions are typed [Expression] values rather than bare strings, so they
+/// compose type-safely and only render to a string at the end (via [Expression.text]
+/// or string interpolation):
+///
+/// ```
+/// condition = Expressions.and(List(
+///   Expressions.succeeded(),
+///   Expressions.equals(Expressions.variable("Build.SourceBranch"), "refs/heads/main")
+/// )).text
+/// ```
+///
+/// See <https://learn.microsoft.com/azure/devops/pipelines/process/expressions>.
+module microsoft.AzurePipelines.Expressions
+
+/// A composable Azure Pipelines expression. Render it with [text] (or string
+/// interpolation, which uses [toString]).
+class Expression {
+  /// The rendered Azure expression, e.g. `eq(variables['x'], 'y')`.
+  text: String
+
+  function toString(): String = text
+}
+
+// --- literals & references ------------------------------------------------
+
+/// Wrap an already-rendered expression string.
+function raw(expression: String): Expression = new { text = expression }
+
+/// A single-quoted string literal: `str("main")` → `'main'`.
+function str(value: String): Expression = new { text = "'\(value)'" }
+
+/// Reference a variable: `variable("System.Debug")` → `variables['System.Debug']`.
+function variable(name: String): Expression = new { text = "variables['\(name)']" }
+
+/// Reference a template parameter: `parameter("env")` → `parameters['env']`.
+function parameter(name: String): Expression = new { text = "parameters['\(name)']" }
+
+// --- boolean logic --------------------------------------------------------
+
+function and(conditions: List<Expression>): Expression =
+  new { text = "and(\(conditions.map((c) -> c.text).join(", ")))" }
+
+function or(conditions: List<Expression>): Expression =
+  new { text = "or(\(conditions.map((c) -> c.text).join(", ")))" }
+
+function not(condition: Expression): Expression = new { text = "not(\(condition.text))" }
+
+// --- comparisons ----------------------------------------------------------
+
+function eq(left: Expression, right: Expression): Expression = new { text = "eq(\(left.text), \(right.text))" }
+
+function ne(left: Expression, right: Expression): Expression = new { text = "ne(\(left.text), \(right.text))" }
+
+function lt(left: Expression, right: Expression): Expression = new { text = "lt(\(left.text), \(right.text))" }
+
+function gt(left: Expression, right: Expression): Expression = new { text = "gt(\(left.text), \(right.text))" }
+
+function le(left: Expression, right: Expression): Expression = new { text = "le(\(left.text), \(right.text))" }
+
+function ge(left: Expression, right: Expression): Expression = new { text = "ge(\(left.text), \(right.text))" }
+
+// --- string helpers -------------------------------------------------------
+
+function contains(haystack: Expression, needle: Expression): Expression =
+  new { text = "contains(\(haystack.text), \(needle.text))" }
+
+function startsWith(value: Expression, prefix: Expression): Expression =
+  new { text = "startsWith(\(value.text), \(prefix.text))" }
+
+function endsWith(value: Expression, suffix: Expression): Expression =
+  new { text = "endsWith(\(value.text), \(suffix.text))" }
+
+/// `in(value, a, b, …)` — true if `value` equals any of the options.
+function isIn(value: Expression, options: List<Expression>): Expression =
+  new { text = "in(\(value.text), \(options.map((o) -> o.text).join(", ")))" }
+
+// --- job/stage status (for `condition`) -----------------------------------
+
+/// Run if all previous steps/jobs/stages succeeded (the implicit default).
+function succeeded(): Expression = raw("succeeded()")
+
+/// Run if any previous step/job/stage failed.
+function failed(): Expression = raw("failed()")
+
+/// Always run, even after failure or cancellation.
+function always(): Expression = raw("always()")
+
+/// Run only if the pipeline was canceled.
+function canceled(): Expression = raw("canceled()")
+
+/// Run regardless of success/failure, but not if canceled.
+function succeededOrFailed(): Expression = raw("succeededOrFailed()")
+
+// --- shortcuts ------------------------------------------------------------
+
+/// `eq` against a string literal: `equals(variable("Build.Reason"), "PullRequest")`.
+function equals(left: Expression, literal: String): Expression = eq(left, str(literal))
+
+/// True when running on the given branch ref, e.g. `onBranch("refs/heads/main")`.
+function onBranch(ref: String): Expression = equals(variable("Build.SourceBranch"), ref)
+
+// --- wrappers -------------------------------------------------------------
+
+/// Wrap as a runtime expression: `runtime(eq(a, b))` → `$[eq(a, b)]`.
+function runtime(expression: Expression): String = "$[\(expression.text)]"
+
+/// Wrap as a compile-time/template expression → `${{ … }}`.
+function template(expression: Expression): String = "${{ \(expression.text) }}"
+
+/// Wrap as a macro: `macro("Build.BuildId")` → `$(Build.BuildId)`.
+function macro(name: String): String = "$(\(name))"
+
+// --- compile-time insertion -----------------------------------------------
+
+/// Declarative compile-time conditional, rendered as `${{ if }}` /
+/// `${{ elseif }}` / `${{ else }}:` insertion blocks. Spread its [steps] into a
+/// `steps` listing (Class-As-Function: declarative inputs, computed result):
+///
+/// ```
+/// steps {
+///   new ScriptStep { script = "build" }
+///   ...new Expressions.Conditional {
+///     condition = Expressions.equals(Expressions.parameter("os"), "Linux")
+///     then { new BashStep { bash = "echo linux" } }
+///     otherwise { new ScriptStep { script = "echo other" } }
+///   }.steps
+/// }
+/// ```
+class Conditional {
+  /// The `${{ if }}` condition.
+  condition: Expression
+  /// Steps inserted when [condition] holds.
+  then: Listing
+  /// Optional `${{ elseif }}` branches, keyed by their condition.
+  elseifs: Mapping<Expression, Listing> = new {}
+  /// Optional `${{ else }}` steps.
+  otherwise: Listing?
+  /// The rendered insertion entries — spread these into a `steps` listing.
+  fixed steps: Listing = new {
+    new Mapping { ["${{ if \(condition.text) }}"] = then }
+    for (elseifCondition, branch in elseifs) {
+      new Mapping { ["${{ elseif \(elseifCondition.text) }}"] = branch }
+    }
+    when (otherwise != null) {
+      new Mapping { ["${{ else }}"] = otherwise }
+    }
+  }
+}
+
+/// A compile-time `${{ if <condition> }}:` block (low-level; prefer [Conditional]).
+function ifSteps(condition: Expression, steps: Listing): Mapping = new Mapping {
+  ["${{ if \(condition.text) }}"] = steps
+}
+
+/// A compile-time `${{ elseif <condition> }}:` branch.
+function elseifSteps(condition: Expression, steps: Listing): Mapping = new Mapping {
+  ["${{ elseif \(condition.text) }}"] = steps
+}
+
+/// A compile-time `${{ else }}:` branch.
+function elseSteps(steps: Listing): Mapping = new Mapping {
+  ["${{ else }}"] = steps
+}
+
+/// A compile-time `${{ each <var> in <collection> }}:` loop over steps.
+function eachStep(variable: String, collection: Expression, steps: Listing): Mapping = new Mapping {
+  ["${{ each \(variable) in \(collection.text) }}"] = steps
+}

@@ -1,5 +1,8 @@
 amends "../StagedPipeline.pkl"
+
 import "../Variables.pkl"
+import "../Expressions.pkl"
+import "../Tasks.pkl"
 
 name = "James"
 
@@ -17,6 +20,17 @@ stages {
               echo "This is a Test!" \(Variables.Pipeline.Workspace)
               """
           }
+          // Declarative compile-time `${{ if }}` / `${{ else }}` insertion,
+          // built with the Class-As-Function `Conditional`.
+          ...new Expressions.Conditional {
+            condition = Expressions.equals(Expressions.variable("Agent.OS"), "Linux")
+            then {
+              new BashStep { bash = "echo running on linux" }
+            }
+            otherwise {
+              new ScriptStep { script = "echo not linux" }
+            }
+          }.steps
         }
       }
     }

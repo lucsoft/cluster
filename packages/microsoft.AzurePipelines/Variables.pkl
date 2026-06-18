@@ -1,7 +1,120 @@
-local class PipelineType {
-  Workspace: "$(Pipeline.Workspace)"
+/// Azure Pipelines variables.
+///
+/// Predefined, read-only variables grouped by namespace — use them in
+/// expressions, e.g. `script = "deploy \(Variables.Build.SourceBranchName)"`.
+///
+/// To declare your own pipeline variables use [createVariable] or
+/// `new ServiceSchema.Variable { name = …; value = … }` in a `variables` block.
+///
+/// See <https://learn.microsoft.com/azure/devops/pipelines/build/variables>.
+module microsoft.AzurePipelines.Variables
+
+import "./ServiceSchema.pkl"
+
+/// Declare a pipeline variable (`name`/`value` form). Equivalent to
+/// `new ServiceSchema.Variable { name = …; value = … }`.
+function createVariable(varName: String, varValue: String): ServiceSchema.Variable = new {
+  name = varName
+  value = varValue
 }
 
-Pipeline: PipelineType = new {
-  Workspace = "$(Pipeline.Workspace)"
+/// Mark a variable read-only so it can't be overridden at queue time.
+function createReadonlyVariable(varName: String, varValue: String): ServiceSchema.Variable = new {
+  name = varName
+  value = varValue
+  readonly = "true"
 }
+
+class BuildVars {
+  /// The ID of the record for the completed build.
+  fixed BuildId: String = "$(Build.BuildId)"
+  /// The name (run number) of the completed build.
+  fixed BuildNumber: String = "$(Build.BuildNumber)"
+  /// The name of the build pipeline.
+  fixed DefinitionName: String = "$(Build.DefinitionName)"
+  /// The event that triggered the build (e.g. `Manual`, `IndividualCI`, `PullRequest`).
+  fixed Reason: String = "$(Build.Reason)"
+  /// The full ref of the branch the build was queued for (e.g. `refs/heads/main`).
+  fixed SourceBranch: String = "$(Build.SourceBranch)"
+  /// The branch name without the `refs/heads/` prefix (e.g. `main`).
+  fixed SourceBranchName: String = "$(Build.SourceBranchName)"
+  /// The commit that triggered the build.
+  fixed SourceVersion: String = "$(Build.SourceVersion)"
+  /// The comment/message of the triggering commit.
+  fixed SourceVersionMessage: String = "$(Build.SourceVersionMessage)"
+  /// Local path where the source is checked out.
+  fixed SourcesDirectory: String = "$(Build.SourcesDirectory)"
+  /// Local path for artifacts staged before publishing.
+  fixed ArtifactStagingDirectory: String = "$(Build.ArtifactStagingDirectory)"
+  /// Local path for compiled binaries.
+  fixed BinariesDirectory: String = "$(Build.BinariesDirectory)"
+  /// The name of the triggering repository.
+  fixed RepositoryName: String = "$(Build.Repository.Name)"
+  /// The repository provider (e.g. `TfsGit`, `GitHub`).
+  fixed RepositoryProvider: String = "$(Build.Repository.Provider)"
+  /// Local path to the repository root.
+  fixed RepositoryLocalPath: String = "$(Build.Repository.LocalPath)"
+  /// The user who requested the build.
+  fixed RequestedFor: String = "$(Build.RequestedFor)"
+  /// The email of the user who requested the build.
+  fixed RequestedForEmail: String = "$(Build.RequestedForEmail)"
+}
+
+class SystemVars {
+  /// OAuth token to access the REST API (must be mapped into `env` explicitly).
+  fixed AccessToken: String = "$(System.AccessToken)"
+  /// The directory jobs run in (usually the agent work folder).
+  fixed DefaultWorkingDirectory: String = "$(System.DefaultWorkingDirectory)"
+  /// The name of the project that contains the build.
+  fixed TeamProject: String = "$(System.TeamProject)"
+  /// The ID of the project that contains the build.
+  fixed TeamProjectId: String = "$(System.TeamProjectId)"
+  /// The URI of the Azure DevOps organization.
+  fixed CollectionUri: String = "$(System.CollectionUri)"
+  /// The ID of the current job.
+  fixed JobId: String = "$(System.JobId)"
+  /// The human-readable name of the current job.
+  fixed JobDisplayName: String = "$(System.JobDisplayName)"
+  /// The name of the current stage.
+  fixed StageName: String = "$(System.StageName)"
+  /// The human-readable name of the current stage.
+  fixed StageDisplayName: String = "$(System.StageDisplayName)"
+  /// The ID of the pull request that triggered the build (PR builds only).
+  fixed PullRequestId: String = "$(System.PullRequest.PullRequestId)"
+  /// The source branch of the triggering pull request.
+  fixed PullRequestSourceBranch: String = "$(System.PullRequest.SourceBranch)"
+  /// The target branch of the triggering pull request.
+  fixed PullRequestTargetBranch: String = "$(System.PullRequest.TargetBranch)"
+}
+
+class AgentVars {
+  /// The name of the agent running the job.
+  fixed Name: String = "$(Agent.Name)"
+  /// The operating system of the agent host (`Windows_NT`, `Linux`, `Darwin`).
+  fixed OS: String = "$(Agent.OS)"
+  /// The CPU architecture of the agent host (`X86`, `X64`, `ARM`).
+  fixed OSArchitecture: String = "$(Agent.OSArchitecture)"
+  /// The status of the running job, for use in conditions.
+  fixed JobStatus: String = "$(Agent.JobStatus)"
+  /// The working directory for this agent.
+  fixed WorkFolder: String = "$(Agent.WorkFolder)"
+  /// The local path where the build is run.
+  fixed BuildDirectory: String = "$(Agent.BuildDirectory)"
+  /// The directory used by tasks like Tool Installers.
+  fixed ToolsDirectory: String = "$(Agent.ToolsDirectory)"
+  /// A temporary folder cleaned after each pipeline job.
+  fixed TempDirectory: String = "$(Agent.TempDirectory)"
+}
+
+class PipelineVars {
+  /// The default working directory shared across jobs in a pipeline.
+  fixed Workspace: String = "$(Pipeline.Workspace)"
+}
+
+Build: BuildVars = new {}
+
+System: SystemVars = new {}
+
+Agent: AgentVars = new {}
+
+Pipeline: PipelineVars = new {}

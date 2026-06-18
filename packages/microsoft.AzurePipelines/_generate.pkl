@@ -1,0 +1,561 @@
+/// Generate the Azure Pipelines Pkl bindings.
+///
+/// This is a thin wrapper around the pkl-pantry json_schema generator that
+/// produces the full schema (`ServiceSchema.pkl` — pipelines, stages, jobs,
+/// steps, resources, …) and additionally emits strongly-typed task classes
+/// (`Tasks.pkl`).
+///
+/// The upstream generator turns the `task` definition's 259-branch `anyOf`
+/// into anonymous, unreferenced `TaskAlternate<N>` classes with untyped
+/// `inputs: Dynamic`. Instead we emit one class per task id — e.g. `FtpUpload_1`
+/// for `FtpUpload@1` — each extending `ServiceSchema.Task` with a fixed `task`
+/// literal and a typed `*Inputs` class. The generated `Task` class is reopened
+/// (`open class Task`) so those subclasses are assignable anywhere a
+/// `Step`/`Task` is expected.
+///
+/// The task source is built with the `pkl.experimental.syntax` AST (the same
+/// toolkit the json_schema generator uses), so identifier/string escaping and
+/// indentation are handled by the renderer rather than by hand.
+///
+/// Usage:
+///
+/// ```
+/// pkl eval _generate.pkl -m .
+/// pkl eval _generate.pkl -m . -p source=./service-schema.json
+/// ```
+@ModuleInfo { minPklVersion = "0.25.0" }
+module microsoft.AzurePipelines.generate
+
+import
+  "package://pkg.pkl-lang.org/pkl-pantry/org.json_schema.contrib@1.2.0#/internal/ModulesGenerator.pkl"
+import "package://pkg.pkl-lang.org/pkl-pantry/org.json_schema@1.1.0#/JsonSchema.pkl"
+import "package://pkg.pkl-lang.org/pkl-pantry/org.json_schema@1.1.0#/Parser.pkl"
+import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.1.0#/ClassNode.pkl"
+import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.1.0#/ClassOrModuleNode.pkl"
+import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.1.0#/DocCommentNode.pkl"
+import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.1.0#/ExpressionNode.pkl"
+import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.1.0#/IdentifierNode.pkl"
+import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.1.0#/ModuleNode.pkl"
+import
+  "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.1.0#/QualifiedIdentifierNode.pkl"
+import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.1.0#/TypeAnnotationNode.pkl"
+import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.1.0#/TypeNode.pkl"
+import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.uri@1.0.3#/URI.pkl"
+import "pkl:json"
+import "pkl:platform"
+
+// --- schema source resolution (mirrors pkl-pantry's generate.pkl) ---------
+
+local sourceProperty: String =
+  read?("prop:source")
+    ?? "https://raw.githubusercontent.com/microsoft/azure-pipelines-vscode/master/service-schema.json"
+
+local sourceUri: String =
+  if (sourceProperty.startsWith(Regex(#"\w+:"#)))
+    sourceProperty // absolute URI
+  else if (sourceProperty.startsWith("/"))
+    "file://\(sourceProperty)" // absolute file path
+  else // relative file path
+    let (pwd = read("env:PWD"))
+    let (
+      path =
+        if (platform.current.operatingSystem.name == "Windows")
+          "/\(pwd)/\(sourceProperty)".replaceAll("\\", "/")
+        else
+          "\(pwd)/\(sourceProperty)"
+    )
+      "file://\(URI.encode(path))"
+
+local schemaResource = read(URI.encode(sourceUri))
+
+// --- surrounding schema (ServiceSchema.pkl) via pkl-pantry ----------------
+
+/// The upstream generator renders every `task` `anyOf` branch as an anonymous,
+/// unreferenced `TaskAlternate<N>` class (plus its `*Inputs`, and the lone
+/// `Inputs` of the first branch). Those ~500 classes are dead weight now that
+/// `Tasks.pkl` provides the typed equivalents, so drop them from the module.
+local function stripDeadTaskClasses(node: ModuleNode): ModuleNode = (node) {
+  classes = new {
+    for (c in node.classes!!) {
+      when (
+        let (name = c.classHeader.name.value)
+          !name.startsWith("TaskAlternate") && name != "Inputs"
+      ) {
+        c
+      }
+    }
+  }
+}
+
+// --- pipeline & step refactor (factor common props onto abstract bases) ---
+
+local function findClass(node: ModuleNode, name: String): ClassNode =
+  node.classes!!.toList().findOrNull((c) -> c.classHeader.name.value == name) as ClassNode
+
+local function basePropNames(node: ModuleNode, baseName: String): Set<String> =
+  findClass(node, baseName).properties!!.toList().map((p) -> p.name.value).toSet()
+
+/// Make a variant `extends baseName`, drop the properties it inherits from the
+/// base, and rename it.
+local function deriveFrom(
+  c: ClassNode,
+  baseName: String,
+  baseProps: Set<String>,
+  newName: String,
+): ClassNode = (c) {
+  classHeader {
+    name { value = newName }
+    extendsClause = new { type = declared(baseName) }
+  }
+  properties = new {
+    for (p in c.properties!!) {
+      when (!baseProps.contains(p.name.value)) { p }
+    }
+  }
+}
+
+// The `oneOf`/`anyOf` branches the upstream generator turns into
+// `<Parent>Alternate<i>` classes. We derive the friendly names from the same
+// schema the generator reads, so the index↔name mapping can't drift.
+local stepBranches: List<Mapping> =
+  (rawSchema["definitions"]["step"]["anyOf"] as Listing).toList() as List<Mapping>
+local pipelineBranches: List<Mapping> =
+  (rawSchema["definitions"]["pipeline"]["anyOf"] as Listing).toList() as List<Mapping>
+
+/// The discriminator of a branch: the explicit `firstProperty` hint if present,
+/// else the first declared property. Null for `$ref` branches (which resolve to
+/// a named type — e.g. the `task` ref → `Task`).
+local function discriminatorOf(branch: Mapping): String? =
+  let (hint = branch.getOrNull("firstProperty"))
+    if (hint != null)
+      (hint as Listing).toList().first as String
+    else
+      let (props = branch.getOrNull("properties"))
+        if (props != null) (props as Mapping).toMap().entries.first.key else null
+
+local function pascalFirst(s: String): String = s.take(1).toUpperCase() + s.drop(1)
+
+/// Acronym casing that `pascalFirst` can't infer.
+local stepNameCasing: Mapping<String, String> = new { ["powershell"] = "PowerShell" }
+
+local function stepClassName(disc: String): String =
+  (stepNameCasing.toMap().getOrNull(disc) ?? pascalFirst(disc)) + "Step"
+
+/// Step variants, derived from `step.anyOf`: each inline branch becomes
+/// `<discriminator>Step` (e.g. `bash` → `BashStep`); its index gives the
+/// upstream `StepAlternate<i>` name. The `$ref` branch (task) stays `Task`.
+local stepKeep: Mapping<String, String> = new {
+  for (i, branch in stepBranches) {
+    when (!branch.containsKey("$ref")) {
+      ["StepAlternate\(i)"] = stepClassName(discriminatorOf(branch) as String)
+    }
+  }
+}
+
+/// Pipeline shapes worth keeping, keyed by their discriminating property; every
+/// other `pipeline.anyOf` branch (extends-template, phases, single-phase
+/// queue/server) is dropped. The names are bespoke so this stays an explicit
+/// table, but the upstream `PipelineAlternate<i>` index is derived.
+local pipelineNames: Mapping<String, String> = new {
+  ["stages"] = "StagedPipeline" // stages-based
+  ["jobs"] = "PipelineJobs" // jobs-based
+  ["strategy"] = "PipelineJob" // single job (job strategy + steps at root)
+}
+
+local pipelineKeep: Mapping<String, String> = new {
+  for (i, branch in pipelineBranches) {
+    when (pipelineNames.toMap().containsKey(discriminatorOf(branch) ?? "")) {
+      ["PipelineAlternate\(i)"] = pipelineNames.toMap()[discriminatorOf(branch) as String]
+    }
+  }
+}
+
+local pipelineDrop: Set<String> =
+  new Listing {
+    for (i, branch in pipelineBranches) {
+      when (!pipelineNames.toMap().containsKey(discriminatorOf(branch) ?? "")) {
+        "PipelineAlternate\(i)"
+      }
+    }
+  }.toSet()
+
+/// Phase `anyOf` branches. Two share the `phase` discriminator (differing by
+/// `queue` vs `server` target), so they're named by that distinguishing
+/// property; the index gives the upstream `PhaseAlternate<i>` name. Unlike
+/// pipelines/steps there is no upstream `PhaseBase`, so [refactorClasses]
+/// synthesizes one from the shared props.
+local phaseBranches: List<Mapping> =
+  (rawSchema["definitions"]["phase"]["anyOf"] as Listing).toList() as List<Mapping>
+
+local function phaseClassName(branch: Mapping): String =
+  let (props = branch["properties"] as Mapping)
+    if (props.containsKey("queue"))
+      "AgentPhase" // agent (queue) phase
+    else if (props.containsKey("server"))
+      "ServerPhase" // server / agent-less phase
+    else
+      "PhaseTemplate" // template reference
+
+local phaseKeep: Mapping<String, String> = new {
+  for (i, branch in phaseBranches) {
+    ["PhaseAlternate\(i)"] = phaseClassName(branch)
+  }
+}
+
+/// Variable `anyOf` branches → friendly names (keyed by discriminator). The
+/// `Variable` union itself is renamed to `VariableEntry` (see [fixupModule]) so
+/// the value form can be the `Variable` class — i.e. `new Variable {}`.
+local variableNames: Mapping<String, String> = new {
+  ["name"] = "Variable" // name/value/readonly
+  ["group"] = "VariableGroup" // variable-group reference
+  ["template"] = "VariableTemplate" // variables template
+}
+local variableBranches: List<Mapping> =
+  (rawSchema["definitions"]["variable"]["anyOf"] as Listing).toList() as List<Mapping>
+
+local variableKeep: Mapping<String, String> = new {
+  for (i, branch in variableBranches) {
+    ["VariableAlternate\(i)"] = variableNames[discriminatorOf(branch) as String]
+  }
+}
+
+/// Does the class declare any of [props]? Variants that share their base's
+/// props get factored onto it; those that don't are renamed only.
+local function sharesAnyProp(c: ClassNode, props: Set<String>): Boolean =
+  c.properties!!.toList().any((p) -> props.contains(p.name.value))
+
+local function propNameSet(c: ClassNode): Set<String> =
+  c.properties!!.toList().map((p) -> p.name.value).toSet()
+
+/// Synthesize an abstract base class named [baseName] from the properties the
+/// [variantNames] classes have in common (the upstream generator emits no base
+/// for the phase `anyOf`).
+local function synthesizeBase(
+  node: ModuleNode,
+  variantNames: List<String>,
+  baseName: String,
+): ClassNode =
+  let (variants = variantNames.map((n) -> findClass(node, n)))
+  let (
+    shared =
+      propNameSet(variants.first)
+        .toList()
+        .filter((n) -> variants.every((v) -> propNameSet(v).contains(n)))
+        .toSet()
+  )
+    new {
+      classHeader = new {
+        name = new { value = baseName }
+        modifiers = new { "abstract" }
+      }
+      properties = new {
+        for (p in variants.first.properties!!) {
+          when (shared.contains(p.name.value)) { p }
+        }
+      }
+    }
+
+/// Factor the pipeline, step and phase variants onto their abstract bases and
+/// give them meaningful names. `PipelineBase`/`TaskBase` already hold the shared
+/// properties; `PhaseBase` is synthesized. The variants merely duplicate them.
+local function refactorClasses(node: ModuleNode): ModuleNode =
+  let (pipeBaseProps = basePropNames(node, "PipelineBase"))
+  let (taskBaseProps = basePropNames(node, "TaskBase"))
+  // phase variants that share the common shape (i.e. not the template branch)
+  let (
+    phaseVariantNames =
+      phaseBranches
+        .mapIndexed((i, b) ->
+          if ((b["properties"] as Mapping).containsKey("phase")) "PhaseAlternate\(i)" else null
+        )
+        .filterNonNull() as List<String>
+  )
+  let (phaseBaseNode = synthesizeBase(node, phaseVariantNames, "PhaseBase"))
+  let (phaseBaseProps = propNameSet(phaseBaseNode))
+    (node) {
+      classes = new {
+        phaseBaseNode
+        for (c in node.classes!!) {
+          when (
+            c.classHeader.name.value == "PipelineBase" || c.classHeader.name.value == "TaskBase"
+          ) {
+            (c) { classHeader { modifiers = new { "abstract" } } }
+          }
+          when (pipelineKeep.containsKey(c.classHeader.name.value)) {
+            deriveFrom(c, "PipelineBase", pipeBaseProps, pipelineKeep[c.classHeader.name.value])
+          }
+          when (stepKeep.containsKey(c.classHeader.name.value) && sharesAnyProp(c, taskBaseProps)) {
+            deriveFrom(c, "TaskBase", taskBaseProps, stepKeep[c.classHeader.name.value])
+          }
+          when (stepKeep.containsKey(c.classHeader.name.value) && !sharesAnyProp(c, taskBaseProps)) {
+            // a step with no shared props (e.g. `template`) — rename only
+            (c) { classHeader { name { value = stepKeep[c.classHeader.name.value] } } }
+          }
+          when (phaseKeep.containsKey(c.classHeader.name.value) && sharesAnyProp(c, phaseBaseProps)) {
+            deriveFrom(c, "PhaseBase", phaseBaseProps, phaseKeep[c.classHeader.name.value])
+          }
+          when (
+            phaseKeep.containsKey(c.classHeader.name.value) && !sharesAnyProp(c, phaseBaseProps)
+          ) {
+            // the template phase — rename only
+            (c) { classHeader { name { value = phaseKeep[c.classHeader.name.value] } } }
+          }
+          when (variableKeep.containsKey(c.classHeader.name.value)) {
+            // variable variants share no props — rename only
+            (c) { classHeader { name { value = variableKeep[c.classHeader.name.value] } } }
+          }
+          when (
+            c.classHeader.name.value != "PipelineBase"
+              && c.classHeader.name.value != "TaskBase"
+              && !pipelineKeep.containsKey(c.classHeader.name.value)
+              && !pipelineDrop.contains(c.classHeader.name.value)
+              && !stepKeep.containsKey(c.classHeader.name.value)
+              && !phaseKeep.containsKey(c.classHeader.name.value)
+              && !variableKeep.containsKey(c.classHeader.name.value)
+          ) {
+            c
+          }
+        }
+      }
+    }
+
+/// The rewritten unions, built from the keep tables so they always match the
+/// renamed classes.
+// `StepExpression` carries compile-time `${{ if/each … }}:` insertion blocks
+// (a mapping from the expression key to a nested step list) that the schema
+// can't model as a typed step.
+local stepUnion: String = """
+  typealias StepExpression = Mapping<String, Listing>
+
+  typealias Step = *Task | \(stepKeep.toMap().values.join(" | ")) | StepExpression
+  """
+local pipelineUnion: String = "typealias Pipeline = *" + pipelineKeep.toMap().values.join(" | ")
+local phaseUnion: String = "typealias Phase = *" + phaseKeep.toMap().values.join(" | ")
+// The `Variable` union is renamed to `VariableEntry` so its value form can be
+// the `Variable` class (`new Variable { name = …; value = … }`).
+local variableUnion: String =
+  "typealias VariableEntry = *" + variableKeep.toMap().values.join(" | ")
+
+/// Apply the fixups the upstream json_schema generator can't do itself, so the
+/// regenerated module evaluates and integrates with the typed tasks.
+local function fixupModule(rendered: String): String =
+  rendered
+    // Reopen the module so `StagedPipeline.pkl` can extend it.
+    .replaceFirst(Regex("(?m)^(?!open )module "), "open module ")
+    // Reopen `Task` so the typed task classes in `Tasks.pkl` can extend it.
+    .replaceFirst(Regex("(?m)^class Task \\{"), "open class Task {")
+    // Break the `AnyAllowExpressions`/`Sequence` typealias cycle (Pkl rejects
+    // cyclic typealiases). `Sequence` is inlined one level.
+    .replaceFirst(
+      Regex(
+        #"typealias AnyAllowExpressions = NonEmptyString\s*\|\s*Sequence\s*\|\s*MappingOfStringString"#,
+      ),
+      "typealias AnyAllowExpressions = NonEmptyString|Listing<NonEmptyString|MappingOfStringString>|MappingOfStringString",
+    )
+    // Mark the default member (`*`) of the `Stage`/`Job` unions so `new {}`
+    // entries in `stages`/`jobs` know which type to construct.
+    .replaceAllMapped(Regex(#"typealias (Stage|Job) =(\s+)(?!\*)"#), (m) ->
+      "typealias \(m.groups[1]!!.value) =\(m.groups[2]!!.value)*"
+    )
+    // Rewrite the `Pipeline`/`Step`/`Phase` unions to reference the refactored,
+    // renamed variant classes (with a `*` default member). `Pipeline`/`Step`
+    // render multi-line; `Phase` is short enough to stay single-line.
+    .replaceFirst(Regex(#"typealias Pipeline =(\n  \|?[A-Za-z0-9]+)+"#), pipelineUnion)
+    .replaceFirst(Regex(#"typealias Step =(\n  \|?[A-Za-z0-9]+)+"#), stepUnion)
+    .replaceFirst(Regex(#"typealias Phase = [\w|]+"#), phaseUnion)
+    // Rename the `Variable` union → `VariableEntry`, freeing `Variable` for the
+    // renamed value class, and repoint the `Variables` listing at it. The
+    // listing is made the default member (`*`) so `variables { new Variable {} }`
+    // works; the map form stays available as `variables = new Mapping { … }`.
+    .replaceFirst(Regex(#"typealias Variable = [\w|]+"#), variableUnion)
+    .replaceFirst("Listing<Variable>", "*Listing<VariableEntry>")
+
+local modulesGenerator: ModulesGenerator = new {
+  rootSchema = Parser.parse(schemaResource) as JsonSchema
+  baseUri = URI.parse(sourceUri)!!
+}
+
+// --- task schema (Tasks.pkl) via the syntax AST ---------------------------
+
+local rawSchema = (new json.Parser { useMapping = true }).parse(schemaResource) as Mapping
+
+local branches: List<Mapping> =
+  (rawSchema["definitions"]["task"]["anyOf"] as Listing).toList() as List<Mapping>
+
+local function id(name: String): IdentifierNode = new { value = name }
+
+local function qualified(name: String): QualifiedIdentifierNode = new {
+  parts = new { for (part in name.split(".")) { id(part) } }
+}
+
+local function declared(typeName: String): TypeNode.DeclaredTypeNode = new {
+  name = qualified(typeName)
+  typeArguments = new Listing {}
+}
+
+local function nullable(node: TypeNode): TypeNode.NullableTypeNode = new { typeNode = node }
+
+local function stringLiteralType(literal: String): TypeNode.StringLiteralTypeNode = new {
+  value = literal
+}
+
+local function doc(text: String?): DocCommentNode? =
+  if (text == null) null else new { value = text }
+
+local function annotation(node: TypeNode): TypeAnnotationNode = new { type = node }
+
+/// Map a JSON-schema input property to a Pkl type node (without nullability).
+local function pklType(prop: Mapping): TypeNode =
+  let (enum = prop.getOrNull("enum"))
+    if (enum != null)
+      let (
+        literals =
+          (enum as Listing)
+            .toList()
+            .map((v) -> if (v is String) stringLiteralType(v) else declared(v.toString()))
+      )
+        if (literals.length == 1)
+          literals.first
+        else
+          new TypeNode.UnionTypeNode { members = new { for (l in literals) { l } } }
+    else
+      declared(
+        let (type = prop.getOrNull("type"))
+          if (type == "string")
+            "String"
+          else if (type == "boolean")
+            "Boolean"
+          else if (type == "integer")
+            "Int"
+          else if (type == "number")
+            "Number"
+          else
+            "Any",
+      )
+
+// --- task name resolution -------------------------------------------------
+
+/// `^FtpUpload@1$` -> `FtpUpload@1`.
+local function taskIdFromPattern(pattern: String): String =
+  if (pattern.startsWith("^") && pattern.endsWith("$")) pattern.drop(1).dropLast(1) else pattern
+
+/// `FtpUpload@1` -> `FtpUpload_1` (a valid Pkl identifier).
+local function sanitize(taskId: String): String = taskId.replaceAll(Regex("[^A-Za-z0-9]+"), "_")
+
+local taskIds: List<String> =
+  branches.map((b) -> taskIdFromPattern((b["properties"]["task"]["pattern"]) as String))
+
+local rawNames: List<String> = taskIds.map((tid) -> sanitize(tid))
+
+/// Disambiguate the handful of task ids that appear in multiple branches with
+/// differing input shapes (e.g. two `Docker@2` forms): the 2nd+ get an `_altN`
+/// suffix.
+local classNames: List<String> =
+  rawNames.mapIndexed((i, name) ->
+    let (prior = rawNames.take(i).filter((x) -> x == name).length)
+      if (prior == 0) name else "\(name)_alt\(prior)"
+  )
+
+// --- task class builders --------------------------------------------------
+
+local function inputProperties(inputs: Mapping): List<ClassOrModuleNode.PropertyDefinitionNode> =
+  let (props = (inputs.getOrNull("properties") as Mapping?)?.toMap() ?? Map())
+  let (required = ((inputs.getOrNull("required") as Listing?)?.toList() ?? List()).toSet())
+    props.entries.map((entry) ->
+      let (propSchema = entry.value as Mapping)
+      let (type = pklType(propSchema))
+        new ClassOrModuleNode.PropertyDefinitionNode {
+          docComment = doc(propSchema.getOrNull("description") as String?)
+          name = id(entry.key)
+          typeAnnotation = annotation(if (required.contains(entry.key)) type else nullable(type))
+        })
+
+local function hasInputs(inputs: Mapping?): Boolean =
+  inputs != null && (inputs.getOrNull("properties") as Mapping?)?.length?.isPositive == true
+
+local function taskClass(branch: Mapping, className: String, taskId: String): ClassNode =
+  let (taskSchema = branch["properties"]["task"] as Mapping)
+  let (inputs = branch["properties"].getOrNull("inputs") as Mapping?)
+    new ClassNode {
+      docComment = doc(taskSchema.getOrNull("description") as String?)
+      classHeader {
+        name = id(className)
+        extendsClause { type = declared("ServiceSchema.Task") }
+      }
+      properties {
+        // `task: "FtpUpload@1" = "FtpUpload@1"`
+        new {
+          name = id("task")
+          typeAnnotation = annotation(stringLiteralType(taskId))
+          defaultValue = new ExpressionNode.LiteralValueExpressionNode { value = taskId }
+        }
+        // tasks with no declared inputs inherit `inputs: Dynamic?` from Task.
+        when (hasInputs(inputs)) {
+          new {
+            docComment = doc(inputs!!.getOrNull("description") as String?)
+            name = id("inputs")
+            typeAnnotation = annotation(nullable(declared("\(className)Inputs")))
+          }
+        }
+      }
+    }
+
+local function inputsClass(inputs: Mapping, className: String): ClassNode = new ClassNode {
+  docComment = doc(inputs.getOrNull("description") as String?)
+  // `local`: the `*Inputs` classes are an implementation detail of their task
+  // class, not part of the module's public surface.
+  classHeader {
+    name = id("\(className)Inputs")
+    modifiers = new { "local" }
+  }
+  properties = new { for (prop in inputProperties(inputs)) { prop } }
+}
+
+local tasksModule: ModuleNode = new {
+  declaration {
+    docComment {
+      value =
+        """
+        Strongly-typed Azure Pipelines task steps.
+
+        One class per task id (e.g. `FtpUpload_1` for `FtpUpload@1`), each
+        extending `ServiceSchema.Task` with typed `inputs`. Assignable anywhere
+        a `Step`/`Task` is expected.
+
+        Generated by `_generate.pkl` from
+        <\(sourceUri)>.
+        Do not edit by hand.
+        """
+    }
+    moduleHeader { name = qualified("microsoft.AzurePipelines.Tasks") }
+  }
+  imports { new { value = "./ServiceSchema.pkl" } }
+  classes = new {
+    for (i, branch in branches) {
+      taskClass(branch, classNames[i], taskIds[i])
+      when (hasInputs(branch["properties"].getOrNull("inputs") as Mapping?)) {
+        inputsClass(branch["properties"]["inputs"] as Mapping, classNames[i])
+      }
+    }
+  }
+}
+
+// --- output ---------------------------------------------------------------
+
+output {
+  files {
+    // Surrounding schema, with the fixups the upstream generator can't do:
+    //  - reopen the module so `StagedPipeline.pkl` can extend it;
+    //  - reopen `Task` so the typed task classes in `Tasks.pkl` can extend it;
+    //  - break the `AnyAllowExpressions`/`Sequence` typealias cycle, which Pkl
+    //    rejects (`Sequence` is inlined one level, as in the hand-curated file).
+    for (mod in modulesGenerator.modules) {
+      ["\(mod.moduleName).pkl"] {
+        text = fixupModule(refactorClasses(stripDeadTaskClasses(mod.moduleNode)).output.text)
+      }
+    }
+    ["Tasks.pkl"] {
+      text = tasksModule.render("")
+    }
+  }
+}
