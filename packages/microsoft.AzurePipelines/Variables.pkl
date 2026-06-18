@@ -25,6 +25,60 @@ function createReadonlyVariable(varName: String, varValue: String): ServiceSchem
   readonly = "true"
 }
 
+/// A `##vso[task.setvariable]` logging command — set a pipeline variable at
+/// runtime from a script step, for use by *later* steps. Render it into a step's
+/// `script` with [text]:
+///
+/// ```
+/// new ScriptStep {
+///   script = new Variables.SetVariable { name = "USE_TELEMETRY"; value = "true" }.text
+/// }
+/// ```
+///
+/// → `echo "##vso[task.setvariable variable=USE_TELEMETRY]true"`.
+class SetVariable {
+  /// The variable name.
+  name: String
+  /// The value to assign.
+  value: String
+  /// Expose to other jobs/stages (read via `dependencies.<job>.outputs['<step>.<name>']`).
+  isOutput: Boolean = false
+  /// Mask the value in logs.
+  isSecret: Boolean = false
+
+  fixed text: String =
+    let (
+      flags = (if (isOutput) ";isOutput=true" else "") + (if (isSecret) ";issecret=true" else "")
+    )
+      "echo \"##vso[task.setvariable variable=\(name)\(flags)]\(value)\""
+
+  function toString(): String = text
+}
+
+/// Render a plain `name = value` mapping to one [SetVariable] logging command
+/// per entry (newline-joined) — drop the result into a step's `script`:
+///
+/// ```
+/// new ScriptStep {
+///   script = Variables.setVariables(new Mapping {
+///     ["ARGOCD_ENV_USE_TELEMETRY"] = "true"
+///     ["REGION"] = "eu"
+///   })
+/// }
+/// ```
+///
+/// →
+/// ```
+/// echo "##vso[task.setvariable variable=ARGOCD_ENV_USE_TELEMETRY]true"
+/// echo "##vso[task.setvariable variable=REGION]eu"
+/// ```
+function setVariables(values: Mapping<String, String>): String =
+  values
+    .toMap()
+    .entries
+    .map((entry) -> new SetVariable { name = entry.key; value = entry.value }.text)
+    .join("\n")
+
 class BuildVars {
   /// The ID of the record for the completed build.
   fixed BuildId: String = "$(Build.BuildId)"
