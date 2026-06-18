@@ -24,7 +24,7 @@ class PowerShell_2 extends ServiceSchema.Task {
 /// PowerShell inputs
 local class PowerShell_2Inputs {
   /// Type
-  targetType: ("filePath"|"inline")?
+  targetType: ("filePath" | "inline")?
 
   /// Script Path
   filePath: String?
@@ -36,22 +36,22 @@ local class PowerShell_2Inputs {
   script: String?
 
   /// ErrorActionPreference
-  errorActionPreference: ("default"|"stop"|"continue"|"silentlyContinue")?
+  errorActionPreference: ("default" | "stop" | "continue" | "silentlyContinue")?
 
   /// WarningPreference
-  warningPreference: ("default"|"stop"|"continue"|"silentlyContinue")?
+  warningPreference: ("default" | "stop" | "continue" | "silentlyContinue")?
 
   /// InformationPreference
-  informationPreference: ("default"|"stop"|"continue"|"silentlyContinue")?
+  informationPreference: ("default" | "stop" | "continue" | "silentlyContinue")?
 
   /// VerbosePreference
-  verbosePreference: ("default"|"stop"|"continue"|"silentlyContinue")?
+  verbosePreference: ("default" | "stop" | "continue" | "silentlyContinue")?
 
   /// DebugPreference
-  debugPreference: ("default"|"stop"|"continue"|"silentlyContinue")?
+  debugPreference: ("default" | "stop" | "continue" | "silentlyContinue")?
 
   /// ProgressPreference
-  progressPreference: ("default"|"stop"|"continue"|"silentlyContinue")?
+  progressPreference: ("default" | "stop" | "continue" | "silentlyContinue")?
 
   /// Fail on Standard Error
   failOnStderr: Boolean?
@@ -85,7 +85,7 @@ class PowerShell_1 extends ServiceSchema.Task {
 /// PowerShell inputs
 local class PowerShell_1Inputs {
   /// Type
-  scriptType: ("inlineScript"|"filePath")?
+  scriptType: ("inlineScript" | "filePath")?
 
   /// Script Path
   scriptName: String?
@@ -119,7 +119,7 @@ local class AzurePowerShell_5Inputs {
   azureSubscription: String
 
   /// Script Type
-  ScriptType: ("FilePath"|"InlineScript")?
+  ScriptType: ("FilePath" | "InlineScript")?
 
   /// Script Path
   ScriptPath: String?
@@ -131,13 +131,13 @@ local class AzurePowerShell_5Inputs {
   ScriptArguments: String?
 
   /// ErrorActionPreference
-  errorActionPreference: ("stop"|"continue"|"silentlyContinue")?
+  errorActionPreference: ("stop" | "continue" | "silentlyContinue")?
 
   /// Fail on Standard Error
   FailOnStandardError: Boolean?
 
   /// Azure PowerShell Version
-  azurePowerShellVersion: ("LatestVersion"|"OtherVersion")?
+  azurePowerShellVersion: ("LatestVersion" | "OtherVersion")?
 
   /// Preferred Azure PowerShell Version
   preferredAzurePowerShellVersion: String?
@@ -168,7 +168,7 @@ local class AzurePowerShell_4Inputs {
   azureSubscription: String
 
   /// Script Type
-  ScriptType: ("FilePath"|"InlineScript")?
+  ScriptType: ("FilePath" | "InlineScript")?
 
   /// Script Path
   ScriptPath: String?
@@ -180,7 +180,7 @@ local class AzurePowerShell_4Inputs {
   ScriptArguments: String?
 
   /// ErrorActionPreference
-  errorActionPreference: ("stop"|"continue"|"silentlyContinue")?
+  errorActionPreference: ("stop" | "continue" | "silentlyContinue")?
 
   /// Fail on Standard Error
   FailOnStandardError: Boolean?
@@ -189,7 +189,7 @@ local class AzurePowerShell_4Inputs {
   RestrictContextToCurrentTask: Boolean?
 
   /// Azure PowerShell Version
-  azurePowerShellVersion: ("LatestVersion"|"OtherVersion")?
+  azurePowerShellVersion: ("LatestVersion" | "OtherVersion")?
 
   /// Preferred Azure PowerShell Version
   preferredAzurePowerShellVersion: String?
@@ -217,7 +217,7 @@ class AzurePowerShell_1 extends ServiceSchema.Task {
 /// Azure PowerShell inputs
 local class AzurePowerShell_1Inputs {
   /// Azure Connection Type
-  ConnectedServiceNameSelector: ("ConnectedServiceName"|"ConnectedServiceNameARM")?
+  ConnectedServiceNameSelector: ("ConnectedServiceName" | "ConnectedServiceNameARM")?
 
   /// Azure Classic Subscription
   ConnectedServiceName: String?
@@ -226,7 +226,7 @@ local class AzurePowerShell_1Inputs {
   ConnectedServiceNameARM: String?
 
   /// Script Type
-  ScriptType: ("FilePath"|"InlineScript")?
+  ScriptType: ("FilePath" | "InlineScript")?
 
   /// Script Path
   ScriptPath: String?
@@ -251,7 +251,7 @@ class AzurePowerShell_2 extends ServiceSchema.Task {
 /// Azure PowerShell inputs
 local class AzurePowerShell_2Inputs {
   /// Azure Connection Type
-  azureConnectionType: ("ConnectedServiceName"|"ConnectedServiceNameARM")?
+  azureConnectionType: ("ConnectedServiceName" | "ConnectedServiceNameARM")?
 
   /// Azure Classic Subscription
   azureClassicSubscription: String?
@@ -260,7 +260,7 @@ local class AzurePowerShell_2Inputs {
   azureSubscription: String?
 
   /// Script Type
-  ScriptType: ("FilePath"|"InlineScript")?
+  ScriptType: ("FilePath" | "InlineScript")?
 
   /// Script Path
   ScriptPath: String?
@@ -272,7 +272,7 @@ local class AzurePowerShell_2Inputs {
   ScriptArguments: String?
 
   /// Azure PowerShell Version
-  azurePowerShellVersion: ("LatestVersion"|"OtherVersion")?
+  azurePowerShellVersion: ("LatestVersion" | "OtherVersion")?
 
   /// Preferred Azure PowerShell Version
   preferredAzurePowerShellVersion: String?
@@ -291,7 +291,7 @@ class AzurePowerShell_3 extends ServiceSchema.Task {
 /// Azure PowerShell inputs
 local class AzurePowerShell_3Inputs {
   /// Azure Connection Type
-  azureConnectionType: ("ConnectedServiceName"|"ConnectedServiceNameARM")?
+  azureConnectionType: ("ConnectedServiceName" | "ConnectedServiceNameARM")?
 
   /// Azure Classic Subscription
   azureClassicSubscription: String?
@@ -300,7 +300,7 @@ local class AzurePowerShell_3Inputs {
   azureSubscription: String?
 
   /// Script Type
-  ScriptType: ("FilePath"|"InlineScript")?
+  ScriptType: ("FilePath" | "InlineScript")?
 
   /// Script Path
   ScriptPath: String?
@@ -312,13 +312,13 @@ local class AzurePowerShell_3Inputs {
   ScriptArguments: String?
 
   /// ErrorActionPreference
-  errorActionPreference: ("stop"|"continue"|"silentlyContinue")?
+  errorActionPreference: ("stop" | "continue" | "silentlyContinue")?
 
   /// Fail on Standard Error
   FailOnStandardError: Boolean?
 
   /// Azure PowerShell Version
-  azurePowerShellVersion: ("LatestVersion"|"OtherVersion")?
+  azurePowerShellVersion: ("LatestVersion" | "OtherVersion")?
 
   /// Preferred Azure PowerShell Version
   preferredAzurePowerShellVersion: String?
@@ -340,7 +340,7 @@ class MysqlDeploymentOnMachineGroup_1 extends ServiceSchema.Task {
 /// MySQL database deploy inputs
 local class MysqlDeploymentOnMachineGroup_1Inputs {
   /// Deploy MySql Using
-  TaskNameSelector: ("SqlTaskFile"|"InlineSqlTask")?
+  TaskNameSelector: ("SqlTaskFile" | "InlineSqlTask")?
 
   /// MySQL Script
   SqlFile: String?
@@ -448,7 +448,7 @@ local class Maven_4Inputs {
   allowBrokenSymlinks: Boolean?
 
   /// Code coverage tool
-  codeCoverageToolOption: ("None"|"Cobertura"|"JaCoCo")?
+  codeCoverageToolOption: ("None" | "Cobertura" | "JaCoCo")?
 
   /// Class inclusion/exclusion filters
   codeCoverageClassFilter: String?
@@ -466,19 +466,19 @@ local class Maven_4Inputs {
   codeCoverageRestoreOriginalPomXml: Boolean?
 
   /// Set JAVA_HOME by
-  javaHomeOption: ("JDKVersion"|"Path")?
+  javaHomeOption: ("JDKVersion" | "Path")?
 
   /// JDK version
-  jdkVersionOption: ("default"|"1.21"|"1.17"|"1.11"|"1.10"|"1.9"|"1.8"|"1.7"|"1.6")?
+  jdkVersionOption: ("default" | "1.21" | "1.17" | "1.11" | "1.10" | "1.9" | "1.8" | "1.7" | "1.6")?
 
   /// JDK path
   jdkDirectory: String?
 
   /// JDK architecture
-  jdkArchitectureOption: ("x86"|"x64")?
+  jdkArchitectureOption: ("x86" | "x64")?
 
   /// Maven version
-  mavenVersionOption: ("Default"|"Path")?
+  mavenVersionOption: ("Default" | "Path")?
 
   /// Maven path
   mavenDirectory: String?
@@ -502,7 +502,7 @@ local class Maven_4Inputs {
   isJacocoCoverageReportXML: Boolean?
 
   /// SonarQube scanner for Maven version
-  sqMavenPluginVersionChoice: ("latest"|"pom")?
+  sqMavenPluginVersionChoice: ("latest" | "pom")?
 
   /// Run Checkstyle
   checkStyleRunAnalysis: Boolean?
@@ -520,7 +520,7 @@ local class Maven_4Inputs {
   spotBugsVersion: String?
 
   /// The goal for the spotbugs plugin
-  spotBugsGoal: ("spotbugs"|"check")?
+  spotBugsGoal: ("spotbugs" | "check")?
 
   /// Fail when bugs are found with spotbugs:check
   failWhenBugsFound: Boolean?
@@ -560,7 +560,7 @@ local class Maven_2Inputs {
   allowBrokenSymlinks: Boolean?
 
   /// Code coverage tool
-  codeCoverageToolOption: ("None"|"Cobertura"|"JaCoCo")?
+  codeCoverageToolOption: ("None" | "Cobertura" | "JaCoCo")?
 
   /// Class inclusion/exclusion filters
   codeCoverageClassFilter: String?
@@ -578,19 +578,19 @@ local class Maven_2Inputs {
   codeCoverageRestoreOriginalPomXml: Boolean?
 
   /// Set JAVA_HOME by
-  javaHomeOption: ("JDKVersion"|"Path")?
+  javaHomeOption: ("JDKVersion" | "Path")?
 
   /// JDK version
-  jdkVersionOption: ("default"|"1.21"|"1.17"|"1.11"|"1.10"|"1.9"|"1.8"|"1.7"|"1.6")?
+  jdkVersionOption: ("default" | "1.21" | "1.17" | "1.11" | "1.10" | "1.9" | "1.8" | "1.7" | "1.6")?
 
   /// JDK path
   jdkDirectory: String?
 
   /// JDK architecture
-  jdkArchitectureOption: ("x86"|"x64")?
+  jdkArchitectureOption: ("x86" | "x64")?
 
   /// Maven version
-  mavenVersionOption: ("Default"|"Path")?
+  mavenVersionOption: ("Default" | "Path")?
 
   /// Maven path
   mavenDirectory: String?
@@ -611,7 +611,7 @@ local class Maven_2Inputs {
   isJacocoCoverageReportXML: Boolean?
 
   /// SonarQube scanner for Maven version
-  sqMavenPluginVersionChoice: ("latest"|"pom")?
+  sqMavenPluginVersionChoice: ("latest" | "pom")?
 
   /// Run Checkstyle
   checkStyleRunAnalysis: Boolean?
@@ -657,7 +657,7 @@ local class Maven_3Inputs {
   allowBrokenSymlinks: Boolean?
 
   /// Code coverage tool
-  codeCoverageToolOption: ("None"|"Cobertura"|"JaCoCo")?
+  codeCoverageToolOption: ("None" | "Cobertura" | "JaCoCo")?
 
   /// Class inclusion/exclusion filters
   codeCoverageClassFilter: String?
@@ -675,19 +675,19 @@ local class Maven_3Inputs {
   codeCoverageRestoreOriginalPomXml: Boolean?
 
   /// Set JAVA_HOME by
-  javaHomeOption: ("JDKVersion"|"Path")?
+  javaHomeOption: ("JDKVersion" | "Path")?
 
   /// JDK version
-  jdkVersionOption: ("default"|"1.21"|"1.17"|"1.11"|"1.10"|"1.9"|"1.8"|"1.7"|"1.6")?
+  jdkVersionOption: ("default" | "1.21" | "1.17" | "1.11" | "1.10" | "1.9" | "1.8" | "1.7" | "1.6")?
 
   /// JDK path
   jdkDirectory: String?
 
   /// JDK architecture
-  jdkArchitectureOption: ("x86"|"x64")?
+  jdkArchitectureOption: ("x86" | "x64")?
 
   /// Maven version
-  mavenVersionOption: ("Default"|"Path")?
+  mavenVersionOption: ("Default" | "Path")?
 
   /// Maven path
   mavenDirectory: String?
@@ -711,7 +711,7 @@ local class Maven_3Inputs {
   isJacocoCoverageReportXML: Boolean?
 
   /// SonarQube scanner for Maven version
-  sqMavenPluginVersionChoice: ("latest"|"pom")?
+  sqMavenPluginVersionChoice: ("latest" | "pom")?
 
   /// Run Checkstyle
   checkStyleRunAnalysis: Boolean?
@@ -729,7 +729,7 @@ local class Maven_3Inputs {
   spotBugsVersion: String?
 
   /// The goal for the spotbugs plugin
-  spotBugsGoal: ("spotbugs"|"check")?
+  spotBugsGoal: ("spotbugs" | "check")?
 
   /// Fail when bugs are found with spotbugs:check
   failWhenBugsFound: Boolean?
@@ -766,7 +766,7 @@ local class Maven_1Inputs {
   testRunTitle: String?
 
   /// Code Coverage Tool
-  codeCoverageToolOption: ("None"|"Cobertura"|"JaCoCo")?
+  codeCoverageToolOption: ("None" | "Cobertura" | "JaCoCo")?
 
   /// Class Inclusion/Exclusion Filters
   codeCoverageClassFilter: String?
@@ -781,19 +781,19 @@ local class Maven_1Inputs {
   codeCoverageFailIfEmpty: Boolean?
 
   /// Set JAVA_HOME by
-  javaHomeOption: ("JDKVersion"|"Path")?
+  javaHomeOption: ("JDKVersion" | "Path")?
 
   /// JDK Version
-  jdkVersionOption: ("default"|"1.9"|"1.8"|"1.7"|"1.6")?
+  jdkVersionOption: ("default" | "1.9" | "1.8" | "1.7" | "1.6")?
 
   /// JDK Path
   jdkDirectory: String?
 
   /// JDK Architecture
-  jdkArchitectureOption: ("x86"|"x64")?
+  jdkArchitectureOption: ("x86" | "x64")?
 
   /// Maven Version
-  mavenVersionOption: ("Default"|"Path")?
+  mavenVersionOption: ("Default" | "Path")?
 
   /// Maven Path
   mavenDirectory: String?
@@ -866,7 +866,7 @@ local class DotNetCoreCLI_2Inputs {
   azureSubscription: String?
 
   /// Command
-  command: ("build"|"push"|"pack"|"publish"|"restore"|"run"|"test"|"custom")?
+  command: ("build" | "push" | "pack" | "publish" | "restore" | "run" | "test" | "custom")?
 
   /// Publish web projects
   publishWebProjects: Boolean?
@@ -896,7 +896,7 @@ local class DotNetCoreCLI_2Inputs {
   modifyOutputPath: Boolean?
 
   /// Feeds to use
-  feedsToUse: ("select"|"config")?
+  feedsToUse: ("select" | "config")?
 
   /// Use packages from this Azure Artifacts feed. Select from the dropdown or enter [project name/]feed name.
   vstsFeed: String?
@@ -917,13 +917,13 @@ local class DotNetCoreCLI_2Inputs {
   restoreDirectory: String?
 
   /// Verbosity
-  verbosityRestore: ("-"|"Quiet"|"Minimal"|"Normal"|"Detailed"|"Diagnostic")?
+  verbosityRestore: ("-" | "Quiet" | "Minimal" | "Normal" | "Detailed" | "Diagnostic")?
 
   /// Path to NuGet package(s) to publish
   packagesToPush: String?
 
   /// Target feed location
-  nuGetFeedType: ("internal"|"external")?
+  nuGetFeedType: ("internal" | "external")?
 
   /// Target feed
   publishVstsFeed: String?
@@ -953,7 +953,7 @@ local class DotNetCoreCLI_2Inputs {
   includesource: Boolean?
 
   /// Automatic package versioning
-  versioningScheme: ("off"|"byPrereleaseNumber"|"byEnvVar"|"byBuildNumber")?
+  versioningScheme: ("off" | "byPrereleaseNumber" | "byEnvVar" | "byBuildNumber")?
 
   /// Environment variable
   versionEnvVar: String?
@@ -971,7 +971,7 @@ local class DotNetCoreCLI_2Inputs {
   buildProperties: String?
 
   /// Verbosity
-  verbosityPack: ("-"|"Quiet"|"Minimal"|"Normal"|"Detailed"|"Diagnostic")?
+  verbosityPack: ("-" | "Quiet" | "Minimal" | "Normal" | "Detailed" | "Diagnostic")?
 
   /// Working directory
   workingDirectory: String?
@@ -993,7 +993,7 @@ class DotNetCoreCLI_0 extends ServiceSchema.Task {
 /// .NET Core (PREVIEW) inputs
 local class DotNetCoreCLI_0Inputs {
   /// Command
-  command: ("build"|"publish"|"restore"|"test"|"run")?
+  command: ("build" | "publish" | "restore" | "test" | "run")?
 
   /// Publish Web Projects
   publishWebProjects: Boolean?
@@ -1021,7 +1021,7 @@ class DotNetCoreCLI_1 extends ServiceSchema.Task {
 /// .NET Core inputs
 local class DotNetCoreCLI_1Inputs {
   /// Command
-  command: ("build"|"publish"|"restore"|"test"|"run")?
+  command: ("build" | "publish" | "restore" | "test" | "run")?
 
   /// Publish Web Projects
   publishWebProjects: Boolean?
@@ -1071,7 +1071,7 @@ class AzureRmWebAppDeployment_4 extends ServiceSchema.Task {
 /// Azure App Service deploy inputs
 local class AzureRmWebAppDeployment_4Inputs {
   /// Connection type
-  ConnectionType: ("AzureRM"|"PublishProfile")?
+  ConnectionType: ("AzureRM" | "PublishProfile")?
 
   /// Azure subscription
   azureSubscription: String?
@@ -1085,14 +1085,15 @@ local class AzureRmWebAppDeployment_4Inputs {
   /// App Service type
   appType: (
     "webApp"
-    |"webAppLinux"
-    |"webAppContainer"
-    |"webAppHyperVContainer"
-    |"functionApp"
-    |"functionAppLinux"
-    |"functionAppContainer"
-    |"apiApp"
-    |"mobileApp")?
+      | "webAppLinux"
+      | "webAppContainer"
+      | "webAppHyperVContainer"
+      | "functionApp"
+      | "functionAppLinux"
+      | "functionAppContainer"
+      | "apiApp"
+      | "mobileApp"
+  )?
 
   /// App Service name
   WebAppName: String?
@@ -1127,24 +1128,25 @@ local class AzureRmWebAppDeployment_4Inputs {
   /// Runtime Stack
   RuntimeStackFunction: (
     "DOTNET|2.2"
-    |"DOTNET|3.1"
-    |"JAVA|8"
-    |"JAVA|11"
-    |"NODE|8"
-    |"NODE|10"
-    |"NODE|12"
-    |"NODE|14"
-    |"NODE|20"
-    |"NODE|22"
-    |"PYTHON|3.6"
-    |"PYTHON|3.7"
-    |"PYTHON|3.8")?
+      | "DOTNET|3.1"
+      | "JAVA|8"
+      | "JAVA|11"
+      | "NODE|8"
+      | "NODE|10"
+      | "NODE|12"
+      | "NODE|14"
+      | "NODE|20"
+      | "NODE|22"
+      | "PYTHON|3.6"
+      | "PYTHON|3.7"
+      | "PYTHON|3.8"
+  )?
 
   /// Startup command 
   StartupCommand: String?
 
   /// Deployment script type
-  ScriptType: (""|"Inline Script"|"File Path")?
+  ScriptType: ("" | "Inline Script" | "File Path")?
 
   /// Inline Script
   InlineScript: String?
@@ -1165,7 +1167,7 @@ local class AzureRmWebAppDeployment_4Inputs {
   enableCustomDeployment: Boolean?
 
   /// Deployment method
-  DeploymentType: ("webDeploy"|"zipDeploy"|"runFromZip")?
+  DeploymentType: ("webDeploy" | "zipDeploy" | "runFromZip")?
 
   /// Take App Offline
   TakeAppOfflineFlag: Boolean?
@@ -1263,7 +1265,7 @@ class AzureRmWebAppDeployment_5 extends ServiceSchema.Task {
 /// Azure App Service deploy inputs
 local class AzureRmWebAppDeployment_5Inputs {
   /// Connection type
-  ConnectionType: ("AzureRM"|"PublishProfile")?
+  ConnectionType: ("AzureRM" | "PublishProfile")?
 
   /// Azure subscription
   azureSubscription: String?
@@ -1277,14 +1279,15 @@ local class AzureRmWebAppDeployment_5Inputs {
   /// App Service type
   appType: (
     "webApp"
-    |"webAppLinux"
-    |"webAppContainer"
-    |"webAppHyperVContainer"
-    |"functionApp"
-    |"functionAppLinux"
-    |"functionAppContainer"
-    |"apiApp"
-    |"mobileApp")?
+      | "webAppLinux"
+      | "webAppContainer"
+      | "webAppHyperVContainer"
+      | "functionApp"
+      | "functionAppLinux"
+      | "functionAppContainer"
+      | "apiApp"
+      | "mobileApp"
+  )?
 
   /// App Service name
   WebAppName: String?
@@ -1316,66 +1319,68 @@ local class AzureRmWebAppDeployment_5Inputs {
   /// Runtime Stack
   RuntimeStack: (
     "DOTNETCORE|9.0"
-    |"DOTNETCORE|8.0"
-    |"DOTNETCORE|7.0"
-    |"DOTNETCORE|6.0"
-    |"NODE|22-lts"
-    |"NODE|20-lts"
-    |"NODE|18-lts"
-    |"NODE|16-lts"
-    |"PYTHON|3.13"
-    |"PYTHON|3.12"
-    |"PYTHON|3.11"
-    |"PYTHON|3.10"
-    |"PYTHON|3.9"
-    |"PYTHON|3.8"
-    |"PHP|8.3"
-    |"PHP|8.2"
-    |"PHP|8.1"
-    |"PHP|8.0"
-    |"JAVA|21-java21"
-    |"JAVA|17-java17"
-    |"JAVA|11-java11"
-    |"JAVA|8-jre8"
-    |"JBOSSEAP|8-java17"
-    |"JBOSSEAP|8-java11"
-    |"JBOSSEAP|7-java17"
-    |"JBOSSEAP|7-java11"
-    |"JBOSSEAP|7-java8"
-    |"TOMCAT|10.1-java21"
-    |"TOMCAT|10.1-java17"
-    |"TOMCAT|10.1-java11"
-    |"TOMCAT|10.0-java17"
-    |"TOMCAT|10.0-java11"
-    |"TOMCAT|10.0-jre8"
-    |"TOMCAT|9.0-java21"
-    |"TOMCAT|9.0-java17"
-    |"TOMCAT|9.0-java11"
-    |"TOMCAT|9.0-jre8"
-    |"TOMCAT|8.5-java11"
-    |"TOMCAT|8.5-jre8")?
+      | "DOTNETCORE|8.0"
+      | "DOTNETCORE|7.0"
+      | "DOTNETCORE|6.0"
+      | "NODE|22-lts"
+      | "NODE|20-lts"
+      | "NODE|18-lts"
+      | "NODE|16-lts"
+      | "PYTHON|3.13"
+      | "PYTHON|3.12"
+      | "PYTHON|3.11"
+      | "PYTHON|3.10"
+      | "PYTHON|3.9"
+      | "PYTHON|3.8"
+      | "PHP|8.3"
+      | "PHP|8.2"
+      | "PHP|8.1"
+      | "PHP|8.0"
+      | "JAVA|21-java21"
+      | "JAVA|17-java17"
+      | "JAVA|11-java11"
+      | "JAVA|8-jre8"
+      | "JBOSSEAP|8-java17"
+      | "JBOSSEAP|8-java11"
+      | "JBOSSEAP|7-java17"
+      | "JBOSSEAP|7-java11"
+      | "JBOSSEAP|7-java8"
+      | "TOMCAT|10.1-java21"
+      | "TOMCAT|10.1-java17"
+      | "TOMCAT|10.1-java11"
+      | "TOMCAT|10.0-java17"
+      | "TOMCAT|10.0-java11"
+      | "TOMCAT|10.0-jre8"
+      | "TOMCAT|9.0-java21"
+      | "TOMCAT|9.0-java17"
+      | "TOMCAT|9.0-java11"
+      | "TOMCAT|9.0-jre8"
+      | "TOMCAT|8.5-java11"
+      | "TOMCAT|8.5-jre8"
+  )?
 
   /// Runtime Stack
   RuntimeStackFunction: (
     "DOTNET|2.2"
-    |"DOTNET|3.1"
-    |"JAVA|8"
-    |"JAVA|11"
-    |"NODE|8"
-    |"NODE|10"
-    |"NODE|12"
-    |"NODE|14"
-    |"NODE|20"
-    |"NODE|22"
-    |"PYTHON|3.6"
-    |"PYTHON|3.7"
-    |"PYTHON|3.8")?
+      | "DOTNET|3.1"
+      | "JAVA|8"
+      | "JAVA|11"
+      | "NODE|8"
+      | "NODE|10"
+      | "NODE|12"
+      | "NODE|14"
+      | "NODE|20"
+      | "NODE|22"
+      | "PYTHON|3.6"
+      | "PYTHON|3.7"
+      | "PYTHON|3.8"
+  )?
 
   /// Startup command 
   StartupCommand: String?
 
   /// Deployment script type
-  ScriptType: (""|"Inline Script"|"File Path")?
+  ScriptType: ("" | "Inline Script" | "File Path")?
 
   /// Inline Script
   InlineScript: String?
@@ -1396,7 +1401,7 @@ local class AzureRmWebAppDeployment_5Inputs {
   enableCustomDeployment: Boolean?
 
   /// Deployment method
-  DeploymentType: ("webDeploy"|"zipDeploy"|"runFromZip")?
+  DeploymentType: ("webDeploy" | "zipDeploy" | "runFromZip")?
 
   /// Take App Offline
   TakeAppOfflineFlag: Boolean?
@@ -1426,7 +1431,7 @@ local class AzureRmWebAppDeployment_5Inputs {
   JSONFiles: String?
 
   /// Deployment method
-  DeploymentTypeLinux: ("oneDeploy"|"zipDeploy")?
+  DeploymentTypeLinux: ("oneDeploy" | "zipDeploy")?
 
   /// Enable clean deployment
   CleanDeploymentFlag: Boolean?
@@ -1448,7 +1453,7 @@ local class AzureRmWebAppDeployment_3Inputs {
   azureSubscription: String
 
   /// App type
-  appType: ("app"|"applinux"|"functionapp"|"api"|"mobileapp")?
+  appType: ("app" | "applinux" | "functionapp" | "api" | "mobileapp")?
 
   /// App Service name
   WebAppName: String
@@ -1463,7 +1468,7 @@ local class AzureRmWebAppDeployment_3Inputs {
   SlotName: String?
 
   /// Image Source
-  ImageSource: ("Registry"|"Builtin")?
+  ImageSource: ("Registry" | "Builtin")?
 
   /// Registry
   AzureContainerRegistry: String?
@@ -1478,7 +1483,7 @@ local class AzureRmWebAppDeployment_3Inputs {
   AzureContainerRegistryTag: String?
 
   /// Repository Access
-  DockerRepositoryAccess: ("private"|"public")?
+  DockerRepositoryAccess: ("private" | "public")?
 
   /// Registry Connection
   dockerRegistryConnection: String?
@@ -1517,7 +1522,7 @@ local class AzureRmWebAppDeployment_3Inputs {
   WebAppUri: String?
 
   /// Deployment script type
-  ScriptType: (""|"Inline Script"|"File Path")?
+  ScriptType: ("" | "Inline Script" | "File Path")?
 
   /// Inline Script
   InlineScript: String?
@@ -1590,7 +1595,7 @@ local class PowerShellOnTargetMachines_3Inputs {
   UserPassword: String?
 
   /// Script Type
-  ScriptType: ("FilePath"|"Inline")?
+  ScriptType: ("FilePath" | "Inline")?
 
   /// Script File Path
   ScriptPath: String?
@@ -1608,16 +1613,16 @@ local class PowerShellOnTargetMachines_3Inputs {
   SessionVariables: String?
 
   /// Protocol
-  CommunicationProtocol: ("Http"|"Https")?
+  CommunicationProtocol: ("Http" | "Https")?
 
   /// Authentication
-  AuthenticationMechanism: ("Default"|"Credssp")?
+  AuthenticationMechanism: ("Default" | "Credssp")?
 
   /// Session Option parameters
   NewPsSessionOptionArguments: String?
 
   /// ErrorActionPreference
-  ErrorActionPreference: ("stop"|"continue"|"silentlyContinue")?
+  ErrorActionPreference: ("stop" | "continue" | "silentlyContinue")?
 
   /// Fail on Standard Error
   failOnStderr: Boolean?
@@ -1654,7 +1659,7 @@ local class PowerShellOnTargetMachines_1Inputs {
   AdminPassword: String?
 
   /// Protocol
-  Protocol: ("Http"|"Https")?
+  Protocol: ("Http" | "Https")?
 
   /// Test Certificate
   TestCertificate: Boolean?
@@ -1675,7 +1680,7 @@ local class PowerShellOnTargetMachines_1Inputs {
   RunPowershellInParallel: Boolean?
 
   /// Select Machines By
-  ResourceFilteringMethod: ("machineNames"|"tags")?
+  ResourceFilteringMethod: ("machineNames" | "tags")?
 
   /// Filter Criteria
   MachineNames: String?
@@ -1703,7 +1708,7 @@ local class PowerShellOnTargetMachines_2Inputs {
   AdminPassword: String?
 
   /// Protocol
-  Protocol: ("Http"|"Https")?
+  Protocol: ("Http" | "Https")?
 
   /// Test Certificate
   TestCertificate: Boolean?
@@ -1724,7 +1729,7 @@ local class PowerShellOnTargetMachines_2Inputs {
   RunPowershellInParallel: Boolean?
 
   /// Select Machines By
-  ResourceFilteringMethod: ("machineNames"|"tags")?
+  ResourceFilteringMethod: ("machineNames" | "tags")?
 
   /// Filter Criteria
   MachineNames: String?
@@ -1743,7 +1748,7 @@ class PublishCodeCoverageResults_1 extends ServiceSchema.Task {
 /// Publish code coverage inputs
 local class PublishCodeCoverageResults_1Inputs {
   /// Code coverage tool
-  codeCoverageTool: ("Cobertura"|"JaCoCo")?
+  codeCoverageTool: ("Cobertura" | "JaCoCo")?
 
   /// Summary file
   summaryFileLocation: String
@@ -1780,7 +1785,7 @@ local class RunVisualStudioTestsusingTestAgent_1Inputs {
   dropLocation: String
 
   /// Test Selection
-  testSelection: ("testAssembly"|"testPlan")?
+  testSelection: ("testAssembly" | "testPlan")?
 
   /// Test Plan
   testPlan: String?
@@ -1844,7 +1849,7 @@ local class ManualIntervention_8Inputs {
   emailRecipients: String?
 
   /// On timeout
-  onTimeout: ("reject"|"resume")?
+  onTimeout: ("reject" | "resume")?
 }
 
 /// Install Apple provisioning profile
@@ -1860,7 +1865,7 @@ class InstallAppleProvisioningProfile_1 extends ServiceSchema.Task {
 /// Install Apple provisioning profile inputs
 local class InstallAppleProvisioningProfile_1Inputs {
   /// Provisioning profile location
-  provisioningProfileLocation: ("secureFiles"|"sourceRepository")?
+  provisioningProfileLocation: ("secureFiles" | "sourceRepository")?
 
   /// Provisioning profile
   provProfileSecureFile: String?
@@ -1902,9 +1907,7 @@ class SonarQubePostTest_1 extends ServiceSchema.Task {
 }
 
 /// SonarQube for MSBuild - End Analysis inputs
-local class SonarQubePostTest_1Inputs {
-
-}
+local class SonarQubePostTest_1Inputs {}
 
 /// PyPI publisher
 ///
@@ -2016,7 +2019,7 @@ class Go_0 extends ServiceSchema.Task {
 /// Go inputs
 local class Go_0Inputs {
   /// Command
-  command: ("get"|"build"|"test"|"custom")?
+  command: ("get" | "build" | "test" | "custom")?
 
   /// Custom command
   customCommand: String?
@@ -2039,9 +2042,7 @@ class PublishPipelineMetadata_0 extends ServiceSchema.Task {
 }
 
 /// Publish Pipeline Metadata inputs
-local class PublishPipelineMetadata_0Inputs {
-
-}
+local class PublishPipelineMetadata_0Inputs {}
 
 /// Docker
 ///
@@ -2056,7 +2057,7 @@ class Docker_0 extends ServiceSchema.Task {
 /// Docker inputs
 local class Docker_0Inputs {
   /// Container Registry Type
-  containerregistrytype: ("Azure Container Registry"|"Container Registry")?
+  containerregistrytype: ("Azure Container Registry" | "Container Registry")?
 
   /// Docker Registry Service Connection
   dockerRegistryConnection: String?
@@ -2068,7 +2069,14 @@ local class Docker_0Inputs {
   azureContainerRegistry: String?
 
   /// Action
-  action: ("Build an image"|"Tag images"|"Push an image"|"Push images"|"Run an image"|"Run a Docker command")?
+  action: (
+    "Build an image"
+      | "Tag images"
+      | "Push an image"
+      | "Push images"
+      | "Run an image"
+      | "Run a Docker command"
+  )?
 
   /// Docker File
   dockerFile: String?
@@ -2131,7 +2139,7 @@ local class Docker_0Inputs {
   detached: Boolean?
 
   /// Restart Policy
-  restartPolicy: ("no"|"onFailure"|"always"|"unlessStopped")?
+  restartPolicy: ("no" | "onFailure" | "always" | "unlessStopped")?
 
   /// Maximum Restart Retries
   restartMaxRetries: String?
@@ -2171,7 +2179,7 @@ local class Docker_2Inputs {
   repository: String?
 
   /// Command
-  command: ("buildAndPush"|"build"|"push"|"login"|"logout"|"start"|"stop")?
+  command: ("buildAndPush" | "build" | "push" | "login" | "logout" | "start" | "stop")?
 
   /// Dockerfile
   Dockerfile: String?
@@ -2208,7 +2216,7 @@ class Docker_1 extends ServiceSchema.Task {
 /// Docker inputs
 local class Docker_1Inputs {
   /// Container registry type
-  containerregistrytype: ("Azure Container Registry"|"Container Registry")?
+  containerregistrytype: ("Azure Container Registry" | "Container Registry")?
 
   /// Add base image metadata to image(s)
   addBaseImageData: Boolean?
@@ -2223,7 +2231,7 @@ local class Docker_1Inputs {
   azureContainerRegistry: String?
 
   /// Command
-  command: ("Build an image"|"Tag image"|"Push an image"|"Run an image"|"login"|"logout")?
+  command: ("Build an image" | "Tag image" | "Push an image" | "Run an image" | "login" | "logout")?
 
   /// Dockerfile
   dockerFile: String?
@@ -2292,7 +2300,7 @@ local class Docker_1Inputs {
   runInBackground: Boolean?
 
   /// Restart policy
-  restartPolicy: ("no"|"onFailure"|"always"|"unlessStopped")?
+  restartPolicy: ("no" | "onFailure" | "always" | "unlessStopped")?
 
   /// Maximum restart retries
   maxRestartRetries: String?
@@ -2326,7 +2334,7 @@ local class Docker_2_alt1Inputs {
   repository: String?
 
   /// Command
-  command: ("buildAndPush"|"build"|"push"|"login"|"logout"|"start"|"stop")?
+  command: ("buildAndPush" | "build" | "push" | "login" | "logout" | "start" | "stop")?
 
   /// Dockerfile
   Dockerfile: String?
@@ -2446,7 +2454,7 @@ class FtpUpload_2 extends ServiceSchema.Task {
 /// FTP upload inputs
 local class FtpUpload_2Inputs {
   /// Authentication Method
-  credentialsOption: ("serviceEndpoint"|"inputs")?
+  credentialsOption: ("serviceEndpoint" | "inputs")?
 
   /// FTP Service Connection
   serverEndpoint: String?
@@ -2504,7 +2512,7 @@ class FtpUpload_1 extends ServiceSchema.Task {
 /// FTP upload inputs
 local class FtpUpload_1Inputs {
   /// Authentication Method
-  credentialsOption: ("serviceEndpoint"|"inputs")?
+  credentialsOption: ("serviceEndpoint" | "inputs")?
 
   /// FTP Service Connection
   serverEndpoint: String?
@@ -2617,7 +2625,7 @@ local class WindowsMachineFileCopy_1Inputs {
   AdditionalArguments: String?
 
   /// Select Machines By
-  ResourceFilteringMethod: ("machineNames"|"tags")?
+  ResourceFilteringMethod: ("machineNames" | "tags")?
 
   /// Filter Criteria
   MachineNames: String?
@@ -2787,7 +2795,7 @@ class PythonScript_0 extends ServiceSchema.Task {
 /// Python script inputs
 local class PythonScript_0Inputs {
   /// Script source
-  scriptSource: ("filePath"|"inline")?
+  scriptSource: ("filePath" | "inline")?
 
   /// Script path
   scriptPath: String?
@@ -2865,7 +2873,7 @@ class NodeTaskRunnerInstaller_0 extends ServiceSchema.Task {
 /// Node.js tasks runner installer inputs
 local class NodeTaskRunnerInstaller_0Inputs {
   /// Version of runner to install
-  nodeVersion: ("6"|"10"|"16")?
+  nodeVersion: ("6" | "10" | "16")?
 }
 
 /// Xamarin License
@@ -2881,7 +2889,7 @@ class XamarinLicense_1 extends ServiceSchema.Task {
 /// Xamarin License inputs
 local class XamarinLicense_1Inputs {
   /// Action
-  action: ("Activate"|"Deactivate")?
+  action: ("Activate" | "Deactivate")?
 
   /// Email
   email: String
@@ -2890,7 +2898,7 @@ local class XamarinLicense_1Inputs {
   password: String
 
   /// Xamarin Product
-  product: ("MA"|"MT"|"MM")?
+  product: ("MA" | "MT" | "MM")?
 
   /// Timeout in Seconds
   timeout: String?
@@ -3006,7 +3014,7 @@ local class AzureAppConfigurationExport_10Inputs {
   AppConfigurationEndpoint: String
 
   /// Selection Mode
-  SelectionMode: ("Default"|"Snapshot")?
+  SelectionMode: ("Default" | "Snapshot")?
 
   /// Key Filter
   KeyFilter: String?
@@ -3065,10 +3073,10 @@ local class JavaToolInstaller_0Inputs {
   versionSpec: String?
 
   /// JDK architecture
-  jdkArchitectureOption: "x64"|"x86"
+  jdkArchitectureOption: "x64" | "x86"
 
   /// JDK source
-  jdkSourceOption: "AzureStorage"|"LocalDirectory"|"PreInstalled"
+  jdkSourceOption: "AzureStorage" | "LocalDirectory" | "PreInstalled"
 
   /// JDK file
   jdkFile: String?
@@ -3114,10 +3122,10 @@ local class JavaToolInstaller_1Inputs {
   versionSpec: String?
 
   /// JDK architecture
-  jdkArchitectureOption: "x64"|"x86"
+  jdkArchitectureOption: "x64" | "x86"
 
   /// JDK source
-  jdkSourceOption: "AzureStorage"|"LocalDirectory"|"PreInstalled"
+  jdkSourceOption: "AzureStorage" | "LocalDirectory" | "PreInstalled"
 
   /// JDK file
   jdkFile: String?
@@ -3188,7 +3196,7 @@ local class AzureFunctionApp_2Inputs {
   connectedServiceNameARM: String
 
   /// App type
-  appType: "functionApp"|"functionAppLinux"
+  appType: "functionApp" | "functionAppLinux"
 
   /// Is Function App on Flex Consumption Plan
   isFlexConsumption: Boolean?
@@ -3211,28 +3219,29 @@ local class AzureFunctionApp_2Inputs {
   /// Runtime stack
   runtimeStack: (
     "DOTNET|6.0"
-    |"DOTNET-ISOLATED|6.0"
-    |"DOTNET-ISOLATED|7.0"
-    |"DOTNET-ISOLATED|8.0"
-    |"DOTNET-ISOLATED|9.0"
-    |"JAVA|8"
-    |"JAVA|11"
-    |"JAVA|17"
-    |"JAVA|21"
-    |"NODE|14"
-    |"NODE|16"
-    |"NODE|18"
-    |"NODE|20"
-    |"PYTHON|3.8"
-    |"PYTHON|3.9"
-    |"PYTHON|3.10"
-    |"PYTHON|3.11")?
+      | "DOTNET-ISOLATED|6.0"
+      | "DOTNET-ISOLATED|7.0"
+      | "DOTNET-ISOLATED|8.0"
+      | "DOTNET-ISOLATED|9.0"
+      | "JAVA|8"
+      | "JAVA|11"
+      | "JAVA|17"
+      | "JAVA|21"
+      | "NODE|14"
+      | "NODE|16"
+      | "NODE|18"
+      | "NODE|20"
+      | "PYTHON|3.8"
+      | "PYTHON|3.9"
+      | "PYTHON|3.10"
+      | "PYTHON|3.11"
+  )?
 
   /// App settings
   appSettings: String?
 
   /// Deployment method
-  deploymentMethod: ("auto"|"zipDeploy"|"runFromPackage")?
+  deploymentMethod: ("auto" | "zipDeploy" | "runFromPackage")?
 }
 
 /// Azure Functions
@@ -3251,7 +3260,7 @@ local class AzureFunctionApp_1Inputs {
   azureSubscription: String
 
   /// App type
-  appType: "functionApp"|"functionAppLinux"
+  appType: "functionApp" | "functionAppLinux"
 
   /// Azure Functions App name
   appName: String
@@ -3271,22 +3280,23 @@ local class AzureFunctionApp_1Inputs {
   /// Runtime stack
   runtimeStack: (
     "DOTNET|6.0"
-    |"DOTNET-ISOLATED|6.0"
-    |"DOTNET-ISOLATED|7.0"
-    |"DOTNET-ISOLATED|8.0"
-    |"DOTNET-ISOLATED|9.0"
-    |"JAVA|8"
-    |"JAVA|11"
-    |"JAVA|17"
-    |"JAVA|21"
-    |"NODE|14"
-    |"NODE|16"
-    |"NODE|18"
-    |"NODE|20"
-    |"PYTHON|3.8"
-    |"PYTHON|3.9"
-    |"PYTHON|3.10"
-    |"PYTHON|3.11")?
+      | "DOTNET-ISOLATED|6.0"
+      | "DOTNET-ISOLATED|7.0"
+      | "DOTNET-ISOLATED|8.0"
+      | "DOTNET-ISOLATED|9.0"
+      | "JAVA|8"
+      | "JAVA|11"
+      | "JAVA|17"
+      | "JAVA|21"
+      | "NODE|14"
+      | "NODE|16"
+      | "NODE|18"
+      | "NODE|20"
+      | "PYTHON|3.8"
+      | "PYTHON|3.9"
+      | "PYTHON|3.10"
+      | "PYTHON|3.11"
+  )?
 
   /// Startup command 
   startUpCommand: String?
@@ -3301,7 +3311,7 @@ local class AzureFunctionApp_1Inputs {
   configurationStrings: String?
 
   /// Deployment method
-  deploymentMethod: ("auto"|"zipDeploy"|"runFromPackage")?
+  deploymentMethod: ("auto" | "zipDeploy" | "runFromPackage")?
 }
 
 /// Azure Functions Deploy
@@ -3320,7 +3330,7 @@ local class AzureFunctionApp_2_alt1Inputs {
   connectedServiceNameARM: String
 
   /// App type
-  appType: "functionApp"|"functionAppLinux"
+  appType: "functionApp" | "functionAppLinux"
 
   /// Is Function App on Flex Consumption Plan
   isFlexConsumption: Boolean?
@@ -3343,27 +3353,28 @@ local class AzureFunctionApp_2_alt1Inputs {
   /// Runtime stack
   runtimeStack: (
     "DOTNET|6.0"
-    |"DOTNET-ISOLATED|6.0"
-    |"DOTNET-ISOLATED|7.0"
-    |"DOTNET-ISOLATED|8.0"
-    |"JAVA|8"
-    |"JAVA|11"
-    |"JAVA|17"
-    |"JAVA|21"
-    |"NODE|14"
-    |"NODE|16"
-    |"NODE|18"
-    |"NODE|20"
-    |"PYTHON|3.8"
-    |"PYTHON|3.9"
-    |"PYTHON|3.10"
-    |"PYTHON|3.11")?
+      | "DOTNET-ISOLATED|6.0"
+      | "DOTNET-ISOLATED|7.0"
+      | "DOTNET-ISOLATED|8.0"
+      | "JAVA|8"
+      | "JAVA|11"
+      | "JAVA|17"
+      | "JAVA|21"
+      | "NODE|14"
+      | "NODE|16"
+      | "NODE|18"
+      | "NODE|20"
+      | "PYTHON|3.8"
+      | "PYTHON|3.9"
+      | "PYTHON|3.10"
+      | "PYTHON|3.11"
+  )?
 
   /// App settings
   appSettings: String?
 
   /// Deployment method
-  deploymentMethod: ("auto"|"zipDeploy"|"runFromPackage")?
+  deploymentMethod: ("auto" | "zipDeploy" | "runFromPackage")?
 }
 
 /// npm authenticate (for task runners)
@@ -3407,13 +3418,13 @@ local class MSBuild_1Inputs {
   solution: String?
 
   /// MSBuild
-  msbuildLocationMethod: ("version"|"location")?
+  msbuildLocationMethod: ("version" | "location")?
 
   /// MSBuild Version
-  msbuildVersion: ("latest"|"17.0"|"16.0"|"15.0"|"14.0"|"12.0"|"4.0")?
+  msbuildVersion: ("latest" | "17.0" | "16.0" | "15.0" | "14.0" | "12.0" | "4.0")?
 
   /// MSBuild Architecture
-  msbuildArchitecture: ("x86"|"x64")?
+  msbuildArchitecture: ("x86" | "x64")?
 
   /// Path to MSBuild
   msbuildLocation: String?
@@ -3443,7 +3454,7 @@ local class MSBuild_1Inputs {
   createLogFile: Boolean?
 
   /// Log File Verbosity
-  logFileVerbosity: ("quiet"|"minimal"|"normal"|"detailed"|"diagnostic")?
+  logFileVerbosity: ("quiet" | "minimal" | "normal" | "detailed" | "diagnostic")?
 }
 
 /// Build machine image
@@ -3459,7 +3470,7 @@ class PackerBuild_0 extends ServiceSchema.Task {
 /// Build machine image inputs
 local class PackerBuild_0Inputs {
   /// Packer template
-  templateType: ("builtin"|"custom")?
+  templateType: ("builtin" | "custom")?
 
   /// Packer template location
   customTemplateLocation: String?
@@ -3480,31 +3491,32 @@ local class PackerBuild_0Inputs {
   azureResourceGroup: String
 
   /// Base image source
-  baseImageSource: ("default"|"customVhd")?
+  baseImageSource: ("default" | "customVhd")?
 
   /// Base image
   baseImage: (
     "MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:windows"
-    |"MicrosoftWindowsServer:WindowsServer:2016-Datacenter:windows"
-    |"MicrosoftWindowsServer:WindowsServer:2012-Datacenter:windows"
-    |"MicrosoftWindowsServer:WindowsServer:2008-R2-SP1:windows"
-    |"Canonical:UbuntuServer:14.04.4-LTS:linux"
-    |"Canonical:UbuntuServer:16.04-LTS:linux"
-    |"RedHat:RHEL:7.2:linux"
-    |"RedHat:RHEL:6.8:linux"
-    |"OpenLogic:CentOS:7.2:linux"
-    |"OpenLogic:CentOS:6.8:linux"
-    |"credativ:Debian:8:linux"
-    |"credativ:Debian:7:linux"
-    |"SUSE:openSUSE-Leap:42.2:linux"
-    |"SUSE:SLES:12-SP2:linux"
-    |"SUSE:SLES:11-SP4:linux")?
+      | "MicrosoftWindowsServer:WindowsServer:2016-Datacenter:windows"
+      | "MicrosoftWindowsServer:WindowsServer:2012-Datacenter:windows"
+      | "MicrosoftWindowsServer:WindowsServer:2008-R2-SP1:windows"
+      | "Canonical:UbuntuServer:14.04.4-LTS:linux"
+      | "Canonical:UbuntuServer:16.04-LTS:linux"
+      | "RedHat:RHEL:7.2:linux"
+      | "RedHat:RHEL:6.8:linux"
+      | "OpenLogic:CentOS:7.2:linux"
+      | "OpenLogic:CentOS:6.8:linux"
+      | "credativ:Debian:8:linux"
+      | "credativ:Debian:7:linux"
+      | "SUSE:openSUSE-Leap:42.2:linux"
+      | "SUSE:SLES:12-SP2:linux"
+      | "SUSE:SLES:11-SP4:linux"
+  )?
 
   /// Base image URL
   customImageUrl: String?
 
   /// Base image OS
-  customImageOSType: ("windows"|"linux")?
+  customImageOSType: ("windows" | "linux")?
 
   /// Deployment Package
   packagePath: String
@@ -3538,7 +3550,7 @@ class PackerBuild_1 extends ServiceSchema.Task {
 /// Build machine image inputs
 local class PackerBuild_1Inputs {
   /// Packer template
-  templateType: ("builtin"|"custom")?
+  templateType: ("builtin" | "custom")?
 
   /// Packer template location
   customTemplateLocation: String?
@@ -3565,32 +3577,33 @@ local class PackerBuild_1Inputs {
   azureResourceGroup: String
 
   /// Base image source
-  baseImageSource: ("default"|"customVhd")?
+  baseImageSource: ("default" | "customVhd")?
 
   /// Base image
   baseImage: (
     "MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:windows"
-    |"MicrosoftWindowsServer:WindowsServer:2016-Datacenter:windows"
-    |"MicrosoftWindowsServer:WindowsServer:2012-Datacenter:windows"
-    |"MicrosoftWindowsServer:WindowsServer:2008-R2-SP1:windows"
-    |"Canonical:UbuntuServer:14.04.4-LTS:linux"
-    |"Canonical:UbuntuServer:16.04-LTS:linux"
-    |"Canonical:UbuntuServer:18.04-LTS:linux"
-    |"RedHat:RHEL:7.2:linux"
-    |"RedHat:RHEL:6.8:linux"
-    |"OpenLogic:CentOS:7.2:linux"
-    |"OpenLogic:CentOS:6.8:linux"
-    |"credativ:Debian:8:linux"
-    |"credativ:Debian:7:linux"
-    |"SUSE:openSUSE-Leap:42.2:linux"
-    |"SUSE:SLES:12-SP2:linux"
-    |"SUSE:SLES:11-SP4:linux")?
+      | "MicrosoftWindowsServer:WindowsServer:2016-Datacenter:windows"
+      | "MicrosoftWindowsServer:WindowsServer:2012-Datacenter:windows"
+      | "MicrosoftWindowsServer:WindowsServer:2008-R2-SP1:windows"
+      | "Canonical:UbuntuServer:14.04.4-LTS:linux"
+      | "Canonical:UbuntuServer:16.04-LTS:linux"
+      | "Canonical:UbuntuServer:18.04-LTS:linux"
+      | "RedHat:RHEL:7.2:linux"
+      | "RedHat:RHEL:6.8:linux"
+      | "OpenLogic:CentOS:7.2:linux"
+      | "OpenLogic:CentOS:6.8:linux"
+      | "credativ:Debian:8:linux"
+      | "credativ:Debian:7:linux"
+      | "SUSE:openSUSE-Leap:42.2:linux"
+      | "SUSE:SLES:12-SP2:linux"
+      | "SUSE:SLES:11-SP4:linux"
+  )?
 
   /// Base image URL
   customImageUrl: String?
 
   /// Base image OS
-  customImageOSType: ("windows"|"linux")?
+  customImageOSType: ("windows" | "linux")?
 
   /// Deployment Package
   packagePath: String
@@ -3642,7 +3655,7 @@ local class NuGetPackager_0Inputs {
   includeReferencedProjects: Boolean?
 
   /// Automatic package versioning
-  versionByBuild: ("false"|"byPrereleaseNumber"|"byEnvVar"|"true")?
+  versionByBuild: ("false" | "byPrereleaseNumber" | "byEnvVar" | "true")?
 
   /// Environment variable
   versionEnvVar: String?
@@ -3691,7 +3704,7 @@ local class AzureAppConfigurationSnapshot_1Inputs {
   SnapshotName: String
 
   /// Composition Type
-  CompositionType: ("key"|"key_label")?
+  CompositionType: ("key" | "key_label")?
 
   /// Filters for key-values
   Filters: String
@@ -3741,7 +3754,7 @@ local class ServiceFabricUpdateAppVersions_1Inputs {
   versionSuffix: String?
 
   /// Version Behavior
-  versionBehavior: ("Append"|"Replace")?
+  versionBehavior: ("Append" | "Replace")?
 
   /// Update only if changed
   updateOnlyChanged: Boolean?
@@ -3753,7 +3766,7 @@ local class ServiceFabricUpdateAppVersions_1Inputs {
   logAllChanges: Boolean?
 
   /// Compare against
-  compareType: ("LastSuccessful"|"Specific")?
+  compareType: ("LastSuccessful" | "Specific")?
 
   /// Build Number
   buildNumber: String?
@@ -3772,7 +3785,7 @@ class ServiceFabricUpdateManifests_2 extends ServiceSchema.Task {
 /// Update Service Fabric manifests inputs
 local class ServiceFabricUpdateManifests_2Inputs {
   /// Update Type
-  updateType: ("Manifest versions"|"Docker image settings")?
+  updateType: ("Manifest versions" | "Docker image settings")?
 
   /// Application Package
   applicationPackagePath: String
@@ -3781,7 +3794,7 @@ local class ServiceFabricUpdateManifests_2Inputs {
   versionSuffix: String?
 
   /// Version Behavior
-  versionBehavior: ("Append"|"Replace")?
+  versionBehavior: ("Append" | "Replace")?
 
   /// Update only if changed
   updateOnlyChanged: Boolean?
@@ -3793,7 +3806,7 @@ local class ServiceFabricUpdateManifests_2Inputs {
   logAllChanges: Boolean?
 
   /// Compare against
-  compareType: ("LastSuccessful"|"Specific")?
+  compareType: ("LastSuccessful" | "Specific")?
 
   /// Build Number
   buildNumber: String?
@@ -3827,7 +3840,7 @@ local class AzureMonitor_1Inputs {
   ResourceGroupName: String
 
   /// Filter type
-  filterType: ("resource"|"alertrule"|"none")?
+  filterType: ("resource" | "alertrule" | "none")?
 
   /// Resource
   resource: String?
@@ -3836,16 +3849,16 @@ local class AzureMonitor_1Inputs {
   alertRule: String?
 
   /// Severity
-  severity: ("Sev0"|"Sev1"|"Sev2"|"Sev3"|"Sev4")?
+  severity: ("Sev0" | "Sev1" | "Sev2" | "Sev3" | "Sev4")?
 
   /// Time range
-  timeRange: ("1h"|"1d"|"7d"|"30d")?
+  timeRange: ("1h" | "1d" | "7d" | "30d")?
 
   /// Alert state
-  alertState: ("New"|"Acknowledged"|"Closed")?
+  alertState: ("New" | "Acknowledged" | "Closed")?
 
   /// Monitor condition
-  monitorCondition: ("Fired "|"Resolved")?
+  monitorCondition: ("Fired " | "Resolved")?
 }
 
 /// Query Classic Azure Monitor alerts
@@ -3869,9 +3882,10 @@ local class AzureMonitor_0Inputs {
   /// Resource type
   ResourceType: (
     "Microsoft.Insights/components"
-    |"Microsoft.Web/sites"
-    |"Microsoft.Storage/storageAccounts"
-    |"Microsoft.Compute/virtualMachines")?
+      | "Microsoft.Web/sites"
+      | "Microsoft.Storage/storageAccounts"
+      | "Microsoft.Compute/virtualMachines"
+  )?
 
   /// Resource name
   resourceName: String
@@ -3893,7 +3907,7 @@ class Notation_0 extends ServiceSchema.Task {
 /// Notation inputs
 local class Notation_0Inputs {
   /// Command to run
-  command: ("install"|"sign"|"verify")?
+  command: ("install" | "sign" | "verify")?
 
   /// Custom Version
   isCustomVersion: Boolean?
@@ -3911,7 +3925,7 @@ local class Notation_0Inputs {
   artifactRefs: String?
 
   /// Signature Format
-  signatureFormat: ("cose"|"jws")?
+  signatureFormat: ("cose" | "jws")?
 
   /// [Experimental] Allow Referrers API
   allowReferrersAPI: Boolean?
@@ -3969,7 +3983,7 @@ local class AzureNLBManagement_1Inputs {
   LoadBalancer: String
 
   /// Action
-  Action: "Disconnect"|"Connect"
+  Action: "Disconnect" | "Connect"
 }
 
 /// Docker Compose
@@ -3985,7 +3999,7 @@ class DockerCompose_0 extends ServiceSchema.Task {
 /// Docker Compose inputs
 local class DockerCompose_0Inputs {
   /// Container Registry Type
-  containerregistrytype: ("Azure Container Registry"|"Container Registry")?
+  containerregistrytype: ("Azure Container Registry" | "Container Registry")?
 
   /// Docker Registry Service Connection
   dockerRegistryEndpoint: String?
@@ -4014,13 +4028,14 @@ local class DockerCompose_0Inputs {
   /// Action
   action: (
     "Build services"
-    |"Push services"
-    |"Run services"
-    |"Run a specific service"
-    |"Lock services"
-    |"Write service image digests"
-    |"Combine configuration"
-    |"Run a Docker Compose command")?
+      | "Push services"
+      | "Run services"
+      | "Run a specific service"
+      | "Lock services"
+      | "Write service image digests"
+      | "Combine configuration"
+      | "Run a Docker Compose command"
+  )?
 
   /// Additional Image Tags
   additionalImageTags: String?
@@ -4105,7 +4120,7 @@ class DockerCompose_1 extends ServiceSchema.Task {
 /// Docker Compose inputs
 local class DockerCompose_1Inputs {
   /// Container Registry Type
-  containerregistrytype: ("Azure Container Registry"|"Container Registry")?
+  containerregistrytype: ("Azure Container Registry" | "Container Registry")?
 
   /// Docker Registry Service Connection
   dockerRegistryEndpoint: String?
@@ -4134,13 +4149,14 @@ local class DockerCompose_1Inputs {
   /// Action
   action: (
     "Build services"
-    |"Push services"
-    |"Run services"
-    |"Run a specific service"
-    |"Lock services"
-    |"Write service image digests"
-    |"Combine configuration"
-    |"Run a Docker Compose command")?
+      | "Push services"
+      | "Run services"
+      | "Run a specific service"
+      | "Lock services"
+      | "Write service image digests"
+      | "Combine configuration"
+      | "Run a Docker Compose command"
+  )?
 
   /// Additional Image Tags
   additionalImageTags: String?
@@ -4233,9 +4249,10 @@ local class AzureMonitorAlerts_0Inputs {
   /// Resource Type
   ResourceType: (
     "Microsoft.Insights/components"
-    |"Microsoft.Web/sites"
-    |"Microsoft.Storage/storageAccounts"
-    |"Microsoft.Compute/virtualMachines")?
+      | "Microsoft.Web/sites"
+      | "Microsoft.Storage/storageAccounts"
+      | "Microsoft.Compute/virtualMachines"
+  )?
 
   /// Resource name
   ResourceName: String
@@ -4284,10 +4301,22 @@ local class XamarinTestCloud_1Inputs {
   testAssemblyDirectory: String
 
   /// Parallelization
-  parallelizationOption: ("none"|"--fixture-chunk"|"--test-chunk")?
+  parallelizationOption: ("none" | "--fixture-chunk" | "--test-chunk")?
 
   /// System language
-  localeOption: ("da_DK"|"nl_NL"|"en_GB"|"en_US"|"fr_FR"|"de_DE"|"ja_JP"|"ru_RU"|"es_MX"|"es_ES"|"user")?
+  localeOption: (
+    "da_DK"
+      | "nl_NL"
+      | "en_GB"
+      | "en_US"
+      | "fr_FR"
+      | "de_DE"
+      | "ja_JP"
+      | "ru_RU"
+      | "es_MX"
+      | "es_ES"
+      | "user"
+  )?
 
   /// Other locale
   userDefinedLocale: String?
@@ -4339,7 +4368,7 @@ local class ServiceFabricDeploy_1Inputs {
   registerPackageTimeoutSec: String?
 
   /// Overwrite Behavior
-  overwriteBehavior: ("Always"|"Never"|"SameAppTypeAndVersion")?
+  overwriteBehavior: ("Always" | "Never" | "SameAppTypeAndVersion")?
 
   /// Skip upgrade for same Type and Version
   skipUpgradeSameTypeAndVersion: Boolean?
@@ -4360,10 +4389,10 @@ local class ServiceFabricDeploy_1Inputs {
   unregisterUnusedVersions: Boolean?
 
   /// Upgrade Mode
-  upgradeMode: ("Monitored"|"UnmonitoredAuto"|"UnmonitoredManual")?
+  upgradeMode: ("Monitored" | "UnmonitoredAuto" | "UnmonitoredManual")?
 
   /// FailureAction
-  FailureAction: ("Rollback"|"Manual")?
+  FailureAction: ("Rollback" | "Manual")?
 
   /// UpgradeReplicaSetCheckTimeoutSec
   UpgradeReplicaSetCheckTimeoutSec: String?
@@ -4405,7 +4434,9 @@ local class ServiceFabricDeploy_1Inputs {
   configureDockerSettings: Boolean?
 
   /// Registry Credentials Source
-  registryCredentials: ("AzureResourceManagerEndpoint"|"ContainerRegistryEndpoint"|"UsernamePassword")?
+  registryCredentials: (
+    "AzureResourceManagerEndpoint" | "ContainerRegistryEndpoint" | "UsernamePassword"
+  )?
 
   /// Docker Registry Service Connection
   dockerRegistryConnection: String?
@@ -4451,7 +4482,7 @@ local class Xcode_5Inputs {
   scheme: String?
 
   /// Xcode version
-  xcodeVersion: ("8"|"9"|"10"|"11"|"12"|"13"|"default"|"specifyPath")?
+  xcodeVersion: ("8" | "9" | "10" | "11" | "12" | "13" | "default" | "specifyPath")?
 
   /// Xcode developer path
   xcodeDeveloperDir: String?
@@ -4466,7 +4497,7 @@ local class Xcode_5Inputs {
   exportPath: String?
 
   /// Export options
-  exportOptions: ("auto"|"plist"|"specify")?
+  exportOptions: ("auto" | "plist" | "specify")?
 
   /// Export method
   exportMethod: String?
@@ -4481,7 +4512,7 @@ local class Xcode_5Inputs {
   exportArgs: String?
 
   /// Signing style
-  signingOption: ("nosign"|"default"|"manual"|"auto")?
+  signingOption: ("nosign" | "default" | "manual" | "auto")?
 
   /// Signing identity
   signingIdentity: String?
@@ -4496,13 +4527,13 @@ local class Xcode_5Inputs {
   teamId: String?
 
   /// Destination platform
-  destinationPlatformOption: ("default"|"iOS"|"tvOS"|"macOS"|"custom")?
+  destinationPlatformOption: ("default" | "iOS" | "tvOS" | "macOS" | "custom")?
 
   /// Custom destination platform
   destinationPlatform: String?
 
   /// Destination type
-  destinationTypeOption: ("simulators"|"devices")?
+  destinationTypeOption: ("simulators" | "devices")?
 
   /// Simulator
   destinationSimulators: String?
@@ -4566,7 +4597,7 @@ local class Xcode_3Inputs {
   exportPath: String?
 
   /// Export Options
-  exportOptions: ("auto"|"plist"|"specify")?
+  exportOptions: ("auto" | "plist" | "specify")?
 
   /// Export Method
   exportMethod: String?
@@ -4587,7 +4618,7 @@ local class Xcode_3Inputs {
   teamId: String?
 
   /// Override Using
-  signMethod: ("file"|"id")?
+  signMethod: ("file" | "id")?
 
   /// Signing Identity
   iosSigningIdentity: String?
@@ -4660,7 +4691,7 @@ local class Xcode_4Inputs {
   scheme: String?
 
   /// Xcode version
-  xcodeVersion: ("8"|"9"|"default"|"specifyPath")?
+  xcodeVersion: ("8" | "9" | "default" | "specifyPath")?
 
   /// Xcode developer path
   xcodeDeveloperDir: String?
@@ -4675,7 +4706,7 @@ local class Xcode_4Inputs {
   exportPath: String?
 
   /// Export options
-  exportOptions: ("auto"|"plist"|"specify")?
+  exportOptions: ("auto" | "plist" | "specify")?
 
   /// Export method
   exportMethod: String?
@@ -4690,7 +4721,7 @@ local class Xcode_4Inputs {
   exportArgs: String?
 
   /// Signing style
-  signingOption: ("nosign"|"default"|"manual"|"auto")?
+  signingOption: ("nosign" | "default" | "manual" | "auto")?
 
   /// Signing identity
   signingIdentity: String?
@@ -4702,13 +4733,13 @@ local class Xcode_4Inputs {
   teamId: String?
 
   /// Destination platform
-  destinationPlatformOption: ("default"|"iOS"|"tvOS"|"macOS"|"custom")?
+  destinationPlatformOption: ("default" | "iOS" | "tvOS" | "macOS" | "custom")?
 
   /// Custom destination platform
   destinationPlatform: String?
 
   /// Destination type
-  destinationTypeOption: ("simulators"|"devices")?
+  destinationTypeOption: ("simulators" | "devices")?
 
   /// Simulator
   destinationSimulators: String?
@@ -4763,7 +4794,7 @@ local class Xcode_2Inputs {
   packageApp: Boolean?
 
   /// Create Package (IPA) using
-  packageTool: ("xcrun"|"xcodebuild")?
+  packageTool: ("xcrun" | "xcodebuild")?
 
   /// Archive Path
   archivePath: String?
@@ -4772,7 +4803,7 @@ local class Xcode_2Inputs {
   exportPath: String?
 
   /// Export Options
-  exportOptions: ("auto"|"plist"|"specify")?
+  exportOptions: ("auto" | "plist" | "specify")?
 
   /// Export Method
   exportMethod: String?
@@ -4790,7 +4821,7 @@ local class Xcode_2Inputs {
   teamId: String?
 
   /// Override Using
-  signMethod: ("file"|"id")?
+  signMethod: ("file" | "id")?
 
   /// Signing Identity
   iosSigningIdentity: String?
@@ -4857,7 +4888,7 @@ local class NuGetPublisher_0Inputs {
   searchPattern: String?
 
   /// Feed type
-  nuGetFeedType: ("external"|"internal")?
+  nuGetFeedType: ("external" | "internal")?
 
   /// NuGet Service Connection
   connectedServiceName: String?
@@ -4869,10 +4900,10 @@ local class NuGetPublisher_0Inputs {
   nuGetAdditionalArgs: String?
 
   /// Verbosity
-  verbosity: ("-"|"Quiet"|"Normal"|"Detailed")?
+  verbosity: ("-" | "Quiet" | "Normal" | "Detailed")?
 
   /// NuGet Version
-  nuGetVersion: ("3.3.0"|"3.5.0.1829"|"4.0.0.2283"|"custom")?
+  nuGetVersion: ("3.3.0" | "3.5.0.1829" | "4.0.0.2283" | "custom")?
 
   /// Path to NuGet.exe
   nuGetPath: String?
@@ -4959,7 +4990,7 @@ class SqlDacpacDeploymentOnMachineGroup_0 extends ServiceSchema.Task {
 /// SQL Server database deploy inputs
 local class SqlDacpacDeploymentOnMachineGroup_0Inputs {
   /// Deploy SQL Using
-  TaskType: ("dacpac"|"sqlQuery"|"sqlInline")?
+  TaskType: ("dacpac" | "sqlQuery" | "sqlInline")?
 
   /// DACPAC File
   DacpacFile: String?
@@ -4980,7 +5011,7 @@ local class SqlDacpacDeploymentOnMachineGroup_0Inputs {
   InlineSql: String?
 
   /// Specify SQL Using
-  TargetMethod: ("server"|"connectionString"|"publishProfile")?
+  TargetMethod: ("server" | "connectionString" | "publishProfile")?
 
   /// Server Name
   ServerName: String?
@@ -4989,7 +5020,7 @@ local class SqlDacpacDeploymentOnMachineGroup_0Inputs {
   DatabaseName: String?
 
   /// Authentication
-  AuthScheme: ("windowsAuthentication"|"sqlServerAuthentication")?
+  AuthScheme: ("windowsAuthentication" | "sqlServerAuthentication")?
 
   /// SQL User name
   SqlUsername: String?
@@ -5126,7 +5157,7 @@ local class VSMobileCenterTest_0Inputs {
   enablePrepare: Boolean?
 
   /// Test Framework
-  framework: ("appium"|"espresso"|"calabash"|"uitest"|"xcuitest")?
+  framework: ("appium" | "espresso" | "calabash" | "uitest" | "xcuitest")?
 
   /// Build Directory
   appiumBuildDir: String?
@@ -5183,7 +5214,7 @@ local class VSMobileCenterTest_0Inputs {
   enableRun: Boolean?
 
   /// Authentication Method
-  credsType: ("serviceEndpoint"|"inputs")?
+  credsType: ("serviceEndpoint" | "inputs")?
 
   /// Mobile Center Connection
   serverEndpoint: String?
@@ -5207,7 +5238,19 @@ local class VSMobileCenterTest_0Inputs {
   dsymDir: String?
 
   /// System Language
-  locale: ("da_DK"|"nl_NL"|"en_GB"|"en_US"|"fr_FR"|"de_DE"|"ja_JP"|"ru_RU"|"es_MX"|"es_ES"|"user")?
+  locale: (
+    "da_DK"
+      | "nl_NL"
+      | "en_GB"
+      | "en_US"
+      | "fr_FR"
+      | "de_DE"
+      | "ja_JP"
+      | "ru_RU"
+      | "es_MX"
+      | "es_ES"
+      | "user"
+  )?
 
   /// Other Locale
   userDefinedLocale: String?
@@ -5250,7 +5293,7 @@ local class AppCenterTest_1Inputs {
   prepareTests: Boolean?
 
   /// Test framework
-  frameworkOption: ("appium"|"espresso"|"calabash"|"uitest"|"xcuitest")?
+  frameworkOption: ("appium" | "espresso" | "calabash" | "uitest" | "xcuitest")?
 
   /// Build directory
   appiumBuildDirectory: String?
@@ -5307,7 +5350,7 @@ local class AppCenterTest_1Inputs {
   runTests: Boolean?
 
   /// Authentication method
-  credentialsOption: ("serviceEndpoint"|"inputs")?
+  credentialsOption: ("serviceEndpoint" | "inputs")?
 
   /// App Center service connection
   serverEndpoint: String?
@@ -5331,7 +5374,19 @@ local class AppCenterTest_1Inputs {
   dsymDirectory: String?
 
   /// System language
-  localeOption: ("da_DK"|"nl_NL"|"en_GB"|"en_US"|"fr_FR"|"de_DE"|"ja_JP"|"ru_RU"|"es_MX"|"es_ES"|"user")?
+  localeOption: (
+    "da_DK"
+      | "nl_NL"
+      | "en_GB"
+      | "en_US"
+      | "fr_FR"
+      | "de_DE"
+      | "ja_JP"
+      | "ru_RU"
+      | "es_MX"
+      | "es_ES"
+      | "user"
+  )?
 
   /// Other locale
   userDefinedLocale: String?
@@ -5573,7 +5628,7 @@ local class Grunt_0Inputs {
   enableCodeCoverage: Boolean?
 
   /// Test Framework
-  testFramework: ("Mocha"|"Jasmine")?
+  testFramework: ("Mocha" | "Jasmine")?
 
   /// Source Files
   srcFiles: String?
@@ -5595,7 +5650,7 @@ class SqlAzureDacpacDeployment_1 extends ServiceSchema.Task {
 /// Azure SQL Database deployment inputs
 local class SqlAzureDacpacDeployment_1Inputs {
   /// Azure Service Connection Type
-  azureConnectionType: ("ConnectedServiceName"|"ConnectedServiceNameARM")?
+  azureConnectionType: ("ConnectedServiceName" | "ConnectedServiceNameARM")?
 
   /// Azure Classic Subscription
   azureClassicSubscription: String?
@@ -5604,7 +5659,13 @@ local class SqlAzureDacpacDeployment_1Inputs {
   azureSubscription: String?
 
   /// Authentication Type
-  AuthenticationType: ("server"|"aadAuthenticationPassword"|"aadAuthenticationIntegrated"|"connectionString"|"servicePrincipal")?
+  AuthenticationType: (
+    "server"
+      | "aadAuthenticationPassword"
+      | "aadAuthenticationIntegrated"
+      | "connectionString"
+      | "servicePrincipal"
+  )?
 
   /// Azure SQL Server
   ServerName: String?
@@ -5628,10 +5689,12 @@ local class SqlAzureDacpacDeployment_1Inputs {
   ConnectionString: String?
 
   /// Deploy type
-  deployType: ("DacpacTask"|"SqlTask"|"InlineSqlTask")?
+  deployType: ("DacpacTask" | "SqlTask" | "InlineSqlTask")?
 
   /// Action
-  DeploymentAction: ("Publish"|"Extract"|"Export"|"Import"|"Script"|"DriftReport"|"DeployReport")?
+  DeploymentAction: (
+    "Publish" | "Extract" | "Export" | "Import" | "Script" | "DriftReport" | "DeployReport"
+  )?
 
   /// DACPAC File
   DacpacFile: String?
@@ -5658,7 +5721,7 @@ local class SqlAzureDacpacDeployment_1Inputs {
   InlineAdditionalArguments: String?
 
   /// Specify Firewall Rules Using
-  IpDetectionMethod: ("AutoDetect"|"IPAddressRange")?
+  IpDetectionMethod: ("AutoDetect" | "IPAddressRange")?
 
   /// Start IP Address
   StartIpAddress: String?
@@ -5723,7 +5786,7 @@ local class IISWebAppDeployment_1Inputs {
   AdminPassword: String?
 
   /// Protocol
-  WinRMProtocol: ("Http"|"Https")?
+  WinRMProtocol: ("Http" | "Https")?
 
   /// Test Certificate
   TestCertificate: Boolean?
@@ -5747,7 +5810,7 @@ local class IISWebAppDeployment_1Inputs {
   WebSitePhysicalPath: String?
 
   /// Physical Path Authentication
-  WebSitePhysicalPathAuth: ("WebSiteUserPassThrough"|"WebSiteWindowsAuth")?
+  WebSitePhysicalPathAuth: ("WebSiteUserPassThrough" | "WebSiteWindowsAuth")?
 
   /// User Name
   WebSiteAuthUserName: String?
@@ -5762,7 +5825,7 @@ local class IISWebAppDeployment_1Inputs {
   AssignDuplicateBinding: Boolean?
 
   /// Protocol
-  Protocol: ("https"|"http")?
+  Protocol: ("https" | "http")?
 
   /// IP Address
   IPAddress: String?
@@ -5792,13 +5855,15 @@ local class IISWebAppDeployment_1Inputs {
   AppPoolName: String?
 
   /// .NET Version
-  DotNetVersion: ("v4.0"|"v2.0"|"No Managed Code")?
+  DotNetVersion: ("v4.0" | "v2.0" | "No Managed Code")?
 
   /// Managed Pipeline Mode
-  PipeLineMode: ("Integrated"|"Classic")?
+  PipeLineMode: ("Integrated" | "Classic")?
 
   /// Identity
-  AppPoolIdentity: ("ApplicationPoolIdentity"|"LocalService"|"LocalSystem"|"NetworkService"|"SpecificUser")?
+  AppPoolIdentity: (
+    "ApplicationPoolIdentity" | "LocalService" | "LocalSystem" | "NetworkService" | "SpecificUser"
+  )?
 
   /// Username
   AppPoolUsername: String?
@@ -5813,7 +5878,7 @@ local class IISWebAppDeployment_1Inputs {
   DeployInParallel: Boolean?
 
   /// Select Machines By
-  ResourceFilteringMethod: ("machineNames"|"tags")?
+  ResourceFilteringMethod: ("machineNames" | "tags")?
 
   /// Deploy to Machines
   MachineFilter: String?
@@ -5948,7 +6013,7 @@ local class NuGetInstaller_0Inputs {
   nugetConfigPath: String?
 
   /// Installation type
-  restoreMode: ("restore"|"install")?
+  restoreMode: ("restore" | "install")?
 
   /// Disable local cache
   noCache: Boolean?
@@ -5957,10 +6022,10 @@ local class NuGetInstaller_0Inputs {
   nuGetRestoreArgs: String?
 
   /// Verbosity
-  verbosity: ("-"|"Quiet"|"Normal"|"Detailed")?
+  verbosity: ("-" | "Quiet" | "Normal" | "Detailed")?
 
   /// NuGet Version
-  nuGetVersion: ("3.3.0"|"3.5.0.1829"|"4.0.0.2283"|"custom")?
+  nuGetVersion: ("3.3.0" | "3.5.0.1829" | "4.0.0.2283" | "custom")?
 
   /// Path to NuGet.exe
   nuGetPath: String?
@@ -5982,7 +6047,7 @@ local class NuGetRestore_1Inputs {
   solution: String?
 
   /// Feeds to use
-  selectOrConfig: ("select"|"config")?
+  selectOrConfig: ("select" | "config")?
 
   /// Use packages from this Azure Artifacts feed
   feed: String?
@@ -6000,7 +6065,7 @@ local class NuGetRestore_1Inputs {
   packagesDirectory: String?
 
   /// Verbosity
-  verbosity: ("-"|"Quiet"|"Normal"|"Detailed")?
+  verbosity: ("-" | "Quiet" | "Normal" | "Detailed")?
 }
 
 /// NuGet
@@ -6016,13 +6081,13 @@ class NuGetCommand_2 extends ServiceSchema.Task {
 /// NuGet inputs
 local class NuGetCommand_2Inputs {
   /// Command
-  command: ("restore"|"pack"|"push"|"custom")?
+  command: ("restore" | "pack" | "push" | "custom")?
 
   /// Path to solution, packages.config, or project.json
   restoreSolution: String?
 
   /// Feeds to use
-  feedsToUse: ("select"|"config")?
+  feedsToUse: ("select" | "config")?
 
   /// Use packages from this Azure Artifacts/TFS feed. Select from the dropdown or enter [project name/]feed name.
   vstsFeed: String?
@@ -6046,13 +6111,13 @@ local class NuGetCommand_2Inputs {
   restoreDirectory: String?
 
   /// Verbosity
-  verbosityRestore: ("Quiet"|"Normal"|"Detailed")?
+  verbosityRestore: ("Quiet" | "Normal" | "Detailed")?
 
   /// Path to NuGet package(s) to publish
   packagesToPush: String?
 
   /// Target feed location
-  nuGetFeedType: ("internal"|"external")?
+  nuGetFeedType: ("internal" | "external")?
 
   /// Target feed
   publishVstsFeed: String?
@@ -6067,7 +6132,7 @@ local class NuGetCommand_2Inputs {
   publishFeedCredentials: String?
 
   /// Verbosity
-  verbosityPush: ("Quiet"|"Normal"|"Detailed")?
+  verbosityPush: ("Quiet" | "Normal" | "Detailed")?
 
   /// Path to csproj or nuspec file(s) to pack
   packagesToPack: String?
@@ -6079,7 +6144,7 @@ local class NuGetCommand_2Inputs {
   packDestination: String?
 
   /// Automatic package versioning
-  versioningScheme: ("off"|"byPrereleaseNumber"|"byEnvVar"|"byBuildNumber")?
+  versioningScheme: ("off" | "byPrereleaseNumber" | "byEnvVar" | "byBuildNumber")?
 
   /// Include referenced projects
   includeReferencedProjects: Boolean?
@@ -6097,7 +6162,7 @@ local class NuGetCommand_2Inputs {
   patchVersion: String?
 
   /// Time zone
-  packTimezone: ("utc"|"local")?
+  packTimezone: ("utc" | "local")?
 
   /// Create symbols package
   includeSymbols: Boolean?
@@ -6112,7 +6177,7 @@ local class NuGetCommand_2Inputs {
   basePath: String?
 
   /// Verbosity
-  verbosityPack: ("Quiet"|"Normal"|"Detailed")?
+  verbosityPack: ("Quiet" | "Normal" | "Detailed")?
 
   /// Command and arguments
   arguments: String?
@@ -6171,13 +6236,13 @@ local class XamariniOS_1Inputs {
   workingDirectory: String?
 
   /// Build tool
-  buildToolOption: ("xbuild"|"msbuild")?
+  buildToolOption: ("xbuild" | "msbuild")?
 
   /// Build tool path
   mdtoolFile: String?
 
   /// Override using
-  signingOption: ("file"|"id")?
+  signingOption: ("file" | "id")?
 
   /// Signing identity
   signingIdentity: String?
@@ -6263,7 +6328,7 @@ class PublishTestResults_1 extends ServiceSchema.Task {
 /// Publish test results inputs
 local class PublishTestResults_1Inputs {
   /// Test Result Format
-  testRunner: ("JUnit"|"NUnit"|"VSTest"|"XUnit")?
+  testRunner: ("JUnit" | "NUnit" | "VSTest" | "XUnit")?
 
   /// Test Results Files
   testResultsFiles: String?
@@ -6297,7 +6362,7 @@ class PublishTestResults_2 extends ServiceSchema.Task {
 /// Publish Test Results inputs
 local class PublishTestResults_2Inputs {
   /// Test result format
-  testResultsFormat: ("JUnit"|"NUnit"|"VSTest"|"XUnit"|"CTest")?
+  testResultsFormat: ("JUnit" | "NUnit" | "VSTest" | "XUnit" | "CTest")?
 
   /// Test results files
   testResultsFiles: String?
@@ -6343,7 +6408,7 @@ class PublishTestResults_1_alt1 extends ServiceSchema.Task {
 /// Publish test results inputs
 local class PublishTestResults_1_alt1Inputs {
   /// Test Result Format
-  testRunner: ("JUnit"|"NUnit"|"VSTest"|"XUnit")?
+  testRunner: ("JUnit" | "NUnit" | "VSTest" | "XUnit")?
 
   /// Test Results Files
   testResultsFiles: String?
@@ -6383,7 +6448,7 @@ local class AzureFileCopy_6Inputs {
   azureSubscription: String
 
   /// Destination Type
-  Destination: "AzureBlob"|"AzureVMs"
+  Destination: "AzureBlob" | "AzureVMs"
 
   /// RM Storage Account
   storage: String
@@ -6398,7 +6463,7 @@ local class AzureFileCopy_6Inputs {
   resourceGroup: String?
 
   /// Select Machines By
-  ResourceFilteringMethod: ("machineNames"|"tags")?
+  ResourceFilteringMethod: ("machineNames" | "tags")?
 
   /// Filter Criteria
   MachineNames: String?
@@ -6450,7 +6515,7 @@ local class AzureFileCopy_4Inputs {
   azureSubscription: String
 
   /// Destination Type
-  Destination: "AzureBlob"|"AzureVMs"
+  Destination: "AzureBlob" | "AzureVMs"
 
   /// RM Storage Account
   storage: String
@@ -6465,7 +6530,7 @@ local class AzureFileCopy_4Inputs {
   resourceGroup: String?
 
   /// Select Machines By
-  ResourceFilteringMethod: ("machineNames"|"tags")?
+  ResourceFilteringMethod: ("machineNames" | "tags")?
 
   /// Filter Criteria
   MachineNames: String?
@@ -6520,7 +6585,7 @@ local class AzureFileCopy_5Inputs {
   azureSubscription: String
 
   /// Destination Type
-  Destination: "AzureBlob"|"AzureVMs"
+  Destination: "AzureBlob" | "AzureVMs"
 
   /// RM Storage Account
   storage: String
@@ -6535,7 +6600,7 @@ local class AzureFileCopy_5Inputs {
   resourceGroup: String?
 
   /// Select Machines By
-  ResourceFilteringMethod: ("machineNames"|"tags")?
+  ResourceFilteringMethod: ("machineNames" | "tags")?
 
   /// Filter Criteria
   MachineNames: String?
@@ -6587,7 +6652,7 @@ local class AzureFileCopy_2Inputs {
   SourcePath: String
 
   /// Azure Connection Type
-  azureConnectionType: ("ConnectedServiceName"|"ConnectedServiceNameARM")?
+  azureConnectionType: ("ConnectedServiceName" | "ConnectedServiceNameARM")?
 
   /// Azure Classic Subscription
   azureClassicSubscription: String?
@@ -6596,7 +6661,7 @@ local class AzureFileCopy_2Inputs {
   azureSubscription: String?
 
   /// Destination Type
-  Destination: "AzureBlob"|"AzureVMs"
+  Destination: "AzureBlob" | "AzureVMs"
 
   /// Classic Storage Account
   classicStorage: String?
@@ -6617,7 +6682,7 @@ local class AzureFileCopy_2Inputs {
   resourceGroup: String?
 
   /// Select Machines By
-  ResourceFilteringMethod: ("machineNames"|"tags")?
+  ResourceFilteringMethod: ("machineNames" | "tags")?
 
   /// Filter Criteria
   MachineNames: String?
@@ -6675,7 +6740,7 @@ local class AzureFileCopy_3Inputs {
   azureSubscription: String
 
   /// Destination Type
-  Destination: "AzureBlob"|"AzureVMs"
+  Destination: "AzureBlob" | "AzureVMs"
 
   /// RM Storage Account
   storage: String
@@ -6690,7 +6755,7 @@ local class AzureFileCopy_3Inputs {
   resourceGroup: String?
 
   /// Select Machines By
-  ResourceFilteringMethod: ("machineNames"|"tags")?
+  ResourceFilteringMethod: ("machineNames" | "tags")?
 
   /// Filter Criteria
   MachineNames: String?
@@ -6748,7 +6813,7 @@ local class AzureFileCopy_1Inputs {
   SourcePath: String
 
   /// Azure Connection Type
-  azureConnectionType: ("ConnectedServiceName"|"ConnectedServiceNameARM")?
+  azureConnectionType: ("ConnectedServiceName" | "ConnectedServiceNameARM")?
 
   /// Azure Classic Subscription
   azureClassicSubscription: String?
@@ -6757,7 +6822,7 @@ local class AzureFileCopy_1Inputs {
   azureSubscription: String?
 
   /// Destination Type
-  Destination: "AzureBlob"|"AzureVMs"
+  Destination: "AzureBlob" | "AzureVMs"
 
   /// Classic Storage Account
   classicStorage: String?
@@ -6778,7 +6843,7 @@ local class AzureFileCopy_1Inputs {
   resourceGroup: String?
 
   /// Select Machines By
-  ResourceFilteringMethod: ("machineNames"|"tags")?
+  ResourceFilteringMethod: ("machineNames" | "tags")?
 
   /// Filter Criteria
   MachineNames: String?
@@ -6845,7 +6910,7 @@ local class PublishSymbols_2Inputs {
   PublishSymbols: Boolean?
 
   /// Symbol server type
-  SymbolServerType: (" "|"TeamServices"|"FileShare")?
+  SymbolServerType: (" " | "TeamServices" | "FileShare")?
 
   /// Path to publish symbols
   SymbolsPath: String?
@@ -6857,7 +6922,7 @@ local class PublishSymbols_2Inputs {
   SymbolExpirationInDays: String?
 
   /// Symbol file formats to publish
-  IndexableFileFormats: ("Default"|"Pdb"|"SourceMap"|"All")?
+  IndexableFileFormats: ("Default" | "Pdb" | "SourceMap" | "All")?
 
   /// Verbose logging
   DetailedLog: Boolean?
@@ -7007,7 +7072,7 @@ local class Gradle_2Inputs {
   testRunTitle: String?
 
   /// Code coverage tool
-  codeCoverageToolOption: ("None"|"Cobertura"|"JaCoCo")?
+  codeCoverageToolOption: ("None" | "Cobertura" | "JaCoCo")?
 
   /// Class files directories
   codeCoverageClassFilesDirectories: String?
@@ -7022,16 +7087,16 @@ local class Gradle_2Inputs {
   codeCoverageGradle5xOrHigher: Boolean?
 
   /// Set JAVA_HOME by
-  javaHomeOption: ("JDKVersion"|"Path")?
+  javaHomeOption: ("JDKVersion" | "Path")?
 
   /// JDK version
-  jdkVersionOption: ("default"|"1.17"|"1.11"|"1.10"|"1.9"|"1.8"|"1.7"|"1.6")?
+  jdkVersionOption: ("default" | "1.17" | "1.11" | "1.10" | "1.9" | "1.8" | "1.7" | "1.6")?
 
   /// JDK path
   jdkDirectory: String?
 
   /// JDK architecture
-  jdkArchitectureOption: ("x86"|"x64")?
+  jdkArchitectureOption: ("x86" | "x64")?
 
   /// Set GRADLE_OPTS
   gradleOptions: String?
@@ -7040,7 +7105,7 @@ local class Gradle_2Inputs {
   sonarQubeRunAnalysis: Boolean?
 
   /// SonarQube scanner for Gradle version
-  sqGradlePluginVersionChoice: ("specify"|"build")?
+  sqGradlePluginVersionChoice: ("specify" | "build")?
 
   /// SonarQube scanner for Gradle plugin version
   sonarQubeGradlePluginVersion: String?
@@ -7058,7 +7123,7 @@ local class Gradle_2Inputs {
   spotBugsAnalysis: Boolean?
 
   /// Spotbugs plugin version
-  spotBugsGradlePluginVersionChoice: ("specify"|"build")?
+  spotBugsGradlePluginVersionChoice: ("specify" | "build")?
 
   /// Version number
   spotbugsGradlePluginVersion: String?
@@ -7098,7 +7163,7 @@ local class Gradle_3Inputs {
   testRunTitle: String?
 
   /// Code coverage tool
-  codeCoverageToolOption: ("None"|"Cobertura"|"JaCoCo")?
+  codeCoverageToolOption: ("None" | "Cobertura" | "JaCoCo")?
 
   /// Class files directories
   codeCoverageClassFilesDirectories: String?
@@ -7113,16 +7178,16 @@ local class Gradle_3Inputs {
   codeCoverageGradle5xOrHigher: Boolean?
 
   /// Set JAVA_HOME by
-  javaHomeOption: ("JDKVersion"|"Path")?
+  javaHomeOption: ("JDKVersion" | "Path")?
 
   /// JDK version
-  jdkVersionOption: ("default"|"1.17"|"1.11"|"1.10"|"1.9"|"1.8"|"1.7"|"1.6")?
+  jdkVersionOption: ("default" | "1.17" | "1.11" | "1.10" | "1.9" | "1.8" | "1.7" | "1.6")?
 
   /// JDK path
   jdkDirectory: String?
 
   /// JDK architecture
-  jdkArchitectureOption: ("x86"|"x64")?
+  jdkArchitectureOption: ("x86" | "x64")?
 
   /// Set GRADLE_OPTS
   gradleOptions: String?
@@ -7131,7 +7196,7 @@ local class Gradle_3Inputs {
   sonarQubeRunAnalysis: Boolean?
 
   /// SonarQube scanner for Gradle version
-  sqGradlePluginVersionChoice: ("specify"|"build")?
+  sqGradlePluginVersionChoice: ("specify" | "build")?
 
   /// SonarQube scanner for Gradle plugin version
   sonarQubeGradlePluginVersion: String?
@@ -7149,7 +7214,7 @@ local class Gradle_3Inputs {
   spotBugsAnalysis: Boolean?
 
   /// Spotbugs plugin version
-  spotBugsGradlePluginVersionChoice: ("specify"|"build")?
+  spotBugsGradlePluginVersionChoice: ("specify" | "build")?
 
   /// Version number
   spotbugsGradlePluginVersion: String?
@@ -7189,16 +7254,16 @@ local class Gradle_4Inputs {
   testRunTitle: String?
 
   /// Set JAVA_HOME by
-  javaHomeOption: ("JDKVersion"|"Path")?
+  javaHomeOption: ("JDKVersion" | "Path")?
 
   /// JDK version
-  jdkVersionOption: ("default"|"1.17"|"1.11"|"1.10"|"1.9"|"1.8"|"1.7"|"1.6")?
+  jdkVersionOption: ("default" | "1.17" | "1.11" | "1.10" | "1.9" | "1.8" | "1.7" | "1.6")?
 
   /// JDK path
   jdkDirectory: String?
 
   /// JDK architecture
-  jdkArchitectureOption: ("x86"|"x64")?
+  jdkArchitectureOption: ("x86" | "x64")?
 
   /// Set GRADLE_OPTS
   gradleOptions: String?
@@ -7207,7 +7272,7 @@ local class Gradle_4Inputs {
   sonarQubeRunAnalysis: Boolean?
 
   /// SonarQube scanner for Gradle version
-  sqGradlePluginVersionChoice: ("specify"|"build")?
+  sqGradlePluginVersionChoice: ("specify" | "build")?
 
   /// SonarQube scanner for Gradle plugin version
   sonarQubeGradlePluginVersion: String?
@@ -7225,7 +7290,7 @@ local class Gradle_4Inputs {
   spotBugsAnalysis: Boolean?
 
   /// Spotbugs plugin version
-  spotBugsGradlePluginVersionChoice: ("specify"|"build")?
+  spotBugsGradlePluginVersionChoice: ("specify" | "build")?
 
   /// Version number
   spotbugsGradlePluginVersion: String?
@@ -7265,7 +7330,7 @@ local class Gradle_1Inputs {
   testRunTitle: String?
 
   /// Code Coverage Tool
-  codeCoverageToolOption: ("None"|"Cobertura"|"JaCoCo")?
+  codeCoverageToolOption: ("None" | "Cobertura" | "JaCoCo")?
 
   /// Class Files Directories
   codeCoverageClassFilesDirectories: String?
@@ -7277,16 +7342,16 @@ local class Gradle_1Inputs {
   codeCoverageFailIfEmpty: Boolean?
 
   /// Set JAVA_HOME by
-  javaHomeOption: ("JDKVersion"|"Path")?
+  javaHomeOption: ("JDKVersion" | "Path")?
 
   /// JDK Version
-  jdkVersionOption: ("default"|"1.9"|"1.8"|"1.7"|"1.6")?
+  jdkVersionOption: ("default" | "1.9" | "1.8" | "1.7" | "1.6")?
 
   /// JDK Path
   jdkDirectory: String?
 
   /// JDK Architecture
-  jdkArchitectureOption: ("x86"|"x64")?
+  jdkArchitectureOption: ("x86" | "x64")?
 
   /// Set GRADLE_OPTS
   gradleOptions: String?
@@ -7353,10 +7418,10 @@ local class AzureTestPlan_0Inputs {
   azureSubscription: String?
 
   /// Test cases to be executed
-  testSelector: "manualTests"|"automatedTests"
+  testSelector: "manualTests" | "automatedTests"
 
   /// Select tests using
-  testPlanOrRunSelector: ("testPlan"|"testRun")?
+  testPlanOrRunSelector: ("testPlan" | "testRun")?
 
   /// Test Run
   testRunId: String?
@@ -7371,7 +7436,7 @@ local class AzureTestPlan_0Inputs {
   testConfiguration: String
 
   /// Select Test framework language
-  testLanguageInput: ("JavaMaven"|"JavaGradle"|"Python"|"JavaScriptJest"|"Playwright")?
+  testLanguageInput: ("JavaMaven" | "JavaGradle" | "Python" | "JavaScriptJest" | "Playwright")?
 
   /// Pom file path
   pomFilePath: String?
@@ -7432,7 +7497,7 @@ local class AppCenterDistribute_1Inputs {
   symbolsIncludeParentDirectory: Boolean?
 
   /// Create release notes
-  releaseNotesOption: ("input"|"file")?
+  releaseNotesOption: ("input" | "file")?
 
   /// Release notes
   releaseNotesInput: String?
@@ -7487,7 +7552,7 @@ local class AppCenterDistribute_2Inputs {
   symbolsIncludeParentDirectory: Boolean?
 
   /// Create release notes
-  releaseNotesOption: ("input"|"file")?
+  releaseNotesOption: ("input" | "file")?
 
   /// Release notes
   releaseNotesInput: String?
@@ -7527,7 +7592,7 @@ local class AppCenterDistribute_3Inputs {
   buildVersion: String?
 
   /// Symbols type
-  symbolsOption: ("Apple"|"Android"|"UWP")?
+  symbolsOption: ("Apple" | "Android" | "UWP")?
 
   /// Symbols path
   symbolsPath: String?
@@ -7548,7 +7613,7 @@ local class AppCenterDistribute_3Inputs {
   symbolsIncludeParentDirectory: Boolean?
 
   /// Create release notes
-  releaseNotesOption: ("input"|"file")?
+  releaseNotesOption: ("input" | "file")?
 
   /// Release notes
   releaseNotesInput: String?
@@ -7560,7 +7625,7 @@ local class AppCenterDistribute_3Inputs {
   isMandatory: Boolean?
 
   /// Release destination
-  destinationType: ("groups"|"store")?
+  destinationType: ("groups" | "store")?
 
   /// Destination IDs
   distributionGroupId: String?
@@ -7612,7 +7677,7 @@ local class AppCenterDistribute_0Inputs {
   symbolsIncludeParentDirectory: Boolean?
 
   /// Create release notes
-  releaseNotesOption: ("input"|"file")?
+  releaseNotesOption: ("input" | "file")?
 
   /// Release notes
   releaseNotesInput: String?
@@ -7687,7 +7752,7 @@ local class JenkinsDownloadArtifacts_2Inputs {
   saveTo: String?
 
   /// Download artifacts produced by
-  jenkinsBuild: ("LastSuccessfulBuild"|"BuildNumber")?
+  jenkinsBuild: ("LastSuccessfulBuild" | "BuildNumber")?
 
   /// Jenkins build number
   jenkinsBuildNumber: String?
@@ -7748,7 +7813,7 @@ local class JenkinsDownloadArtifacts_1Inputs {
   saveTo: String?
 
   /// Download artifacts produced by
-  jenkinsBuild: ("LastSuccessfulBuild"|"BuildNumber")?
+  jenkinsBuild: ("LastSuccessfulBuild" | "BuildNumber")?
 
   /// Jenkins build number
   jenkinsBuildNumber: String?
@@ -7809,7 +7874,7 @@ local class JenkinsDownloadArtifacts_2_alt1Inputs {
   saveTo: String?
 
   /// Download artifacts produced by
-  jenkinsBuild: ("LastSuccessfulBuild"|"BuildNumber")?
+  jenkinsBuild: ("LastSuccessfulBuild" | "BuildNumber")?
 
   /// Jenkins build number
   jenkinsBuildNumber: String?
@@ -7926,7 +7991,7 @@ class HelmDeploy_1 extends ServiceSchema.Task {
 /// Package and deploy Helm charts inputs
 local class HelmDeploy_1Inputs {
   /// Connection Type
-  connectionType: ("Azure Resource Manager"|"Kubernetes Service Connection"|"None")?
+  connectionType: ("Azure Resource Manager" | "Kubernetes Service Connection" | "None")?
 
   /// Azure subscription
   azureSubscription: String?
@@ -7958,21 +8023,22 @@ local class HelmDeploy_1Inputs {
   /// Command
   command: (
     "create"
-    |"delete"
-    |"expose"
-    |"get"
-    |"init"
-    |"install"
-    |"login"
-    |"logout"
-    |"ls"
-    |"package"
-    |"rollback"
-    |"upgrade"
-    |"uninstall")?
+      | "delete"
+      | "expose"
+      | "get"
+      | "init"
+      | "install"
+      | "login"
+      | "logout"
+      | "ls"
+      | "package"
+      | "rollback"
+      | "upgrade"
+      | "uninstall"
+  )?
 
   /// Chart Type
-  chartType: ("Name"|"FilePath")?
+  chartType: ("Name" | "FilePath")?
 
   /// Chart Name
   chartName: String?
@@ -8066,7 +8132,7 @@ class HelmDeploy_0 extends ServiceSchema.Task {
 /// Package and deploy Helm charts inputs
 local class HelmDeploy_0Inputs {
   /// Connection Type
-  connectionType: ("Azure Resource Manager"|"Kubernetes Service Connection"|"None")?
+  connectionType: ("Azure Resource Manager" | "Kubernetes Service Connection" | "None")?
 
   /// Azure subscription
   azureSubscription: String?
@@ -8098,23 +8164,24 @@ local class HelmDeploy_0Inputs {
   /// Command
   command: (
     "create"
-    |"delete"
-    |"expose"
-    |"get"
-    |"init"
-    |"install"
-    |"login"
-    |"logout"
-    |"ls"
-    |"push"
-    |"package"
-    |"rollback"
-    |"save"
-    |"upgrade"
-    |"uninstall")?
+      | "delete"
+      | "expose"
+      | "get"
+      | "init"
+      | "install"
+      | "login"
+      | "logout"
+      | "ls"
+      | "push"
+      | "package"
+      | "rollback"
+      | "save"
+      | "upgrade"
+      | "uninstall"
+  )?
 
   /// Chart Type
-  chartType: ("Name"|"FilePath")?
+  chartType: ("Name" | "FilePath")?
 
   /// Chart Name
   chartName: String?
@@ -8217,7 +8284,7 @@ local class InstallAppleCertificate_2Inputs {
   certPwd: String?
 
   /// Keychain
-  keychain: ("default"|"temp"|"custom")?
+  keychain: ("default" | "temp" | "custom")?
 
   /// Keychain password
   keychainPassword: String?
@@ -8260,7 +8327,7 @@ local class InstallAppleCertificate_1Inputs {
   certPwd: String?
 
   /// Keychain
-  keychain: ("default"|"temp"|"custom")?
+  keychain: ("default" | "temp" | "custom")?
 
   /// Keychain password
   keychainPassword: String?
@@ -8297,7 +8364,7 @@ local class InstallAppleCertificate_0Inputs {
   certPwd: String?
 
   /// Keychain
-  keychain: ("default"|"temp"|"custom")?
+  keychain: ("default" | "temp" | "custom")?
 
   /// Keychain Password
   keychainPassword: String?
@@ -8334,7 +8401,7 @@ local class AzureFunction_1Inputs {
   key: String
 
   /// Method
-  method: ("OPTIONS"|"GET"|"HEAD"|"POST"|"PUT"|"DELETE"|"TRACE"|"PATCH")?
+  method: ("OPTIONS" | "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "TRACE" | "PATCH")?
 
   /// Headers
   headers: String?
@@ -8346,7 +8413,7 @@ local class AzureFunction_1Inputs {
   body: String?
 
   /// Completion event
-  waitForCompletion: ("true"|"false")?
+  waitForCompletion: ("true" | "false")?
 
   /// Success criteria
   successCriteria: String?
@@ -8371,7 +8438,7 @@ local class AzureFunction_0Inputs {
   key: String
 
   /// Method
-  method: ("OPTIONS"|"GET"|"HEAD"|"POST"|"PUT"|"DELETE"|"TRACE"|"PATCH")?
+  method: ("OPTIONS" | "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "TRACE" | "PATCH")?
 
   /// Headers
   headers: String?
@@ -8383,7 +8450,7 @@ local class AzureFunction_0Inputs {
   body: String?
 
   /// Complete based on
-  waitForCompletion: ("true"|"false")?
+  waitForCompletion: ("true" | "false")?
 
   /// Success criteria
   successCriteria: String?
@@ -8424,7 +8491,7 @@ local class DownloadGitHubRelease_0Inputs {
   userRepository: String
 
   /// Default version
-  defaultVersionType: ("latest"|"specificVersion"|"specificTag")?
+  defaultVersionType: ("latest" | "specificVersion" | "specificTag")?
 
   /// Release
   version: String?
@@ -8452,7 +8519,7 @@ local class SSH_0Inputs {
   sshEndpoint: String
 
   /// Run
-  runOptions: ("commands"|"script"|"inline")?
+  runOptions: ("commands" | "script" | "inline")?
 
   /// Commands
   commands: String?
@@ -8523,7 +8590,7 @@ local class PublishPipelineArtifact_1Inputs {
   artifact: String?
 
   /// Artifact publish location
-  publishLocation: ("pipeline"|"filepath")?
+  publishLocation: ("pipeline" | "filepath")?
 
   /// File share path
   fileSharePath: String?
@@ -8625,7 +8692,7 @@ class Kubernetes_1 extends ServiceSchema.Task {
 /// Kubectl inputs
 local class Kubernetes_1Inputs {
   /// Service connection type
-  connectionType: ("Azure Resource Manager"|"Kubernetes Service Connection"|"None")?
+  connectionType: ("Azure Resource Manager" | "Kubernetes Service Connection" | "None")?
 
   /// Kubernetes service connection
   kubernetesServiceEndpoint: String?
@@ -8646,13 +8713,27 @@ local class Kubernetes_1Inputs {
   namespace: String?
 
   /// Command
-  command: ("apply"|"create"|"delete"|"exec"|"expose"|"get"|"login"|"logout"|"logs"|"rollout"|"run"|"set"|"top")?
+  command: (
+    "apply"
+      | "create"
+      | "delete"
+      | "exec"
+      | "expose"
+      | "get"
+      | "login"
+      | "logout"
+      | "logs"
+      | "rollout"
+      | "run"
+      | "set"
+      | "top"
+  )?
 
   /// Use configuration
   useConfigurationFile: Boolean?
 
   /// Configuration type
-  configurationType: ("configuration"|"inline")?
+  configurationType: ("configuration" | "inline")?
 
   /// File path
   configuration: String?
@@ -8664,13 +8745,13 @@ local class Kubernetes_1Inputs {
   arguments: String?
 
   /// Type of secret
-  secretType: ("dockerRegistry"|"generic")?
+  secretType: ("dockerRegistry" | "generic")?
 
   /// Arguments
   secretArguments: String?
 
   /// Container registry type
-  containerRegistryType: ("Azure Container Registry"|"Container Registry")?
+  containerRegistryType: ("Azure Container Registry" | "Container Registry")?
 
   /// Docker registry service connection
   dockerRegistryEndpoint: String?
@@ -8703,7 +8784,7 @@ local class Kubernetes_1Inputs {
   configMapArguments: String?
 
   /// Kubectl
-  versionOrLocation: ("version"|"location")?
+  versionOrLocation: ("version" | "location")?
 
   /// Version spec
   versionSpec: String?
@@ -8718,7 +8799,7 @@ local class Kubernetes_1Inputs {
   workingDirectory: String?
 
   /// Output format
-  outputFormat: ("json"|"yaml"|"none")?
+  outputFormat: ("json" | "yaml" | "none")?
 }
 
 /// Kubectl
@@ -8740,7 +8821,9 @@ local class Kubernetes_0Inputs {
   namespace: String?
 
   /// Command
-  command: ("apply"|"create"|"delete"|"exec"|"expose"|"get"|"logs"|"run"|"set"|"top")?
+  command: (
+    "apply" | "create" | "delete" | "exec" | "expose" | "get" | "logs" | "run" | "set" | "top"
+  )?
 
   /// Use Configuration files
   useConfigurationFile: Boolean?
@@ -8752,13 +8835,13 @@ local class Kubernetes_0Inputs {
   arguments: String?
 
   /// Type of secret
-  secretType: ("dockerRegistry"|"generic")?
+  secretType: ("dockerRegistry" | "generic")?
 
   /// Arguments
   secretArguments: String?
 
   /// Container Registry type
-  containerRegistryType: ("Azure Container Registry"|"Container Registry")?
+  containerRegistryType: ("Azure Container Registry" | "Container Registry")?
 
   /// Docker Registry service connection
   dockerRegistryConnection: String?
@@ -8791,7 +8874,7 @@ local class Kubernetes_0Inputs {
   configMapArguments: String?
 
   /// Kubectl
-  versionOrLocation: ("version"|"location")?
+  versionOrLocation: ("version" | "location")?
 
   /// Version spec
   versionSpec: String?
@@ -8806,7 +8889,7 @@ local class Kubernetes_0Inputs {
   workingDirectory: String?
 
   /// Output format
-  outputFormat: ("json"|"yaml")?
+  outputFormat: ("json" | "yaml")?
 
   /// Output variable name
   kubectlOutput: String?
@@ -8825,7 +8908,12 @@ class AzureIoTEdge_2 extends ServiceSchema.Task {
 /// Azure IoT Edge inputs
 local class AzureIoTEdge_2Inputs {
   /// Action
-  action: ("Build module images"|"Push module images"|"Generate deployment manifest"|"Deploy to IoT Edge devices")?
+  action: (
+    "Build module images"
+      | "Push module images"
+      | "Generate deployment manifest"
+      | "Deploy to IoT Edge devices"
+  )?
 
   /// Deployment file
   deploymentFilePath: String?
@@ -8843,7 +8931,7 @@ local class AzureIoTEdge_2Inputs {
   priority: String?
 
   /// Choose single/multiple device
-  deviceOption: ("Single Device"|"Multiple Devices")?
+  deviceOption: ("Single Device" | "Multiple Devices")?
 
   /// IoT Edge device ID
   deviceId: String?
@@ -8852,7 +8940,7 @@ local class AzureIoTEdge_2Inputs {
   targetcondition: String?
 
   /// Container registry type
-  containerregistrytype: ("Azure Container Registry"|"Generic Container Registry")?
+  containerregistrytype: ("Azure Container Registry" | "Generic Container Registry")?
 
   /// Docker Registry Connection
   dockerRegistryConnection: String?
@@ -8867,16 +8955,16 @@ local class AzureIoTEdge_2Inputs {
   templateFilePath: String?
 
   /// Default platform
-  defaultPlatform: ("amd64"|"windows-amd64"|"arm32v7"|"arm64v8")?
+  defaultPlatform: ("amd64" | "windows-amd64" | "arm32v7" | "arm64v8")?
 
   /// Add registry credential to deployment manifest
-  fillRegistryCredential: ("true"|"false")?
+  fillRegistryCredential: ("true" | "false")?
 
   /// Output path
   deploymentManifestOutputPath: String?
 
   /// Validate the schema of generated deployment manifest
-  validateGeneratedDeploymentManifest: ("true"|"false")?
+  validateGeneratedDeploymentManifest: ("true" | "false")?
 
   /// Bypass module(s)
   bypassModules: String?
@@ -8904,7 +8992,9 @@ local class ServiceFabricComposeDeploy_0Inputs {
   applicationName: String?
 
   /// Registry Credentials Source
-  registryCredentials: ("AzureResourceManagerEndpoint"|"ContainerRegistryEndpoint"|"UsernamePassword"|"None")?
+  registryCredentials: (
+    "AzureResourceManagerEndpoint" | "ContainerRegistryEndpoint" | "UsernamePassword" | "None"
+  )?
 
   /// Docker Registry Service Connection
   dockerRegistryConnection: String?
@@ -9098,7 +9188,7 @@ class DownloadPipelineArtifact_2 extends ServiceSchema.Task {
 /// Download Pipeline Artifacts inputs
 local class DownloadPipelineArtifact_2Inputs {
   /// Download artifacts produced by
-  buildType: ("current"|"specific")?
+  buildType: ("current" | "specific")?
 
   /// Project
   project: String?
@@ -9110,7 +9200,7 @@ local class DownloadPipelineArtifact_2Inputs {
   specificBuildWithTriggering: Boolean?
 
   /// Build version to download
-  buildVersionToDownload: ("latest"|"latestFromBranch"|"specific")?
+  buildVersionToDownload: ("latest" | "latestFromBranch" | "specific")?
 
   /// Branch name
   branchName: String?
@@ -9150,7 +9240,7 @@ class DownloadPipelineArtifact_1 extends ServiceSchema.Task {
 /// Download pipeline artifact inputs
 local class DownloadPipelineArtifact_1Inputs {
   /// Download artifacts produced by
-  buildType: ("current"|"specific")?
+  buildType: ("current" | "specific")?
 
   /// Project
   project: String?
@@ -9162,7 +9252,7 @@ local class DownloadPipelineArtifact_1Inputs {
   specificBuildWithTriggering: Boolean?
 
   /// Build version to download
-  buildVersionToDownload: ("latest"|"latestFromBranch"|"specific")?
+  buildVersionToDownload: ("latest" | "latestFromBranch" | "specific")?
 
   /// Branch name
   branchName: String?
@@ -9211,7 +9301,7 @@ local class UsePythonVersion_0Inputs {
   addToPath: Boolean?
 
   /// Architecture
-  architecture: ("x86"|"x64")?
+  architecture: ("x86" | "x64")?
 }
 
 /// Service Fabric PowerShell
@@ -9230,7 +9320,7 @@ local class ServiceFabricPowerShell_1Inputs {
   clusterConnection: String
 
   /// Script Type
-  ScriptType: ("FilePath"|"InlineScript")?
+  ScriptType: ("FilePath" | "InlineScript")?
 
   /// Script Path
   ScriptPath: String?
@@ -9255,7 +9345,7 @@ class VSTest_2 extends ServiceSchema.Task {
 /// Visual Studio Test inputs
 local class VSTest_2Inputs {
   /// Select tests using
-  testSelector: ("testAssemblies"|"testPlan"|"testRun")?
+  testSelector: ("testAssemblies" | "testPlan" | "testRun")?
 
   /// Test files
   testAssemblyVer2: String?
@@ -9291,10 +9381,10 @@ local class VSTest_2Inputs {
   uiTests: Boolean?
 
   /// Select test platform using
-  vstestLocationMethod: ("version"|"location")?
+  vstestLocationMethod: ("version" | "location")?
 
   /// Test platform version
-  vsTestVersion: ("latest"|"17.0"|"16.0"|"15.0"|"14.0"|"toolsInstaller")?
+  vsTestVersion: ("latest" | "17.0" | "16.0" | "15.0" | "14.0" | "toolsInstaller")?
 
   /// Path to vstest.console.exe
   vstestLocation: String?
@@ -9321,16 +9411,16 @@ local class VSTest_2Inputs {
   otherConsoleOptions: String?
 
   /// Batch tests
-  distributionBatchType: ("basedOnTestCases"|"basedOnExecutionTime"|"basedOnAssembly")?
+  distributionBatchType: ("basedOnTestCases" | "basedOnExecutionTime" | "basedOnAssembly")?
 
   /// Batch options
-  batchingBasedOnAgentsOption: ("autoBatchSize"|"customBatchSize")?
+  batchingBasedOnAgentsOption: ("autoBatchSize" | "customBatchSize")?
 
   /// Number of tests per batch
   customBatchSizeValue: String?
 
   /// Batch options
-  batchingBasedOnExecutionTimeOption: ("autoBatchSize"|"customTimeBatchSize")?
+  batchingBasedOnExecutionTimeOption: ("autoBatchSize" | "customTimeBatchSize")?
 
   /// Running time (sec) per batch
   customRunTimePerBatchValue: String?
@@ -9360,13 +9450,13 @@ local class VSTest_2Inputs {
   diagnosticsEnabled: Boolean?
 
   /// Collect process dump and attach to test run report
-  collectDumpOn: ("onAbortOnly"|"always"|"never")?
+  collectDumpOn: ("onAbortOnly" | "always" | "never")?
 
   /// Rerun failed tests
   rerunFailedTests: Boolean?
 
   /// Do not rerun if test failures exceed specified threshold
-  rerunType: ("basedOnTestFailurePercentage"|"basedOnTestFailureCount")?
+  rerunType: ("basedOnTestFailurePercentage" | "basedOnTestFailureCount")?
 
   /// % failure
   rerunFailedThreshold: String?
@@ -9394,7 +9484,7 @@ local class VSTest_3Inputs {
   azureSubscription: String?
 
   /// Select tests using
-  testSelector: ("testAssemblies"|"testPlan"|"testRun")?
+  testSelector: ("testAssemblies" | "testPlan" | "testRun")?
 
   /// Test files
   testAssemblyVer2: String?
@@ -9430,10 +9520,10 @@ local class VSTest_3Inputs {
   uiTests: Boolean?
 
   /// Select test platform using
-  vstestLocationMethod: ("version"|"location")?
+  vstestLocationMethod: ("version" | "location")?
 
   /// Test platform version
-  vsTestVersion: ("latest"|"17.0"|"16.0"|"15.0"|"14.0"|"toolsInstaller")?
+  vsTestVersion: ("latest" | "17.0" | "16.0" | "15.0" | "14.0" | "toolsInstaller")?
 
   /// Path to vstest.console.exe
   vstestLocation: String?
@@ -9460,16 +9550,16 @@ local class VSTest_3Inputs {
   otherConsoleOptions: String?
 
   /// Batch tests
-  distributionBatchType: ("basedOnTestCases"|"basedOnExecutionTime"|"basedOnAssembly")?
+  distributionBatchType: ("basedOnTestCases" | "basedOnExecutionTime" | "basedOnAssembly")?
 
   /// Batch options
-  batchingBasedOnAgentsOption: ("autoBatchSize"|"customBatchSize")?
+  batchingBasedOnAgentsOption: ("autoBatchSize" | "customBatchSize")?
 
   /// Number of tests per batch
   customBatchSizeValue: String?
 
   /// Batch options
-  batchingBasedOnExecutionTimeOption: ("autoBatchSize"|"customTimeBatchSize")?
+  batchingBasedOnExecutionTimeOption: ("autoBatchSize" | "customTimeBatchSize")?
 
   /// Running time (sec) per batch
   customRunTimePerBatchValue: String?
@@ -9505,13 +9595,13 @@ local class VSTest_3Inputs {
   diagnosticsEnabled: Boolean?
 
   /// Collect process dump and attach to test run report
-  collectDumpOn: ("onAbortOnly"|"always"|"never")?
+  collectDumpOn: ("onAbortOnly" | "always" | "never")?
 
   /// Rerun failed tests
   rerunFailedTests: Boolean?
 
   /// Do not rerun if test failures exceed specified threshold
-  rerunType: ("basedOnTestFailurePercentage"|"basedOnTestFailureCount")?
+  rerunType: ("basedOnTestFailurePercentage" | "basedOnTestFailureCount")?
 
   /// % failure
   rerunFailedThreshold: String?
@@ -9554,10 +9644,10 @@ local class VSTest_1Inputs {
   runInParallel: Boolean?
 
   /// VSTest
-  vstestLocationMethod: ("version"|"location")?
+  vstestLocationMethod: ("version" | "location")?
 
   /// VSTest version
-  vsTestVersion: ("latest"|"14.0"|"12.0")?
+  vsTestVersion: ("latest" | "14.0" | "12.0")?
 
   /// Path to vstest.console.exe
   vstestLocation: String?
@@ -9606,7 +9696,7 @@ local class ManualValidation_1Inputs {
   instructions: String?
 
   /// On timeout
-  onTimeout: ("reject"|"resume")?
+  onTimeout: ("reject" | "resume")?
 }
 
 /// Manual validation
@@ -9634,7 +9724,7 @@ local class ManualValidation_0Inputs {
   instructions: String?
 
   /// On timeout
-  onTimeout: ("reject"|"resume")?
+  onTimeout: ("reject" | "resume")?
 }
 
 /// Ant
@@ -9668,7 +9758,7 @@ local class Ant_1Inputs {
   testRunTitle: String?
 
   /// Code coverage tool
-  codeCoverageToolOptions: ("None"|"Cobertura"|"JaCoCo")?
+  codeCoverageToolOptions: ("None" | "Cobertura" | "JaCoCo")?
 
   /// Class files directories
   codeCoverageClassFilesDirectories: String?
@@ -9686,16 +9776,16 @@ local class Ant_1Inputs {
   antHomeDirectory: String?
 
   /// Set JAVA_HOME by
-  javaHomeOption: ("JDKVersion"|"Path")?
+  javaHomeOption: ("JDKVersion" | "Path")?
 
   /// JDK version
-  jdkVersionOption: ("default"|"1.11"|"1.10"|"1.9"|"1.8"|"1.7"|"1.6")?
+  jdkVersionOption: ("default" | "1.11" | "1.10" | "1.9" | "1.8" | "1.7" | "1.6")?
 
   /// JDK path
   jdkUserInputDirectory: String?
 
   /// JDK architecture
-  jdkArchitectureOption: ("x86"|"x64")?
+  jdkArchitectureOption: ("x86" | "x64")?
 }
 
 /// Visual Studio test agent deployment
@@ -9720,7 +9810,7 @@ local class DeployVisualStudioTestAgent_2Inputs {
   adminPassword: String
 
   /// Protocol
-  winRmProtocol: ("Http"|"Https")?
+  winRmProtocol: ("Http" | "Https")?
 
   /// Test Certificate
   testCertificate: Boolean?
@@ -9738,7 +9828,7 @@ local class DeployVisualStudioTestAgent_2Inputs {
   isDataCollectionOnly: Boolean?
 
   /// Test agent version
-  testPlatform: ("15.0"|"14.0")?
+  testPlatform: ("15.0" | "14.0")?
 
   /// Test agent location
   agentLocation: String?
@@ -9769,13 +9859,13 @@ local class DeployVisualStudioTestAgent_1Inputs {
   adminPassword: String?
 
   /// Protocol
-  winRmProtocol: ("Http"|"Https")?
+  winRmProtocol: ("Http" | "Https")?
 
   /// Test Certificate
   testCertificate: Boolean?
 
   /// Select Machines By
-  resourceFilteringMethod: ("machineNames"|"tags")?
+  resourceFilteringMethod: ("machineNames" | "tags")?
 
   /// Filter Criteria
   testMachines: String?
@@ -9930,7 +10020,7 @@ local class VSBuild_1Inputs {
   solution: String?
 
   /// Visual Studio Version
-  vsVersion: ("latest"|"17.0"|"16.0"|"15.0"|"14.0"|"12.0"|"11.0")?
+  vsVersion: ("latest" | "17.0" | "16.0" | "15.0" | "14.0" | "12.0" | "11.0")?
 
   /// MSBuild Arguments
   msbuildArgs: String?
@@ -9951,7 +10041,7 @@ local class VSBuild_1Inputs {
   restoreNugetPackages: Boolean?
 
   /// MSBuild Architecture
-  msbuildArchitecture: ("x86"|"x64")?
+  msbuildArchitecture: ("x86" | "x64")?
 
   /// Record Project Details
   logProjectEvents: Boolean?
@@ -9960,7 +10050,7 @@ local class VSBuild_1Inputs {
   createLogFile: Boolean?
 
   /// Log File Verbosity
-  logFileVerbosity: ("quiet"|"minimal"|"normal"|"detailed"|"diagnostic")?
+  logFileVerbosity: ("quiet" | "minimal" | "normal" | "detailed" | "diagnostic")?
 
   /// Enable Default Logger
   enableDefaultLogger: Boolean?
@@ -10032,7 +10122,7 @@ class UseDotNet_2 extends ServiceSchema.Task {
 /// Use .NET Core inputs
 local class UseDotNet_2Inputs {
   /// Package to install
-  packageType: ("runtime"|"sdk")?
+  packageType: ("runtime" | "sdk")?
 
   /// Use global json
   useGlobalJson: Boolean?
@@ -10072,7 +10162,7 @@ class DotNetCoreInstaller_0 extends ServiceSchema.Task {
 /// .NET Core SDK/runtime installer inputs
 local class DotNetCoreInstaller_0Inputs {
   /// Package to install
-  packageType: ("runtime"|"sdk")?
+  packageType: ("runtime" | "sdk")?
 
   /// Version
   version: String?
@@ -10091,7 +10181,7 @@ class DotNetCoreInstaller_1 extends ServiceSchema.Task {
 /// .NET Core sdk/runtime installer inputs
 local class DotNetCoreInstaller_1Inputs {
   /// Package to install
-  packageType: ("runtime"|"sdk")?
+  packageType: ("runtime" | "sdk")?
 
   /// Version
   version: String?
@@ -10119,7 +10209,7 @@ class UseDotNet_2_alt1 extends ServiceSchema.Task {
 /// Use .NET Core inputs
 local class UseDotNet_2_alt1Inputs {
   /// Package to install
-  packageType: ("runtime"|"sdk")?
+  packageType: ("runtime" | "sdk")?
 
   /// Use global json
   useGlobalJson: Boolean?
@@ -10171,13 +10261,13 @@ local class AzureAppConfigurationImport_10Inputs {
   UseFilePathExtension: Boolean?
 
   /// File Format
-  FileFormat: ("json"|"yaml"|"properties")?
+  FileFormat: ("json" | "yaml" | "properties")?
 
   /// File Content Profile
-  FileContentProfile: ("appconfig/default"|"appconfig/kvset")?
+  FileContentProfile: ("appconfig/default" | "appconfig/kvset")?
 
   /// Separator
-  Separator: ("."|"/"|":"|";"|","|"-"|"_"|"__")?
+  Separator: ("." | "/" | ":" | ";" | "," | "-" | "_" | "__")?
 
   /// Depth
   Depth: String?
@@ -10204,7 +10294,7 @@ local class AzureAppConfigurationImport_10Inputs {
   DryRun: Boolean?
 
   /// Import Mode
-  ImportMode: ("All"|"Ignore-Match")?
+  ImportMode: ("All" | "Ignore-Match")?
 }
 
 /// Azure App Service manage
@@ -10225,17 +10315,18 @@ local class AzureAppServiceManage_0Inputs {
   /// Action
   Action: (
     "Swap Slots"
-    |"Start Azure App Service"
-    |"Stop Azure App Service"
-    |"Restart Azure App Service"
-    |"Start Swap With Preview"
-    |"Complete Swap"
-    |"Cancel Swap"
-    |"Delete Slot"
-    |"Install Extensions"
-    |"Enable Continuous Monitoring"
-    |"Start all continuous webjobs"
-    |"Stop all continuous webjobs")?
+      | "Start Azure App Service"
+      | "Stop Azure App Service"
+      | "Restart Azure App Service"
+      | "Start Swap With Preview"
+      | "Complete Swap"
+      | "Cancel Swap"
+      | "Delete Slot"
+      | "Install Extensions"
+      | "Enable Continuous Monitoring"
+      | "Start all continuous webjobs"
+      | "Stop all continuous webjobs"
+  )?
 
   /// App Service name
   WebAppName: String
@@ -10365,7 +10456,7 @@ local class FileTransform_1Inputs {
   xmlTransformationRules: String?
 
   /// File format
-  fileType: ("xml"|"json")?
+  fileType: ("xml" | "json")?
 
   /// Target files
   targetFiles: String?
@@ -10430,31 +10521,31 @@ local class XamarinAndroid_1Inputs {
   clean: Boolean?
 
   /// MSBuild
-  msbuildLocationOption: ("version"|"location")?
+  msbuildLocationOption: ("version" | "location")?
 
   /// MSBuild version
-  msbuildVersionOption: ("latest"|"17.0"|"16.0"|"15.0"|"14.0"|"12.0"|"4.0")?
+  msbuildVersionOption: ("latest" | "17.0" | "16.0" | "15.0" | "14.0" | "12.0" | "4.0")?
 
   /// MSBuild location
   msbuildFile: String?
 
   /// MSBuild architecture
-  msbuildArchitectureOption: ("x86"|"x64")?
+  msbuildArchitectureOption: ("x86" | "x64")?
 
   /// Additional arguments
   msbuildArguments: String?
 
   /// Select JDK to use for the build
-  jdkOption: ("JDKVersion"|"Path")?
+  jdkOption: ("JDKVersion" | "Path")?
 
   /// JDK version
-  jdkVersionOption: ("default"|"1.11"|"1.10"|"1.9"|"1.8"|"1.7"|"1.6")?
+  jdkVersionOption: ("default" | "1.11" | "1.10" | "1.9" | "1.8" | "1.7" | "1.6")?
 
   /// JDK path
   jdkDirectory: String?
 
   /// JDK architecture
-  jdkArchitectureOption: ("x86"|"x64")?
+  jdkArchitectureOption: ("x86" | "x64")?
 }
 
 /// Copy and Publish Build Artifacts
@@ -10479,7 +10570,7 @@ local class CopyPublishBuildArtifacts_1Inputs {
   ArtifactName: String
 
   /// Artifact Type
-  ArtifactType: "Container"|"FilePath"
+  ArtifactType: "Container" | "FilePath"
 
   /// Path
   TargetPath: String?
@@ -10523,7 +10614,7 @@ class DownloadPackage_1 extends ServiceSchema.Task {
 /// Download package inputs
 local class DownloadPackage_1Inputs {
   /// Package Type
-  packageType: ("maven"|"npm"|"nuget"|"pypi"|"upack"|"cargo")?
+  packageType: ("maven" | "npm" | "nuget" | "pypi" | "upack" | "cargo")?
 
   /// Feed
   feed: String
@@ -10560,7 +10651,7 @@ class AzureResourceGroupDeployment_1 extends ServiceSchema.Task {
 /// Azure Resource Group Deployment inputs
 local class AzureResourceGroupDeployment_1Inputs {
   /// Azure Connection Type
-  ConnectedServiceNameSelector: ("ConnectedServiceName"|"ConnectedServiceNameClassic")?
+  ConnectedServiceNameSelector: ("ConnectedServiceName" | "ConnectedServiceNameClassic")?
 
   /// Azure Subscription
   ConnectedServiceName: String?
@@ -10569,7 +10660,15 @@ local class AzureResourceGroupDeployment_1Inputs {
   ConnectedServiceNameClassic: String?
 
   /// Action
-  action: ("Create Or Update Resource Group"|"Select Resource Group"|"Start"|"Stop"|"Restart"|"Delete"|"DeleteRG")?
+  action: (
+    "Create Or Update Resource Group"
+      | "Select Resource Group"
+      | "Start"
+      | "Stop"
+      | "Restart"
+      | "Delete"
+      | "DeleteRG"
+  )?
 
   /// Action
   actionClassic: "Select Resource Group"?
@@ -10583,29 +10682,30 @@ local class AzureResourceGroupDeployment_1Inputs {
   /// Location
   location: (
     "Australia East"
-    |"Australia Southeast"
-    |"Brazil South"
-    |"Canada Central"
-    |"Canada East"
-    |"Central India"
-    |"Central US"
-    |"East Asia"
-    |"East US"
-    |"East US 2 "
-    |"Japan East"
-    |"Japan West"
-    |"North Central US"
-    |"North Europe"
-    |"South Central US"
-    |"South India"
-    |"Southeast Asia"
-    |"UK South"
-    |"UK West"
-    |"West Central US"
-    |"West Europe"
-    |"West India"
-    |"West US"
-    |"West US 2")?
+      | "Australia Southeast"
+      | "Brazil South"
+      | "Canada Central"
+      | "Canada East"
+      | "Central India"
+      | "Central US"
+      | "East Asia"
+      | "East US"
+      | "East US 2 "
+      | "Japan East"
+      | "Japan West"
+      | "North Central US"
+      | "North Europe"
+      | "South Central US"
+      | "South India"
+      | "Southeast Asia"
+      | "UK South"
+      | "UK West"
+      | "West Central US"
+      | "West Europe"
+      | "West India"
+      | "West US"
+      | "West US 2"
+  )?
 
   /// Template
   csmFile: String?
@@ -10617,7 +10717,7 @@ local class AzureResourceGroupDeployment_1Inputs {
   overrideParameters: String?
 
   /// Deployment Mode
-  deploymentMode: ("Validation"|"Incremental"|"Complete")?
+  deploymentMode: ("Validation" | "Incremental" | "Complete")?
 
   /// Enable Deployment Prerequisites
   enableDeploymentPrerequisitesForCreate: Boolean?
@@ -10647,13 +10747,14 @@ local class AzureResourceGroupDeployment_2Inputs {
   /// Action
   action: (
     "Create Or Update Resource Group"
-    |"Select Resource Group"
-    |"Start"
-    |"Stop"
-    |"StopWithDeallocate"
-    |"Restart"
-    |"Delete"
-    |"DeleteRG")?
+      | "Select Resource Group"
+      | "Start"
+      | "Stop"
+      | "StopWithDeallocate"
+      | "Restart"
+      | "Delete"
+      | "DeleteRG"
+  )?
 
   /// Resource group
   resourceGroupName: String
@@ -10662,7 +10763,7 @@ local class AzureResourceGroupDeployment_2Inputs {
   location: String?
 
   /// Template location
-  templateLocation: ("Linked artifact"|"URL of the file")?
+  templateLocation: ("Linked artifact" | "URL of the file")?
 
   /// Template link
   csmFileLink: String?
@@ -10680,10 +10781,10 @@ local class AzureResourceGroupDeployment_2Inputs {
   overrideParameters: String?
 
   /// Deployment mode
-  deploymentMode: ("Incremental"|"Complete"|"Validation")?
+  deploymentMode: ("Incremental" | "Complete" | "Validation")?
 
   /// Enable prerequisites
-  enableDeploymentPrerequisites: ("None"|"ConfigureVMwithWinRM"|"ConfigureVMWithDGAgent")?
+  enableDeploymentPrerequisites: ("None" | "ConfigureVMwithWinRM" | "ConfigureVMWithDGAgent")?
 
   /// Azure Pipelines service connection
   teamServicesConnection: String?
@@ -10735,7 +10836,7 @@ class AzureResourceManagerTemplateDeployment_3 extends ServiceSchema.Task {
 /// ARM template deployment inputs
 local class AzureResourceManagerTemplateDeployment_3Inputs {
   /// Deployment scope
-  deploymentScope: ("Management Group"|"Subscription"|"Resource Group")?
+  deploymentScope: ("Management Group" | "Subscription" | "Resource Group")?
 
   /// Azure Resource Manager connection
   azureResourceManagerConnection: String
@@ -10744,7 +10845,7 @@ local class AzureResourceManagerTemplateDeployment_3Inputs {
   subscriptionId: String?
 
   /// Action
-  action: ("Create Or Update Resource Group"|"DeleteRG")?
+  action: ("Create Or Update Resource Group" | "DeleteRG")?
 
   /// Resource group
   resourceGroupName: String?
@@ -10753,7 +10854,7 @@ local class AzureResourceManagerTemplateDeployment_3Inputs {
   location: String?
 
   /// Template location
-  templateLocation: ("Linked artifact"|"URL of the file")?
+  templateLocation: ("Linked artifact" | "URL of the file")?
 
   /// Template link
   csmFileLink: String?
@@ -10771,7 +10872,7 @@ local class AzureResourceManagerTemplateDeployment_3Inputs {
   overrideParameters: String?
 
   /// Deployment mode
-  deploymentMode: ("Incremental"|"Complete"|"Validation")?
+  deploymentMode: ("Incremental" | "Complete" | "Validation")?
 
   /// Deployment name
   deploymentName: String?
@@ -10802,7 +10903,7 @@ local class InvokeRESTAPI_0Inputs {
   serviceConnection: String
 
   /// Method
-  method: ("OPTIONS"|"GET"|"HEAD"|"POST"|"PUT"|"DELETE"|"TRACE"|"PATCH")?
+  method: ("OPTIONS" | "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "TRACE" | "PATCH")?
 
   /// Headers
   headers: String?
@@ -10814,7 +10915,7 @@ local class InvokeRESTAPI_0Inputs {
   urlSuffix: String?
 
   /// Complete based on
-  waitForCompletion: ("true"|"false")?
+  waitForCompletion: ("true" | "false")?
 
   /// Success criteria
   successCriteria: String?
@@ -10833,7 +10934,7 @@ class InvokeRESTAPI_1 extends ServiceSchema.Task {
 /// Invoke REST API inputs
 local class InvokeRESTAPI_1Inputs {
   /// Connection type
-  connectionType: ("connectedServiceName"|"connectedServiceNameARM")?
+  connectionType: ("connectedServiceName" | "connectedServiceNameARM")?
 
   /// Generic service connection
   serviceConnection: String?
@@ -10842,7 +10943,7 @@ local class InvokeRESTAPI_1Inputs {
   azureServiceConnection: String?
 
   /// Method
-  method: ("OPTIONS"|"GET"|"HEAD"|"POST"|"PUT"|"DELETE"|"TRACE"|"PATCH")?
+  method: ("OPTIONS" | "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "TRACE" | "PATCH")?
 
   /// Headers
   headers: String?
@@ -10854,7 +10955,7 @@ local class InvokeRESTAPI_1Inputs {
   urlSuffix: String?
 
   /// Completion event
-  waitForCompletion: ("true"|"false")?
+  waitForCompletion: ("true" | "false")?
 
   /// Success criteria
   successCriteria: String?
@@ -10879,10 +10980,10 @@ local class ArchiveFiles_1Inputs {
   includeRootFolder: Boolean?
 
   /// Archive type
-  archiveType: ("default"|"7z"|"tar"|"wim")?
+  archiveType: ("default" | "7z" | "tar" | "wim")?
 
   /// Tar compression
-  tarCompression: ("gz"|"bz2"|"xz"|"none")?
+  tarCompression: ("gz" | "bz2" | "xz" | "none")?
 
   /// Archive file to create
   archiveFile: String?
@@ -10910,13 +11011,13 @@ local class ArchiveFiles_2Inputs {
   includeRootFolder: Boolean?
 
   /// Archive type
-  archiveType: ("zip"|"7z"|"tar"|"wim")?
+  archiveType: ("zip" | "7z" | "tar" | "wim")?
 
   /// 7z compression
-  sevenZipCompression: ("ultra"|"maximum"|"normal"|"fast"|"fastest"|"none")?
+  sevenZipCompression: ("ultra" | "maximum" | "normal" | "fast" | "fastest" | "none")?
 
   /// Tar compression
-  tarCompression: ("gz"|"bz2"|"xz"|"none")?
+  tarCompression: ("gz" | "bz2" | "xz" | "none")?
 
   /// Archive file to create
   archiveFile: String?
@@ -11058,7 +11159,7 @@ local class AzureMysqlDeployment_1Inputs {
   SqlPassword: String
 
   /// Type
-  TaskNameSelector: ("SqlTaskFile"|"InlineSqlTask")?
+  TaskNameSelector: ("SqlTaskFile" | "InlineSqlTask")?
 
   /// MySQL Script
   SqlFile: String?
@@ -11070,7 +11171,7 @@ local class AzureMysqlDeployment_1Inputs {
   SqlAdditionalArguments: String?
 
   /// Specify Firewall Rules Using
-  IpDetectionMethod: ("AutoDetect"|"IPAddressRange")?
+  IpDetectionMethod: ("AutoDetect" | "IPAddressRange")?
 
   /// Start IP Address
   StartIpAddress: String?
@@ -11095,7 +11196,7 @@ class Npm_1 extends ServiceSchema.Task {
 /// npm inputs
 local class Npm_1Inputs {
   /// Command
-  command: ("ci"|"install"|"publish"|"custom")?
+  command: ("ci" | "install" | "publish" | "custom")?
 
   /// Working folder that contains package.json
   workingDir: String?
@@ -11107,7 +11208,7 @@ local class Npm_1Inputs {
   customCommand: String?
 
   /// Registries to use
-  customRegistry: ("useNpmrc"|"useFeed")?
+  customRegistry: ("useNpmrc" | "useFeed")?
 
   /// Use packages from this Azure Artifacts/TFS registry
   customFeed: String?
@@ -11116,7 +11217,7 @@ local class Npm_1Inputs {
   customEndpoint: String?
 
   /// Registry location
-  publishRegistry: ("useExternalRegistry"|"useFeed")?
+  publishRegistry: ("useExternalRegistry" | "useFeed")?
 
   /// Target registry
   publishFeed: String?
@@ -11233,7 +11334,7 @@ class NodeTool_0 extends ServiceSchema.Task {
 /// Node.js tool installer inputs
 local class NodeTool_0Inputs {
   /// Source of version
-  versionSource: ("spec"|"fromFile")?
+  versionSource: ("spec" | "fromFile")?
 
   /// Version Spec
   versionSpec: String?
@@ -11279,7 +11380,7 @@ local class SqlServerDacpacDeployment_1Inputs {
   AdminPassword: String?
 
   /// Protocol
-  Protocol: ("Http"|"Https")?
+  Protocol: ("Http" | "Https")?
 
   /// Test Certificate
   TestCertificate: Boolean?
@@ -11288,7 +11389,7 @@ local class SqlServerDacpacDeployment_1Inputs {
   DacpacFile: String
 
   /// Specify SQL Using
-  TargetMethod: ("server"|"connectionString"|"publishProfile")?
+  TargetMethod: ("server" | "connectionString" | "publishProfile")?
 
   /// Server Name
   ServerName: String?
@@ -11315,7 +11416,7 @@ local class SqlServerDacpacDeployment_1Inputs {
   DeployInParallel: Boolean?
 
   /// Select Machines By
-  ResourceFilteringMethod: ("machineNames"|"tags")?
+  ResourceFilteringMethod: ("machineNames" | "tags")?
 
   /// Deploy to Machines
   MachineFilter: String?
@@ -11334,10 +11435,10 @@ class VisualStudioTestPlatformInstaller_1 extends ServiceSchema.Task {
 /// Visual Studio test platform installer inputs
 local class VisualStudioTestPlatformInstaller_1Inputs {
   /// Package Feed
-  packageFeedSelector: ("nugetOrg"|"customFeed"|"netShare")?
+  packageFeedSelector: ("nugetOrg" | "customFeed" | "netShare")?
 
   /// Version
-  versionSelector: ("latestPreRelease"|"latestStable"|"specificVersion")?
+  versionSelector: ("latestPreRelease" | "latestStable" | "specificVersion")?
 
   /// Test Platform Version
   testPlatformVersion: String?
@@ -11470,7 +11571,7 @@ class KubernetesManifest_0 extends ServiceSchema.Task {
 /// Deploy to Kubernetes inputs
 local class KubernetesManifest_0Inputs {
   /// Action
-  action: ("bake"|"createSecret"|"delete"|"deploy"|"patch"|"promote"|"scale"|"reject")?
+  action: ("bake" | "createSecret" | "delete" | "deploy" | "patch" | "promote" | "scale" | "reject")?
 
   /// Kubernetes service connection
   kubernetesServiceConnection: String?
@@ -11479,10 +11580,10 @@ local class KubernetesManifest_0Inputs {
   namespace: String?
 
   /// Strategy
-  strategy: ("canary"|"none")?
+  strategy: ("canary" | "none")?
 
   /// Traffic split method
-  trafficSplitMethod: ("pod"|"smi")?
+  trafficSplitMethod: ("pod" | "smi")?
 
   /// Percentage
   percentage: String?
@@ -11500,7 +11601,7 @@ local class KubernetesManifest_0Inputs {
   imagePullSecrets: String?
 
   /// Render Engine
-  renderType: ("helm"|"kompose"|"kustomize")?
+  renderType: ("helm" | "kompose" | "kustomize")?
 
   /// Path to docker compose file
   dockerComposeFile: String?
@@ -11521,13 +11622,13 @@ local class KubernetesManifest_0Inputs {
   kustomizationPath: String?
 
   /// Resource to patch
-  resourceToPatch: ("file"|"name")?
+  resourceToPatch: ("file" | "name")?
 
   /// File path
   resourceFileToPatch: String?
 
   /// Kind
-  kind: ("deployment"|"replicaset"|"statefulset")?
+  kind: ("deployment" | "replicaset" | "statefulset")?
 
   /// Name
   name: String?
@@ -11536,7 +11637,7 @@ local class KubernetesManifest_0Inputs {
   replicas: String?
 
   /// Merge Strategy
-  mergeStrategy: ("json"|"merge"|"strategic")?
+  mergeStrategy: ("json" | "merge" | "strategic")?
 
   /// Arguments
   arguments: String?
@@ -11545,7 +11646,7 @@ local class KubernetesManifest_0Inputs {
   patch: String?
 
   /// Type of secret
-  secretType: ("dockerRegistry"|"generic")?
+  secretType: ("dockerRegistry" | "generic")?
 
   /// Secret name
   secretName: String?
@@ -11573,10 +11674,10 @@ class KubernetesManifest_1 extends ServiceSchema.Task {
 /// Deploy to Kubernetes inputs
 local class KubernetesManifest_1Inputs {
   /// Action
-  action: ("bake"|"createSecret"|"delete"|"deploy"|"patch"|"promote"|"scale"|"reject")?
+  action: ("bake" | "createSecret" | "delete" | "deploy" | "patch" | "promote" | "scale" | "reject")?
 
   /// Service connection type
-  connectionType: ("azureResourceManager"|"kubernetesServiceConnection")?
+  connectionType: ("azureResourceManager" | "kubernetesServiceConnection")?
 
   /// Kubernetes service connection
   kubernetesServiceConnection: String?
@@ -11597,10 +11698,10 @@ local class KubernetesManifest_1Inputs {
   namespace: String?
 
   /// Strategy
-  strategy: ("canary"|"none")?
+  strategy: ("canary" | "none")?
 
   /// Traffic split method
-  trafficSplitMethod: ("pod"|"smi")?
+  trafficSplitMethod: ("pod" | "smi")?
 
   /// Percentage
   percentage: String?
@@ -11618,7 +11719,7 @@ local class KubernetesManifest_1Inputs {
   imagePullSecrets: String?
 
   /// Render Engine
-  renderType: ("helm"|"kompose"|"kustomize")?
+  renderType: ("helm" | "kompose" | "kustomize")?
 
   /// Path to docker compose file
   dockerComposeFile: String?
@@ -11639,13 +11740,13 @@ local class KubernetesManifest_1Inputs {
   kustomizationPath: String?
 
   /// Resource to patch
-  resourceToPatch: ("file"|"name")?
+  resourceToPatch: ("file" | "name")?
 
   /// File path
   resourceFileToPatch: String?
 
   /// Kind
-  kind: ("deployment"|"replicaset"|"statefulset")?
+  kind: ("deployment" | "replicaset" | "statefulset")?
 
   /// Name
   name: String?
@@ -11654,7 +11755,7 @@ local class KubernetesManifest_1Inputs {
   replicas: String?
 
   /// Merge Strategy
-  mergeStrategy: ("json"|"merge"|"strategic")?
+  mergeStrategy: ("json" | "merge" | "strategic")?
 
   /// Arguments
   arguments: String?
@@ -11663,7 +11764,7 @@ local class KubernetesManifest_1Inputs {
   patch: String?
 
   /// Type of secret
-  secretType: ("dockerRegistry"|"generic")?
+  secretType: ("dockerRegistry" | "generic")?
 
   /// Secret name
   secretName: String?
@@ -11694,7 +11795,7 @@ class DownloadBuildArtifacts_0 extends ServiceSchema.Task {
 /// Download build artifacts inputs
 local class DownloadBuildArtifacts_0Inputs {
   /// Download artifacts produced by
-  buildType: ("current"|"specific")?
+  buildType: ("current" | "specific")?
 
   /// Project
   project: String?
@@ -11706,7 +11807,7 @@ local class DownloadBuildArtifacts_0Inputs {
   specificBuildWithTriggering: Boolean?
 
   /// Build version to download
-  buildVersionToDownload: ("latest"|"latestFromBranch"|"specific")?
+  buildVersionToDownload: ("latest" | "latestFromBranch" | "specific")?
 
   /// Download artifacts even from partially succeeded builds.
   allowPartiallySucceededBuilds: Boolean?
@@ -11721,7 +11822,7 @@ local class DownloadBuildArtifacts_0Inputs {
   tags: String?
 
   /// Download type
-  downloadType: ("single"|"specific")?
+  downloadType: ("single" | "specific")?
 
   /// Artifact name
   artifactName: String?
@@ -11764,7 +11865,7 @@ class DownloadBuildArtifacts_1 extends ServiceSchema.Task {
 /// Download build artifacts inputs
 local class DownloadBuildArtifacts_1Inputs {
   /// Download artifacts produced by
-  buildType: ("current"|"specific")?
+  buildType: ("current" | "specific")?
 
   /// Project
   project: String?
@@ -11776,7 +11877,7 @@ local class DownloadBuildArtifacts_1Inputs {
   specificBuildWithTriggering: Boolean?
 
   /// Build version to download
-  buildVersionToDownload: ("latest"|"latestFromBranch"|"specific")?
+  buildVersionToDownload: ("latest" | "latestFromBranch" | "specific")?
 
   /// Download artifacts even from partially succeeded builds.
   allowPartiallySucceededBuilds: Boolean?
@@ -11791,7 +11892,7 @@ local class DownloadBuildArtifacts_1Inputs {
   tags: String?
 
   /// Download type
-  downloadType: ("single"|"specific")?
+  downloadType: ("single" | "specific")?
 
   /// Artifact name
   artifactName: String?
@@ -11856,7 +11957,7 @@ local class AzureSpringCloud_0Inputs {
   azureSubscription: String
 
   /// Action
-  Action: ("Deploy"|"Set Production"|"Delete Staging Deployment")?
+  Action: ("Deploy" | "Set Production" | "Delete Staging Deployment")?
 
   /// Azure Spring Apps Name
   AzureSpringCloud: String
@@ -11865,7 +11966,7 @@ local class AzureSpringCloud_0Inputs {
   AppName: String
 
   /// Deployment Type
-  DeploymentType: ("Artifacts"|"CustomContainer")?
+  DeploymentType: ("Artifacts" | "CustomContainer")?
 
   /// Use Staging Deployment
   UseStagingDeployment: Boolean?
@@ -11901,7 +12002,7 @@ local class AzureSpringCloud_0Inputs {
   ImageArgs: String?
 
   /// Language Framework
-  ImageLanguageFramework: ("springboot"|"")?
+  ImageLanguageFramework: ("springboot" | "")?
 
   /// Environment Variables
   EnvironmentVariables: String?
@@ -11910,7 +12011,7 @@ local class AzureSpringCloud_0Inputs {
   JvmOptions: String?
 
   /// Runtime Version
-  RuntimeVersion: ("Java_8"|"Java_11"|"Java_17"|"Java_21"|"NetCore_31")?
+  RuntimeVersion: ("Java_8" | "Java_11" | "Java_17" | "Java_21" | "NetCore_31")?
 
   /// Main Entry Path
   DotNetCoreMainEntryPath: String?
@@ -11935,7 +12036,7 @@ local class AzureWebApp_1Inputs {
   azureSubscription: String
 
   /// App type
-  appType: "webApp"|"webAppLinux"
+  appType: "webApp" | "webAppLinux"
 
   /// App name
   appName: String
@@ -11958,44 +12059,45 @@ local class AzureWebApp_1Inputs {
   /// Runtime stack
   runtimeStack: (
     "DOTNETCORE|9.0"
-    |"DOTNETCORE|8.0"
-    |"DOTNETCORE|7.0"
-    |"DOTNETCORE|6.0"
-    |"NODE|22-lts"
-    |"NODE|20-lts"
-    |"NODE|18-lts"
-    |"NODE|16-lts"
-    |"PYTHON|3.13"
-    |"PYTHON|3.12"
-    |"PYTHON|3.11"
-    |"PYTHON|3.10"
-    |"PYTHON|3.9"
-    |"PYTHON|3.8"
-    |"PHP|8.3"
-    |"PHP|8.2"
-    |"PHP|8.1"
-    |"PHP|8.0"
-    |"JAVA|21-java21"
-    |"JAVA|17-java17"
-    |"JAVA|11-java11"
-    |"JAVA|8-jre8"
-    |"JBOSSEAP|8-java17"
-    |"JBOSSEAP|8-java11"
-    |"JBOSSEAP|7-java17"
-    |"JBOSSEAP|7-java11"
-    |"JBOSSEAP|7-java8"
-    |"TOMCAT|10.1-java21"
-    |"TOMCAT|10.1-java17"
-    |"TOMCAT|10.1-java11"
-    |"TOMCAT|10.0-java17"
-    |"TOMCAT|10.0-java11"
-    |"TOMCAT|10.0-jre8"
-    |"TOMCAT|9.0-java21"
-    |"TOMCAT|9.0-java17"
-    |"TOMCAT|9.0-java11"
-    |"TOMCAT|9.0-jre8"
-    |"TOMCAT|8.5-java11"
-    |"TOMCAT|8.5-jre8")?
+      | "DOTNETCORE|8.0"
+      | "DOTNETCORE|7.0"
+      | "DOTNETCORE|6.0"
+      | "NODE|22-lts"
+      | "NODE|20-lts"
+      | "NODE|18-lts"
+      | "NODE|16-lts"
+      | "PYTHON|3.13"
+      | "PYTHON|3.12"
+      | "PYTHON|3.11"
+      | "PYTHON|3.10"
+      | "PYTHON|3.9"
+      | "PYTHON|3.8"
+      | "PHP|8.3"
+      | "PHP|8.2"
+      | "PHP|8.1"
+      | "PHP|8.0"
+      | "JAVA|21-java21"
+      | "JAVA|17-java17"
+      | "JAVA|11-java11"
+      | "JAVA|8-jre8"
+      | "JBOSSEAP|8-java17"
+      | "JBOSSEAP|8-java11"
+      | "JBOSSEAP|7-java17"
+      | "JBOSSEAP|7-java11"
+      | "JBOSSEAP|7-java8"
+      | "TOMCAT|10.1-java21"
+      | "TOMCAT|10.1-java17"
+      | "TOMCAT|10.1-java11"
+      | "TOMCAT|10.0-java17"
+      | "TOMCAT|10.0-java11"
+      | "TOMCAT|10.0-jre8"
+      | "TOMCAT|9.0-java21"
+      | "TOMCAT|9.0-java17"
+      | "TOMCAT|9.0-java11"
+      | "TOMCAT|9.0-jre8"
+      | "TOMCAT|8.5-java11"
+      | "TOMCAT|8.5-jre8"
+  )?
 
   /// Startup command 
   startUpCommand: String?
@@ -12010,7 +12112,7 @@ local class AzureWebApp_1Inputs {
   configurationStrings: String?
 
   /// Deployment method
-  deploymentMethod: ("auto"|"zipDeploy"|"runFromPackage")?
+  deploymentMethod: ("auto" | "zipDeploy" | "runFromPackage")?
 }
 
 /// Azure CLI
@@ -12029,7 +12131,7 @@ local class AzureCLI_1Inputs {
   azureSubscription: String
 
   /// Script Location
-  scriptLocation: ("inlineScript"|"scriptPath")?
+  scriptLocation: ("inlineScript" | "scriptPath")?
 
   /// Script Path
   scriptPath: String?
@@ -12069,10 +12171,10 @@ local class AzureCLI_2Inputs {
   azureSubscription: String
 
   /// Script Type
-  scriptType: "ps"|"pscore"|"batch"|"bash"
+  scriptType: "ps" | "pscore" | "batch" | "bash"
 
   /// Script Location
-  scriptLocation: ("inlineScript"|"scriptPath")?
+  scriptLocation: ("inlineScript" | "scriptPath")?
 
   /// Script Path
   scriptPath: String?
@@ -12084,7 +12186,7 @@ local class AzureCLI_2Inputs {
   arguments: String?
 
   /// ErrorActionPreference
-  powerShellErrorActionPreference: ("stop"|"continue"|"silentlyContinue")?
+  powerShellErrorActionPreference: ("stop" | "continue" | "silentlyContinue")?
 
   /// Access service principal details in script
   addSpnToEnvironment: Boolean?
@@ -12121,7 +12223,7 @@ class AzureCLI_0 extends ServiceSchema.Task {
 /// Azure CLI Preview inputs
 local class AzureCLI_0Inputs {
   /// Azure Connection Type
-  connectedServiceNameSelector: ("connectedServiceName"|"connectedServiceNameARM")?
+  connectedServiceNameSelector: ("connectedServiceName" | "connectedServiceNameARM")?
 
   /// AzureRM Subscription
   connectedServiceNameARM: String?
@@ -12130,7 +12232,7 @@ local class AzureCLI_0Inputs {
   connectedServiceName: String?
 
   /// Script Location
-  scriptLocation: ("inlineScript"|"scriptPath")?
+  scriptLocation: ("inlineScript" | "scriptPath")?
 
   /// Script Path
   scriptPath: String?
@@ -12164,10 +12266,10 @@ local class AzureCLI_2_alt1Inputs {
   azureSubscription: String
 
   /// Script Type
-  scriptType: "ps"|"pscore"|"batch"|"bash"
+  scriptType: "ps" | "pscore" | "batch" | "bash"
 
   /// Script Location
-  scriptLocation: ("inlineScript"|"scriptPath")?
+  scriptLocation: ("inlineScript" | "scriptPath")?
 
   /// Script Path
   scriptPath: String?
@@ -12179,7 +12281,7 @@ local class AzureCLI_2_alt1Inputs {
   arguments: String?
 
   /// ErrorActionPreference
-  powerShellErrorActionPreference: ("stop"|"continue"|"silentlyContinue")?
+  powerShellErrorActionPreference: ("stop" | "continue" | "silentlyContinue")?
 
   /// Access service principal details in script
   addSpnToEnvironment: Boolean?
@@ -12222,13 +12324,13 @@ local class GitHubRelease_1Inputs {
   repositoryName: String?
 
   /// Action
-  action: ("create"|"edit"|"delete")?
+  action: ("create" | "edit" | "delete")?
 
   /// Target
   target: String?
 
   /// Tag source
-  tagSource: ("gitTag"|"userSpecifiedTag")?
+  tagSource: ("gitTag" | "userSpecifiedTag")?
 
   /// Tag Pattern
   tagPattern: String?
@@ -12240,7 +12342,7 @@ local class GitHubRelease_1Inputs {
   title: String?
 
   /// Release notes source
-  releaseNotesSource: ("filePath"|"inline")?
+  releaseNotesSource: ("filePath" | "inline")?
 
   /// Release notes file path
   releaseNotesFilePath: String?
@@ -12252,7 +12354,7 @@ local class GitHubRelease_1Inputs {
   assets: String?
 
   /// Asset upload mode
-  assetUploadMode: ("delete"|"replace")?
+  assetUploadMode: ("delete" | "replace")?
 
   /// Draft release
   isDraft: Boolean?
@@ -12264,13 +12366,15 @@ local class GitHubRelease_1Inputs {
   addChangeLog: Boolean?
 
   /// Compare to
-  changeLogCompareToRelease: ("lastFullRelease"|"lastNonDraftRelease"|"lastNonDraftReleaseByTag")?
+  changeLogCompareToRelease: (
+    "lastFullRelease" | "lastNonDraftRelease" | "lastNonDraftReleaseByTag"
+  )?
 
   /// Release Tag
   changeLogCompareToReleaseTag: String?
 
   /// Changelog type
-  changeLogType: ("commitBased"|"issueBased")?
+  changeLogType: ("commitBased" | "issueBased")?
 
   /// Categories
   changeLogLabels: String?
@@ -12295,13 +12399,13 @@ local class GitHubRelease_0Inputs {
   repositoryName: String?
 
   /// Action
-  action: ("create"|"edit"|"delete")?
+  action: ("create" | "edit" | "delete")?
 
   /// Target
   target: String?
 
   /// Tag source
-  tagSource: ("auto"|"manual")?
+  tagSource: ("auto" | "manual")?
 
   /// Tag Pattern
   tagPattern: String?
@@ -12313,7 +12417,7 @@ local class GitHubRelease_0Inputs {
   title: String?
 
   /// Release notes source
-  releaseNotesSource: ("file"|"input")?
+  releaseNotesSource: ("file" | "input")?
 
   /// Release notes file path
   releaseNotesFile: String?
@@ -12325,7 +12429,7 @@ local class GitHubRelease_0Inputs {
   assets: String?
 
   /// Asset upload mode
-  assetUploadMode: ("delete"|"replace")?
+  assetUploadMode: ("delete" | "replace")?
 
   /// Draft release
   isDraft: Boolean?
@@ -12337,13 +12441,15 @@ local class GitHubRelease_0Inputs {
   addChangeLog: Boolean?
 
   /// Compare to
-  changeLogCompareToRelease: ("lastFullRelease"|"lastNonDraftRelease"|"lastNonDraftReleaseByTag")?
+  changeLogCompareToRelease: (
+    "lastFullRelease" | "lastNonDraftRelease" | "lastNonDraftReleaseByTag"
+  )?
 
   /// Release Tag
   changeLogCompareToReleaseTag: String?
 
   /// Changelog type
-  changeLogType: ("commitBased"|"issueBased")?
+  changeLogType: ("commitBased" | "issueBased")?
 
   /// Categories
   changeLogLabels: String?
@@ -12396,7 +12502,7 @@ local class cURLUploader_2Inputs {
   files: String
 
   /// Authentication Method
-  authType: ("ServiceEndpoint"|"UserAndPass")?
+  authType: ("ServiceEndpoint" | "UserAndPass")?
 
   /// Service Connection
   serviceEndpoint: String?
@@ -12467,13 +12573,13 @@ class UniversalPackages_0 extends ServiceSchema.Task {
 /// Universal packages inputs
 local class UniversalPackages_0Inputs {
   /// Command
-  command: ("download"|"publish")?
+  command: ("download" | "publish")?
 
   /// Destination directory
   downloadDirectory: String?
 
   /// Feed location
-  feedsToUse: ("internal"|"external")?
+  feedsToUse: ("internal" | "external")?
 
   /// organization/collection connection
   externalFeedCredentials: String?
@@ -12500,7 +12606,7 @@ local class UniversalPackages_0Inputs {
   publishDirectory: String?
 
   /// Feed location
-  feedsToUsePublish: ("internal"|"external")?
+  feedsToUsePublish: ("internal" | "external")?
 
   /// organization/collection connection
   publishFeedCredentials: String?
@@ -12521,7 +12627,7 @@ local class UniversalPackages_0Inputs {
   packagePublishExternal: String?
 
   /// Version
-  versionOption: ("major"|"minor"|"patch"|"custom")?
+  versionOption: ("major" | "minor" | "patch" | "custom")?
 
   /// Custom version
   versionPublish: String?
@@ -12530,7 +12636,7 @@ local class UniversalPackages_0Inputs {
   packagePublishDescription: String?
 
   /// Verbosity
-  verbosity: ("None"|"Trace"|"Debug"|"Information"|"Warning"|"Error"|"Critical")?
+  verbosity: ("None" | "Trace" | "Debug" | "Information" | "Warning" | "Error" | "Critical")?
 
   /// Package Output Variable
   publishedPackageVar: String?
@@ -12614,7 +12720,7 @@ class AzureFunctionOnKubernetes_1 extends ServiceSchema.Task {
 /// Azure Function on Kubernetes inputs
 local class AzureFunctionOnKubernetes_1Inputs {
   /// Service connection type
-  connectionType: ("Azure Resource Manager"|"Kubernetes Service Connection")?
+  connectionType: ("Azure Resource Manager" | "Kubernetes Service Connection")?
 
   /// Docker registry service connection
   dockerRegistryServiceConnection: String
@@ -12694,7 +12800,7 @@ class Bash_3 extends ServiceSchema.Task {
 /// Bash inputs
 local class Bash_3Inputs {
   /// Type
-  targetType: ("filePath"|"inline")?
+  targetType: ("filePath" | "inline")?
 
   /// Script Path
   filePath: String?
@@ -12734,7 +12840,7 @@ local class PublishBuildArtifacts_1Inputs {
   ArtifactName: String?
 
   /// Artifact publish location
-  publishLocation: ("Container"|"FilePath")?
+  publishLocation: ("Container" | "FilePath")?
 
   /// Max Artifact Size
   MaxArtifactSize: Int?
@@ -12808,13 +12914,13 @@ local class AzureVmssDeployment_0Inputs {
   azureSubscription: String
 
   /// Action
-  action: ("Update image"|"Configure application startup")?
+  action: ("Update image" | "Configure application startup")?
 
   /// Virtual Machine scale set name
   vmssName: String
 
   /// OS type
-  vmssOsType: "Windows"|"Linux"
+  vmssOsType: "Windows" | "Linux"
 
   /// Image URL
   imageUrl: String
@@ -12851,13 +12957,13 @@ local class AzureVmssDeployment_1Inputs {
   azureSubscription: String
 
   /// Action
-  action: ("Update image"|"Configure application startup")?
+  action: ("Update image" | "Configure application startup")?
 
   /// Virtual Machine scale set name
   vmssName: String
 
   /// OS type
-  vmssOsType: "Windows"|"Linux"
+  vmssOsType: "Windows" | "Linux"
 
   /// Image URL
   imageUrl: String
@@ -13149,7 +13255,7 @@ local class gulp_0Inputs {
   enableCodeCoverage: Boolean?
 
   /// Test Framework
-  testFramework: ("Mocha"|"Jasmine")?
+  testFramework: ("Mocha" | "Jasmine")?
 
   /// Source Files
   srcFiles: String?
@@ -13198,7 +13304,7 @@ local class gulp_1Inputs {
   enableCodeCoverage: Boolean?
 
   /// Test Framework
-  testFramework: ("Mocha"|"Jasmine")?
+  testFramework: ("Mocha" | "Jasmine")?
 
   /// Source Files
   srcFiles: String?
@@ -13223,13 +13329,17 @@ local class IISWebAppManagementOnMachineGroup_0Inputs {
   EnableIIS: Boolean?
 
   /// Configuration type
-  IISDeploymentType: ("IISWebsite"|"IISWebApplication"|"IISVirtualDirectory"|"IISApplicationPool")?
+  IISDeploymentType: (
+    "IISWebsite" | "IISWebApplication" | "IISVirtualDirectory" | "IISApplicationPool"
+  )?
 
   /// Action
-  ActionIISWebsite: ("CreateOrUpdateWebsite"|"StartWebsite"|"StopWebsite")?
+  ActionIISWebsite: ("CreateOrUpdateWebsite" | "StartWebsite" | "StopWebsite")?
 
   /// Action
-  ActionIISApplicationPool: ("CreateOrUpdateAppPool"|"StartAppPool"|"StopAppPool"|"RecycleAppPool")?
+  ActionIISApplicationPool: (
+    "CreateOrUpdateAppPool" | "StartAppPool" | "StopAppPool" | "RecycleAppPool"
+  )?
 
   /// Website name
   StartStopWebsiteName: String?
@@ -13241,7 +13351,7 @@ local class IISWebAppManagementOnMachineGroup_0Inputs {
   WebsitePhysicalPath: String?
 
   /// Physical path authentication
-  WebsitePhysicalPathAuth: ("WebsiteUserPassThrough"|"WebsiteWindowsAuth")?
+  WebsitePhysicalPathAuth: ("WebsiteUserPassThrough" | "WebsiteWindowsAuth")?
 
   /// Username
   WebsiteAuthUserName: String?
@@ -13253,7 +13363,7 @@ local class IISWebAppManagementOnMachineGroup_0Inputs {
   AddBinding: Boolean?
 
   /// Protocol
-  Protocol: ("https"|"http")?
+  Protocol: ("https" | "http")?
 
   /// IP address
   IPAddress: String?
@@ -13289,13 +13399,15 @@ local class IISWebAppManagementOnMachineGroup_0Inputs {
   AppPoolNameForWebsite: String
 
   /// .NET version
-  DotNetVersionForWebsite: ("v4.0"|"v2.0"|"No Managed Code")?
+  DotNetVersionForWebsite: ("v4.0" | "v2.0" | "No Managed Code")?
 
   /// Managed pipeline mode
-  PipeLineModeForWebsite: ("Integrated"|"Classic")?
+  PipeLineModeForWebsite: ("Integrated" | "Classic")?
 
   /// Identity
-  AppPoolIdentityForWebsite: ("ApplicationPoolIdentity"|"LocalService"|"LocalSystem"|"NetworkService"|"SpecificUser")?
+  AppPoolIdentityForWebsite: (
+    "ApplicationPoolIdentity" | "LocalService" | "LocalSystem" | "NetworkService" | "SpecificUser"
+  )?
 
   /// Username
   AppPoolUsernameForWebsite: String?
@@ -13322,7 +13434,7 @@ local class IISWebAppManagementOnMachineGroup_0Inputs {
   PhysicalPathForVD: String?
 
   /// Physical path authentication
-  VDPhysicalPathAuth: ("VDUserPassThrough"|"VDWindowsAuth")?
+  VDPhysicalPathAuth: ("VDUserPassThrough" | "VDWindowsAuth")?
 
   /// Username
   VDAuthUserName: String?
@@ -13340,7 +13452,7 @@ local class IISWebAppManagementOnMachineGroup_0Inputs {
   PhysicalPathForApplication: String?
 
   /// Physical path authentication
-  ApplicationPhysicalPathAuth: ("ApplicationUserPassThrough"|"ApplicationWindowsAuth")?
+  ApplicationPhysicalPathAuth: ("ApplicationUserPassThrough" | "ApplicationWindowsAuth")?
 
   /// Username
   ApplicationAuthUserName: String?
@@ -13355,13 +13467,15 @@ local class IISWebAppManagementOnMachineGroup_0Inputs {
   AppPoolNameForApplication: String
 
   /// .NET version
-  DotNetVersionForApplication: ("v4.0"|"v2.0"|"No Managed Code")?
+  DotNetVersionForApplication: ("v4.0" | "v2.0" | "No Managed Code")?
 
   /// Managed pipeline mode
-  PipeLineModeForApplication: ("Integrated"|"Classic")?
+  PipeLineModeForApplication: ("Integrated" | "Classic")?
 
   /// Identity
-  AppPoolIdentityForApplication: ("ApplicationPoolIdentity"|"LocalService"|"LocalSystem"|"NetworkService"|"SpecificUser")?
+  AppPoolIdentityForApplication: (
+    "ApplicationPoolIdentity" | "LocalService" | "LocalSystem" | "NetworkService" | "SpecificUser"
+  )?
 
   /// Username
   AppPoolUsernameForApplication: String?
@@ -13373,13 +13487,15 @@ local class IISWebAppManagementOnMachineGroup_0Inputs {
   AppPoolName: String
 
   /// .NET version
-  DotNetVersion: ("v4.0"|"v2.0"|"No Managed Code")?
+  DotNetVersion: ("v4.0" | "v2.0" | "No Managed Code")?
 
   /// Managed pipeline mode
-  PipeLineMode: ("Integrated"|"Classic")?
+  PipeLineMode: ("Integrated" | "Classic")?
 
   /// Identity
-  AppPoolIdentity: ("ApplicationPoolIdentity"|"LocalService"|"LocalSystem"|"NetworkService"|"SpecificUser")?
+  AppPoolIdentity: (
+    "ApplicationPoolIdentity" | "LocalService" | "LocalSystem" | "NetworkService" | "SpecificUser"
+  )?
 
   /// Username
   AppPoolUsername: String?
@@ -13410,5 +13526,5 @@ local class DockerInstaller_0Inputs {
   dockerVersion: String?
 
   /// Release type
-  releaseType: ("stable"|"edge"|"test"|"nightly")?
+  releaseType: ("stable" | "edge" | "test" | "nightly")?
 }

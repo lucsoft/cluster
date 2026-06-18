@@ -39,42 +39,60 @@ function parameter(name: String): Expression = new { text = "parameters['\(name)
 
 // --- boolean logic --------------------------------------------------------
 
-function and(conditions: List<Expression>): Expression =
-  new { text = "and(\(conditions.map((c) -> c.text).join(", ")))" }
+function and(conditions: List<Expression>): Expression = new {
+  text = "and(\(conditions.map((c) -> c.text).join(", ")))"
+}
 
-function or(conditions: List<Expression>): Expression =
-  new { text = "or(\(conditions.map((c) -> c.text).join(", ")))" }
+function or(conditions: List<Expression>): Expression = new {
+  text = "or(\(conditions.map((c) -> c.text).join(", ")))"
+}
 
 function not(condition: Expression): Expression = new { text = "not(\(condition.text))" }
 
 // --- comparisons ----------------------------------------------------------
 
-function eq(left: Expression, right: Expression): Expression = new { text = "eq(\(left.text), \(right.text))" }
+function eq(left: Expression, right: Expression): Expression = new {
+  text = "eq(\(left.text), \(right.text))"
+}
 
-function ne(left: Expression, right: Expression): Expression = new { text = "ne(\(left.text), \(right.text))" }
+function ne(left: Expression, right: Expression): Expression = new {
+  text = "ne(\(left.text), \(right.text))"
+}
 
-function lt(left: Expression, right: Expression): Expression = new { text = "lt(\(left.text), \(right.text))" }
+function lt(left: Expression, right: Expression): Expression = new {
+  text = "lt(\(left.text), \(right.text))"
+}
 
-function gt(left: Expression, right: Expression): Expression = new { text = "gt(\(left.text), \(right.text))" }
+function gt(left: Expression, right: Expression): Expression = new {
+  text = "gt(\(left.text), \(right.text))"
+}
 
-function le(left: Expression, right: Expression): Expression = new { text = "le(\(left.text), \(right.text))" }
+function le(left: Expression, right: Expression): Expression = new {
+  text = "le(\(left.text), \(right.text))"
+}
 
-function ge(left: Expression, right: Expression): Expression = new { text = "ge(\(left.text), \(right.text))" }
+function ge(left: Expression, right: Expression): Expression = new {
+  text = "ge(\(left.text), \(right.text))"
+}
 
 // --- string helpers -------------------------------------------------------
 
-function contains(haystack: Expression, needle: Expression): Expression =
-  new { text = "contains(\(haystack.text), \(needle.text))" }
+function contains(haystack: Expression, needle: Expression): Expression = new {
+  text = "contains(\(haystack.text), \(needle.text))"
+}
 
-function startsWith(value: Expression, prefix: Expression): Expression =
-  new { text = "startsWith(\(value.text), \(prefix.text))" }
+function startsWith(value: Expression, prefix: Expression): Expression = new {
+  text = "startsWith(\(value.text), \(prefix.text))"
+}
 
-function endsWith(value: Expression, suffix: Expression): Expression =
-  new { text = "endsWith(\(value.text), \(suffix.text))" }
+function endsWith(value: Expression, suffix: Expression): Expression = new {
+  text = "endsWith(\(value.text), \(suffix.text))"
+}
 
 /// `in(value, a, b, …)` — true if `value` equals any of the options.
-function isIn(value: Expression, options: List<Expression>): Expression =
-  new { text = "in(\(value.text), \(options.map((o) -> o.text).join(", ")))" }
+function isIn(value: Expression, options: List<Expression>): Expression = new {
+  text = "in(\(value.text), \(options.map((o) -> o.text).join(", ")))"
+}
 
 // --- job/stage status (for `condition`) -----------------------------------
 

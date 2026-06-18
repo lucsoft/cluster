@@ -31,6 +31,50 @@ abstract class PhaseBase {
   steps: Steps?
 }
 
+abstract class JobBase {
+  /// Human-readable name for the job
+  displayName: NonEmptyString?
+
+  /// Any jobs which must complete before this one
+  dependsOn: JobDependsOn?
+
+  /// Evaluate this condition expression to determine whether to run this job
+  condition: NonEmptyString?
+
+  /// Continue running even on failure?
+  continueOnError: NonEmptyString?
+
+  /// Time to wait for this job to complete before the server kills it
+  timeoutInMinutes: NonEmptyString?
+
+  /// Time to wait for the job to cancel before forcibly terminating it
+  cancelTimeoutInMinutes: NonEmptyString?
+
+  /// Job-specific variables
+  variables: Variables?
+
+  /// Execution strategy for this job
+  strategy: JobStrategy?
+
+  /// Pool where this job will run
+  pool: Pool?
+
+  /// Container resource name
+  container: JobContainer?
+
+  /// Container resources to run as a service container (name/value pairs)
+  services: MappingOfStringString?
+
+  /// Workspace options on the agent
+  workspace: JobWorkspace?
+
+  /// Any resources required by this job that are not already referenced
+  uses: ExplicitResources?
+
+  /// Job related information passed from a pipeline when extending a template
+  templateContext: MappingOfStringString?
+}
+
 class StagedPipeline extends PipelineBase {
   /// Stages are groups of jobs that can run without human intervention
   stages: Stages
@@ -780,7 +824,7 @@ class StagesTemplate {
   stages: Stages?
 }
 
-class StageAlternate0 {
+class Stage {
   /// ID of the stage
   stage: NonEmptyString?
 
@@ -821,7 +865,7 @@ class StageAlternate0 {
   checks: Checks?
 }
 
-class StageAlternate1 {
+class StageTemplate {
   /// Reference to a template for this stage
   template: NonEmptyString?
 
@@ -937,109 +981,25 @@ class JobsTemplateAlternate1 {
   phases: Phases?
 }
 
-class JobAlternate0 {
+class Job extends JobBase {
   /// ID of the job
   job: ReferenceName?
 
-  /// Human-readable name for the job
-  displayName: NonEmptyString?
-
-  /// Any jobs which must complete before this one
-  dependsOn: JobDependsOn?
-
-  /// Evaluate this condition expression to determine whether to run this job
-  condition: NonEmptyString?
-
-  /// Continue running even on failure?
-  continueOnError: NonEmptyString?
-
-  /// Time to wait for this job to complete before the server kills it
-  timeoutInMinutes: NonEmptyString?
-
-  /// Time to wait for the job to cancel before forcibly terminating it
-  cancelTimeoutInMinutes: NonEmptyString?
-
-  /// Job-specific variables
-  variables: Variables?
-
-  /// Execution strategy for this job
-  strategy: JobStrategy?
-
-  /// Pool where this job will run
-  pool: Pool?
-
-  /// Container resource name
-  container: JobContainer?
-
-  /// Container resources to run as a service container (name/value pairs)
-  services: MappingOfStringString?
-
-  /// Workspace options on the agent
-  workspace: JobWorkspace?
-
-  /// Any resources required by this job that are not already referenced
-  uses: ExplicitResources?
-
   /// A list of steps to run
   steps: Steps?
-
-  /// Job related information passed from a pipeline when extending a template
-  templateContext: MappingOfStringString?
 }
 
-class JobAlternate1 {
+class DeploymentJob extends JobBase {
   /// Name of the deployment job, A-Z, a-z, 0-9, and underscore. The word deploy is a keyword and is
   /// unsupported as the deployment name
   deployment: NonEmptyString?
 
-  /// Human-readable name for the deployment
-  displayName: NonEmptyString?
-
-  /// Any jobs which must complete before this one
-  dependsOn: JobDependsOn?
-
-  /// Evaluate this condition expression to determine whether to run this deployment
-  condition: NonEmptyString?
-
-  /// Continue running even on failure?
-  continueOnError: NonEmptyString?
-
-  /// Time to wait for this job to complete before the server kills it
-  timeoutInMinutes: NonEmptyString?
-
-  /// Time to wait for the job to cancel before forcibly terminating it
-  cancelTimeoutInMinutes: NonEmptyString?
-
-  /// Deployment-specific variables
-  variables: Variables?
-
-  /// Pool where this job will run
-  pool: Pool?
-
   /// Target environment name and optionally a resource name to record the deployment history. Format:
   /// environment-name.resource-name
   environment: DeploymentEnvironment?
-
-  /// Execution strategy for this deployment
-  strategy: DeploymentStrategy?
-
-  /// What to clean up before the job runs
-  workspace: JobWorkspace?
-
-  /// Any resources required by this job that are not already referenced
-  uses: ExplicitResources?
-
-  /// Container resource name
-  container: JobContainer?
-
-  /// Container resources to run as a service container
-  services: MappingOfStringString?
-
-  /// Deployment related information passed from a pipeline when extending a template
-  templateContext: MappingOfStringString?
 }
 
-class JobAlternate2 {
+class JobTemplate {
   /// Reference to a template for this deployment
   template: NonEmptyString?
 
@@ -1572,259 +1532,260 @@ abstract class TaskBase {
 open class Task {
   task: (
     "PowerShell@2"
-    |"PowerShell@1"
-    |"AzurePowerShell@5"
-    |"AzurePowerShell@4"
-    |"AzurePowerShell@1"
-    |"AzurePowerShell@2"
-    |"MysqlDeploymentOnMachineGroup@1"
-    |"PipAuthenticate@1"
-    |"PipAuthenticate@0"
-    |"Maven@4"
-    |"Maven@2"
-    |"Maven@3"
-    |"Maven@1"
-    |"DotNetCoreCLI@2"
-    |"DotNetCoreCLI@0"
-    |"DotNetCoreCLI@1"
-    |"XamarinComponentRestore@0"
-    |"AzureRmWebAppDeployment@4"
-    |"AzureRmWebAppDeployment@2"
-    |"AzureRmWebAppDeployment@5"
-    |"AzureRmWebAppDeployment@3"
-    |"PowerShellOnTargetMachines@3"
-    |"PowerShellOnTargetMachines@1"
-    |"PowerShellOnTargetMachines@2"
-    |"PublishCodeCoverageResults@2"
-    |"PublishCodeCoverageResults@1"
-    |"RunVisualStudioTestsusingTestAgent@1"
-    |"ManualIntervention@8"
-    |"InstallAppleProvisioningProfile@1"
-    |"InstallAppleProvisioningProfile@0"
-    |"SonarQubePostTest@1"
-    |"PyPIPublisher@0"
-    |"ChefKnife@1"
-    |"GoTool@0"
-    |"XcodePackageiOS@0"
-    |"Go@0"
-    |"PublishPipelineMetadata@0"
-    |"Docker@0"
-    |"Docker@2"
-    |"Docker@1"
-    |"JenkinsQueueJob@1"
-    |"JenkinsQueueJob@2"
-    |"FtpUpload@2"
-    |"FtpUpload@1"
-    |"WindowsMachineFileCopy@2"
-    |"WindowsMachineFileCopy@1"
-    |"AndroidBuild@1"
-    |"TwineAuthenticate@1"
-    |"TwineAuthenticate@0"
-    |"IISWebAppDeploymentOnMachineGroup@0"
-    |"PythonScript@0"
-    |"HelmInstaller@0"
-    |"HelmInstaller@1"
-    |"NodeTaskRunnerInstaller@0"
-    |"XamarinLicense@1"
-    |"NuGetAuthenticate@0"
-    |"NuGetAuthenticate@1"
-    |"DownloadGitHubNugetPackage@1"
-    |"MavenAuthenticate@0"
-    |"AzureAppConfigurationExport@10"
-    |"ReviewApp@0"
-    |"JavaToolInstaller@0"
-    |"JavaToolInstaller@1"
-    |"Chef@1"
-    |"AzureFunctionApp@1"
-    |"AzureFunctionApp@2"
-    |"npmAuthenticate@0"
-    |"MSBuild@1"
-    |"PackerBuild@0"
-    |"PackerBuild@1"
-    |"NuGetPackager@0"
-    |"AzureAppConfigurationSnapshot@1"
-    |"DuffleInstaller@0"
-    |"ServiceFabricUpdateAppVersions@1"
-    |"ServiceFabricUpdateManifests@2"
-    |"AzureMonitor@1"
-    |"AzureMonitor@0"
-    |"Notation@0"
-    |"AzureNLBManagement@1"
-    |"DockerCompose@0"
-    |"DockerCompose@1"
-    |"AzureMonitorAlerts@0"
-    |"XamarinTestCloud@1"
-    |"ServiceFabricDeploy@1"
-    |"Xcode@5"
-    |"Xcode@3"
-    |"Xcode@4"
-    |"Xcode@2"
-    |"NuGetPublisher@0"
-    |"queryWorkItems@0"
-    |"AzureWebAppContainer@1"
-    |"SqlDacpacDeploymentOnMachineGroup@0"
-    |"CacheBeta@1"
-    |"CacheBeta@0"
-    |"Cache@2"
-    |"CMake@1"
-    |"VSMobileCenterTest@0"
-    |"AppCenterTest@1"
-    |"DownloadSecureFile@1"
-    |"AzureContainerApps@0"
-    |"AzureContainerApps@1"
-    |"UseRubyVersion@0"
-    |"Grunt@0"
-    |"SqlAzureDacpacDeployment@1"
-    |"ContainerStructureTest@0"
-    |"IISWebAppDeployment@1"
-    |"KubectlInstaller@0"
-    |"CmdLine@2"
-    |"CmdLine@1"
-    |"NuGet@0"
-    |"ContainerBuild@0"
-    |"NuGetInstaller@0"
-    |"NuGetRestore@1"
-    |"NuGetCommand@2"
-    |"Delay@1"
-    |"XamariniOS@1"
-    |"XamariniOS@2"
-    |"PublishTestResults@2"
-    |"PublishTestResults@1"
-    |"AzureFileCopy@6"
-    |"AzureFileCopy@4"
-    |"AzureFileCopy@5"
-    |"AzureFileCopy@2"
-    |"AzureFileCopy@3"
-    |"AzureFileCopy@1"
-    |"PublishSymbols@2"
-    |"PublishSymbols@1"
-    |"CopyFilesOverSSH@0"
-    |"Gradle@2"
-    |"Gradle@3"
-    |"Gradle@4"
-    |"Gradle@1"
-    |"AzureTestPlan@0"
-    |"AppCenterDistribute@1"
-    |"AppCenterDistribute@2"
-    |"AppCenterDistribute@3"
-    |"AppCenterDistribute@0"
-    |"NuGetToolInstaller@0"
-    |"NuGetToolInstaller@1"
-    |"JenkinsDownloadArtifacts@2"
-    |"JenkinsDownloadArtifacts@1"
-    |"AzureFunctionAppContainer@1"
-    |"DecryptFile@1"
-    |"HelmDeploy@1"
-    |"HelmDeploy@0"
-    |"InstallAppleCertificate@2"
-    |"InstallAppleCertificate@1"
-    |"InstallAppleCertificate@0"
-    |"AzureFunction@1"
-    |"AzureFunction@0"
-    |"OpenPolicyAgentInstaller@0"
-    |"DownloadGitHubRelease@0"
-    |"SSH@0"
-    |"PublishPipelineArtifact@0"
-    |"PublishPipelineArtifact@1"
-    |"SonarQubePreBuild@1"
-    |"DownloadFileshareArtifacts@1"
-    |"Kubernetes@1"
-    |"Kubernetes@0"
-    |"AzureIoTEdge@2"
-    |"ServiceFabricComposeDeploy@0"
-    |"AndroidSigning@1"
-    |"AndroidSigning@2"
-    |"AndroidSigning@3"
-    |"DownloadPipelineArtifact@0"
-    |"DownloadPipelineArtifact@2"
-    |"DownloadPipelineArtifact@1"
-    |"UsePythonVersion@0"
-    |"ServiceFabricPowerShell@1"
-    |"VSTest@2"
-    |"VSTest@3"
-    |"VSTest@1"
-    |"ManualValidation@1"
-    |"ManualValidation@0"
-    |"Ant@1"
-    |"DeployVisualStudioTestAgent@2"
-    |"DeployVisualStudioTestAgent@1"
-    |"CondaEnvironment@0"
-    |"CondaEnvironment@1"
-    |"BatchScript@1"
-    |"DownloadGithubNpmPackage@1"
-    |"VSBuild@1"
-    |"AzureKeyVault@1"
-    |"AzureKeyVault@2"
-    |"UseDotNet@2"
-    |"DotNetCoreInstaller@0"
-    |"DotNetCoreInstaller@1"
-    |"AzureAppConfigurationImport@10"
-    |"AzureAppServiceManage@0"
-    |"KubeloginInstaller@0"
-    |"FuncToolsInstaller@0"
-    |"FileTransform@2"
-    |"FileTransform@1"
-    |"ExtractFiles@1"
-    |"XamarinAndroid@1"
-    |"CopyPublishBuildArtifacts@1"
-    |"DownloadPackage@0"
-    |"DownloadPackage@1"
-    |"AzureResourceGroupDeployment@1"
-    |"AzureResourceGroupDeployment@2"
-    |"AzureResourceManagerTemplateDeployment@3"
-    |"InvokeRESTAPI@0"
-    |"InvokeRESTAPI@1"
-    |"ArchiveFiles@1"
-    |"ArchiveFiles@2"
-    |"GitHubComment@0"
-    |"CopyFiles@2"
-    |"CopyFiles@1"
-    |"AzureMysqlDeployment@1"
-    |"Npm@1"
-    |"Npm@0"
-    |"AzureStaticWebApp@0"
-    |"UseNode@1"
-    |"NodeTool@0"
-    |"SqlServerDacpacDeployment@1"
-    |"VisualStudioTestPlatformInstaller@1"
-    |"PublishToAzureServiceBus@1"
-    |"PublishToAzureServiceBus@2"
-    |"PublishToAzureServiceBus@0"
-    |"KubernetesManifest@0"
-    |"KubernetesManifest@1"
-    |"DownloadBuildArtifacts@0"
-    |"DownloadBuildArtifacts@1"
-    |"CocoaPods@0"
-    |"AzureSpringCloud@0"
-    |"AzureWebApp@1"
-    |"AzureCLI@1"
-    |"AzureCLI@2"
-    |"AzureCLI@0"
-    |"GitHubRelease@1"
-    |"GitHubRelease@0"
-    |"cURLUploader@1"
-    |"cURLUploader@2"
-    |"AzureAppServiceSettings@1"
-    |"UniversalPackages@0"
-    |"AzurePolicyCheckGate@0"
-    |"AzureFunctionOnKubernetes@0"
-    |"AzureFunctionOnKubernetes@1"
-    |"ShellScript@2"
-    |"Bash@3"
-    |"PublishBuildArtifacts@1"
-    |"InstallSSHKey@0"
-    |"AzureVmssDeployment@0"
-    |"AzureVmssDeployment@1"
-    |"AzureWebPowerShellDeployment@1"
-    |"CondaAuthenticate@0"
-    |"AzureCloudPowerShellDeployment@2"
-    |"AzureCloudPowerShellDeployment@1"
-    |"CargoAuthenticate@0"
-    |"DeleteFiles@1"
-    |"gulp@0"
-    |"gulp@1"
-    |"IISWebAppManagementOnMachineGroup@0"
-    |"DockerInstaller@0")?
+      | "PowerShell@1"
+      | "AzurePowerShell@5"
+      | "AzurePowerShell@4"
+      | "AzurePowerShell@1"
+      | "AzurePowerShell@2"
+      | "MysqlDeploymentOnMachineGroup@1"
+      | "PipAuthenticate@1"
+      | "PipAuthenticate@0"
+      | "Maven@4"
+      | "Maven@2"
+      | "Maven@3"
+      | "Maven@1"
+      | "DotNetCoreCLI@2"
+      | "DotNetCoreCLI@0"
+      | "DotNetCoreCLI@1"
+      | "XamarinComponentRestore@0"
+      | "AzureRmWebAppDeployment@4"
+      | "AzureRmWebAppDeployment@2"
+      | "AzureRmWebAppDeployment@5"
+      | "AzureRmWebAppDeployment@3"
+      | "PowerShellOnTargetMachines@3"
+      | "PowerShellOnTargetMachines@1"
+      | "PowerShellOnTargetMachines@2"
+      | "PublishCodeCoverageResults@2"
+      | "PublishCodeCoverageResults@1"
+      | "RunVisualStudioTestsusingTestAgent@1"
+      | "ManualIntervention@8"
+      | "InstallAppleProvisioningProfile@1"
+      | "InstallAppleProvisioningProfile@0"
+      | "SonarQubePostTest@1"
+      | "PyPIPublisher@0"
+      | "ChefKnife@1"
+      | "GoTool@0"
+      | "XcodePackageiOS@0"
+      | "Go@0"
+      | "PublishPipelineMetadata@0"
+      | "Docker@0"
+      | "Docker@2"
+      | "Docker@1"
+      | "JenkinsQueueJob@1"
+      | "JenkinsQueueJob@2"
+      | "FtpUpload@2"
+      | "FtpUpload@1"
+      | "WindowsMachineFileCopy@2"
+      | "WindowsMachineFileCopy@1"
+      | "AndroidBuild@1"
+      | "TwineAuthenticate@1"
+      | "TwineAuthenticate@0"
+      | "IISWebAppDeploymentOnMachineGroup@0"
+      | "PythonScript@0"
+      | "HelmInstaller@0"
+      | "HelmInstaller@1"
+      | "NodeTaskRunnerInstaller@0"
+      | "XamarinLicense@1"
+      | "NuGetAuthenticate@0"
+      | "NuGetAuthenticate@1"
+      | "DownloadGitHubNugetPackage@1"
+      | "MavenAuthenticate@0"
+      | "AzureAppConfigurationExport@10"
+      | "ReviewApp@0"
+      | "JavaToolInstaller@0"
+      | "JavaToolInstaller@1"
+      | "Chef@1"
+      | "AzureFunctionApp@1"
+      | "AzureFunctionApp@2"
+      | "npmAuthenticate@0"
+      | "MSBuild@1"
+      | "PackerBuild@0"
+      | "PackerBuild@1"
+      | "NuGetPackager@0"
+      | "AzureAppConfigurationSnapshot@1"
+      | "DuffleInstaller@0"
+      | "ServiceFabricUpdateAppVersions@1"
+      | "ServiceFabricUpdateManifests@2"
+      | "AzureMonitor@1"
+      | "AzureMonitor@0"
+      | "Notation@0"
+      | "AzureNLBManagement@1"
+      | "DockerCompose@0"
+      | "DockerCompose@1"
+      | "AzureMonitorAlerts@0"
+      | "XamarinTestCloud@1"
+      | "ServiceFabricDeploy@1"
+      | "Xcode@5"
+      | "Xcode@3"
+      | "Xcode@4"
+      | "Xcode@2"
+      | "NuGetPublisher@0"
+      | "queryWorkItems@0"
+      | "AzureWebAppContainer@1"
+      | "SqlDacpacDeploymentOnMachineGroup@0"
+      | "CacheBeta@1"
+      | "CacheBeta@0"
+      | "Cache@2"
+      | "CMake@1"
+      | "VSMobileCenterTest@0"
+      | "AppCenterTest@1"
+      | "DownloadSecureFile@1"
+      | "AzureContainerApps@0"
+      | "AzureContainerApps@1"
+      | "UseRubyVersion@0"
+      | "Grunt@0"
+      | "SqlAzureDacpacDeployment@1"
+      | "ContainerStructureTest@0"
+      | "IISWebAppDeployment@1"
+      | "KubectlInstaller@0"
+      | "CmdLine@2"
+      | "CmdLine@1"
+      | "NuGet@0"
+      | "ContainerBuild@0"
+      | "NuGetInstaller@0"
+      | "NuGetRestore@1"
+      | "NuGetCommand@2"
+      | "Delay@1"
+      | "XamariniOS@1"
+      | "XamariniOS@2"
+      | "PublishTestResults@2"
+      | "PublishTestResults@1"
+      | "AzureFileCopy@6"
+      | "AzureFileCopy@4"
+      | "AzureFileCopy@5"
+      | "AzureFileCopy@2"
+      | "AzureFileCopy@3"
+      | "AzureFileCopy@1"
+      | "PublishSymbols@2"
+      | "PublishSymbols@1"
+      | "CopyFilesOverSSH@0"
+      | "Gradle@2"
+      | "Gradle@3"
+      | "Gradle@4"
+      | "Gradle@1"
+      | "AzureTestPlan@0"
+      | "AppCenterDistribute@1"
+      | "AppCenterDistribute@2"
+      | "AppCenterDistribute@3"
+      | "AppCenterDistribute@0"
+      | "NuGetToolInstaller@0"
+      | "NuGetToolInstaller@1"
+      | "JenkinsDownloadArtifacts@2"
+      | "JenkinsDownloadArtifacts@1"
+      | "AzureFunctionAppContainer@1"
+      | "DecryptFile@1"
+      | "HelmDeploy@1"
+      | "HelmDeploy@0"
+      | "InstallAppleCertificate@2"
+      | "InstallAppleCertificate@1"
+      | "InstallAppleCertificate@0"
+      | "AzureFunction@1"
+      | "AzureFunction@0"
+      | "OpenPolicyAgentInstaller@0"
+      | "DownloadGitHubRelease@0"
+      | "SSH@0"
+      | "PublishPipelineArtifact@0"
+      | "PublishPipelineArtifact@1"
+      | "SonarQubePreBuild@1"
+      | "DownloadFileshareArtifacts@1"
+      | "Kubernetes@1"
+      | "Kubernetes@0"
+      | "AzureIoTEdge@2"
+      | "ServiceFabricComposeDeploy@0"
+      | "AndroidSigning@1"
+      | "AndroidSigning@2"
+      | "AndroidSigning@3"
+      | "DownloadPipelineArtifact@0"
+      | "DownloadPipelineArtifact@2"
+      | "DownloadPipelineArtifact@1"
+      | "UsePythonVersion@0"
+      | "ServiceFabricPowerShell@1"
+      | "VSTest@2"
+      | "VSTest@3"
+      | "VSTest@1"
+      | "ManualValidation@1"
+      | "ManualValidation@0"
+      | "Ant@1"
+      | "DeployVisualStudioTestAgent@2"
+      | "DeployVisualStudioTestAgent@1"
+      | "CondaEnvironment@0"
+      | "CondaEnvironment@1"
+      | "BatchScript@1"
+      | "DownloadGithubNpmPackage@1"
+      | "VSBuild@1"
+      | "AzureKeyVault@1"
+      | "AzureKeyVault@2"
+      | "UseDotNet@2"
+      | "DotNetCoreInstaller@0"
+      | "DotNetCoreInstaller@1"
+      | "AzureAppConfigurationImport@10"
+      | "AzureAppServiceManage@0"
+      | "KubeloginInstaller@0"
+      | "FuncToolsInstaller@0"
+      | "FileTransform@2"
+      | "FileTransform@1"
+      | "ExtractFiles@1"
+      | "XamarinAndroid@1"
+      | "CopyPublishBuildArtifacts@1"
+      | "DownloadPackage@0"
+      | "DownloadPackage@1"
+      | "AzureResourceGroupDeployment@1"
+      | "AzureResourceGroupDeployment@2"
+      | "AzureResourceManagerTemplateDeployment@3"
+      | "InvokeRESTAPI@0"
+      | "InvokeRESTAPI@1"
+      | "ArchiveFiles@1"
+      | "ArchiveFiles@2"
+      | "GitHubComment@0"
+      | "CopyFiles@2"
+      | "CopyFiles@1"
+      | "AzureMysqlDeployment@1"
+      | "Npm@1"
+      | "Npm@0"
+      | "AzureStaticWebApp@0"
+      | "UseNode@1"
+      | "NodeTool@0"
+      | "SqlServerDacpacDeployment@1"
+      | "VisualStudioTestPlatformInstaller@1"
+      | "PublishToAzureServiceBus@1"
+      | "PublishToAzureServiceBus@2"
+      | "PublishToAzureServiceBus@0"
+      | "KubernetesManifest@0"
+      | "KubernetesManifest@1"
+      | "DownloadBuildArtifacts@0"
+      | "DownloadBuildArtifacts@1"
+      | "CocoaPods@0"
+      | "AzureSpringCloud@0"
+      | "AzureWebApp@1"
+      | "AzureCLI@1"
+      | "AzureCLI@2"
+      | "AzureCLI@0"
+      | "GitHubRelease@1"
+      | "GitHubRelease@0"
+      | "cURLUploader@1"
+      | "cURLUploader@2"
+      | "AzureAppServiceSettings@1"
+      | "UniversalPackages@0"
+      | "AzurePolicyCheckGate@0"
+      | "AzureFunctionOnKubernetes@0"
+      | "AzureFunctionOnKubernetes@1"
+      | "ShellScript@2"
+      | "Bash@3"
+      | "PublishBuildArtifacts@1"
+      | "InstallSSHKey@0"
+      | "AzureVmssDeployment@0"
+      | "AzureVmssDeployment@1"
+      | "AzureWebPowerShellDeployment@1"
+      | "CondaAuthenticate@0"
+      | "AzureCloudPowerShellDeployment@2"
+      | "AzureCloudPowerShellDeployment@1"
+      | "CargoAuthenticate@0"
+      | "DeleteFiles@1"
+      | "gulp@0"
+      | "gulp@1"
+      | "IISWebAppManagementOnMachineGroup@0"
+      | "DockerInstaller@0"
+  )?
 
   /// Human-readable name for the task
   displayName: String?
@@ -1860,86 +1821,95 @@ typealias Sequence = Listing<AnyAllowExpressions>
 
 typealias MappingOfStringString = Mapping<String, Any>
 
-typealias AnyAllowExpressions = NonEmptyString|Listing<NonEmptyString|MappingOfStringString>|MappingOfStringString
+typealias AnyAllowExpressions =
+  NonEmptyString | Listing<NonEmptyString | MappingOfStringString> | MappingOfStringString
 
 typealias Pipeline = *StagedPipeline | PipelineJobs | PipelineJob
 
-typealias Pr = String(matches(Regex("^none$")))|BranchFilterArray|PrAlternate2
+typealias Pr = String(matches(Regex("^none$"))) | BranchFilterArray | PrAlternate2
 
-typealias Trigger = String(matches(Regex("^none$")))|BranchFilterArray|TriggerAlternate2
+typealias Trigger = String(matches(Regex("^none$"))) | BranchFilterArray | TriggerAlternate2
 
-typealias IncludeExcludeStringFilters = SequenceOfNonEmptyString|IncludeExcludeStringFiltersAlternate1
+typealias IncludeExcludeStringFilters =
+  SequenceOfNonEmptyString | IncludeExcludeStringFiltersAlternate1
 
 typealias BranchFilterArray = Listing<BranchFilter>
 
 /// branch name or prefix filter
 typealias BranchFilter = String(matches(Regex(#"^[^\/~\^\: \[\]\\]+(\/[^\/~\^\: \[\]\\]+)*$"#)))
 
-typealias TemplateParameters = ExtendsParameters|MappingOfStringString
+typealias TemplateParameters = ExtendsParameters | MappingOfStringString
 
 typealias TemplateParameterType =
   String(matches(Regex("^boolean$")))
-  |String(matches(Regex("^container$")))
-  |String(matches(Regex("^containerList$")))
-  |String(matches(Regex("^deployment$")))
-  |String(matches(Regex("^deploymentList$")))
-  |String(matches(Regex("^job$")))
-  |String(matches(Regex("^jobList$")))
-  |String(matches(Regex("^legacyObject$")))
-  |String(matches(Regex("^number$")))
-  |String(matches(Regex("^object$")))
-  |String(matches(Regex("^stage$")))
-  |String(matches(Regex("^stageList$")))
-  |String(matches(Regex("^step$")))
-  |String(matches(Regex("^stepList$")))
-  |String(matches(Regex("^string$")))
-  |String(matches(Regex("^stringList$")))
+    | String(matches(Regex("^container$")))
+    | String(matches(Regex("^containerList$")))
+    | String(matches(Regex("^deployment$")))
+    | String(matches(Regex("^deploymentList$")))
+    | String(matches(Regex("^job$")))
+    | String(matches(Regex("^jobList$")))
+    | String(matches(Regex("^legacyObject$")))
+    | String(matches(Regex("^number$")))
+    | String(matches(Regex("^object$")))
+    | String(matches(Regex("^stage$")))
+    | String(matches(Regex("^stageList$")))
+    | String(matches(Regex("^step$")))
+    | String(matches(Regex("^stepList$")))
+    | String(matches(Regex("^string$")))
+    | String(matches(Regex("^stringList$")))
 
 typealias PipelineTemplateParameters = Listing<PipelineTemplateParameter>
 
 typealias PipelineTemplateParameterType =
   String(matches(Regex("^boolean$")))
-  |String(matches(Regex("^container$")))
-  |String(matches(Regex("^containerList$")))
-  |String(matches(Regex("^deployment$")))
-  |String(matches(Regex("^deploymentList$")))
-  |String(matches(Regex("^environment$")))
-  |String(matches(Regex("^filePath$")))
-  |String(matches(Regex("^job$")))
-  |String(matches(Regex("^jobList$")))
-  |String(matches(Regex("^number$")))
-  |String(matches(Regex("^object$")))
-  |String(matches(Regex("^pool$")))
-  |String(matches(Regex("^secureFile$")))
-  |String(matches(Regex("^serviceConnection$")))
-  |String(matches(Regex("^stage$")))
-  |String(matches(Regex("^stageList$")))
-  |String(matches(Regex("^step$")))
-  |String(matches(Regex("^stepList$")))
-  |String(matches(Regex("^string$")))
-  |String(matches(Regex("^stringList$")))
+    | String(matches(Regex("^container$")))
+    | String(matches(Regex("^containerList$")))
+    | String(matches(Regex("^deployment$")))
+    | String(matches(Regex("^deploymentList$")))
+    | String(matches(Regex("^environment$")))
+    | String(matches(Regex("^filePath$")))
+    | String(matches(Regex("^job$")))
+    | String(matches(Regex("^jobList$")))
+    | String(matches(Regex("^number$")))
+    | String(matches(Regex("^object$")))
+    | String(matches(Regex("^pool$")))
+    | String(matches(Regex("^secureFile$")))
+    | String(matches(Regex("^serviceConnection$")))
+    | String(matches(Regex("^stage$")))
+    | String(matches(Regex("^stageList$")))
+    | String(matches(Regex("^step$")))
+    | String(matches(Regex("^stepList$")))
+    | String(matches(Regex("^string$")))
+    | String(matches(Regex("^stringList$")))
 
 typealias Schedules = Listing<Schedule>
 
-typealias Resources = ResourcesAlternate0|Listing<LegacyResource>
+typealias Resources = ResourcesAlternate0 | Listing<LegacyResource>
 
 typealias BuildResources = Listing<BuildResource>
 
-typealias PackageResourceTrigger = String(matches(Regex("^none$")))|String(matches(Regex("^true$")))
+typealias PackageResourceTrigger =
+  String(matches(Regex("^none$"))) | String(matches(Regex("^true$")))
 
 typealias PackageResources = Listing<PackageResource>
 
 typealias ContainerResources = Listing<ContainerResource>
 
-typealias ContainerArtifactType = String(matches(Regex("^ACR$")))|NonEmptyString
+typealias ContainerArtifactType = String(matches(Regex("^ACR$"))) | NonEmptyString
 
-typealias ContainerResourceTrigger = String(matches(Regex("^none$")))|String(matches(Regex("^true$")))|ContainerResourceTriggerAlternate2
+typealias ContainerResourceTrigger =
+  String(matches(Regex("^none$")))
+    | String(matches(Regex("^true$")))
+    | ContainerResourceTriggerAlternate2
 
 typealias PipelineResources = Listing<PipelineResource>
 
-typealias PipelineResourceTrigger = String(matches(Regex("^none$")))|String(matches(Regex("^true$")))|PipelineResourceTriggerAlternate2
+typealias PipelineResourceTrigger =
+  String(matches(Regex("^none$")))
+    | String(matches(Regex("^true$")))
+    | PipelineResourceTriggerAlternate2
 
-typealias TriggerBranchFilter = TriggerBranchFilterAlternate0|BranchFilterArray
+typealias TriggerBranchFilter = TriggerBranchFilterAlternate0 | BranchFilterArray
 
 typealias RepositoryResources = Listing<RepositoryResource>
 
@@ -1949,57 +1919,64 @@ typealias WebhookResources = Listing<WebhookResource>
 
 typealias WebhookFilters = Listing<WebhookFilter>
 
-typealias Variables = MappingOfStringString|*Listing<VariableEntry>
+typealias Variables = MappingOfStringString | *Listing<VariableEntry>
 
 typealias VariableEntry = *Variable | VariableGroup | VariableTemplate
 
-typealias Stages = Listing<Stage>
+typealias Stages = Listing<StageEntry>
 
-typealias Stage = *StageAlternate0|StageAlternate1
+typealias StageEntry = *Stage | StageTemplate
 
 typealias Checks = Listing<Check>
 
 /// Production readiness check
 typealias CheckType = String(matches(Regex("^productionReadinessPolicy$")))
 
-typealias LockBehavior = String(matches(Regex("^sequential$")))|String(matches(Regex("^runLatest$")))
+typealias LockBehavior =
+  String(matches(Regex("^sequential$"))) | String(matches(Regex("^runLatest$")))
 
-typealias StageTrigger = String(matches(Regex("^manual$")))|String(matches(Regex("^automatic$")))
+typealias StageTrigger = String(matches(Regex("^manual$"))) | String(matches(Regex("^automatic$")))
 
 typealias ExtendsParameters = Listing<TemplateParameter>
 
-typealias ExtendsTemplate = ExtendsTemplateAlternate0|ExtendsTemplateAlternate1|ExtendsTemplateAlternate2|ExtendsTemplateAlternate3
+typealias ExtendsTemplate =
+  ExtendsTemplateAlternate0
+    | ExtendsTemplateAlternate1
+    | ExtendsTemplateAlternate2
+    | ExtendsTemplateAlternate3
 
 typealias ParametersTemplate =
   ParametersTemplateAlternate0
-  |JobsTemplateAlternate0
-  |ParametersTemplateAlternate2
-  |ParametersTemplateAlternate3
+    | JobsTemplateAlternate0
+    | ParametersTemplateAlternate2
+    | ParametersTemplateAlternate3
 
-typealias JobsTemplate = JobsTemplateAlternate0|JobsTemplateAlternate1
+typealias JobsTemplate = JobsTemplateAlternate0 | JobsTemplateAlternate1
 
-typealias Jobs = Listing<Job>
+typealias Jobs = Listing<JobEntry>
 
-typealias Job = *JobAlternate0|JobAlternate1|JobAlternate2
+typealias JobEntry = *Job | DeploymentJob | JobTemplate
 
 /// Pool details
-typealias Pool = NonEmptyString|PoolAlternate1
+typealias Pool = NonEmptyString | PoolAlternate1
 
-typealias PhaseTargetDemands = NonEmptyString|SequenceOfNonEmptyString
+typealias PhaseTargetDemands = NonEmptyString | SequenceOfNonEmptyString
 
-typealias JobContainer = NonEmptyString|JobContainerAlternate1|JobContainerAlternate2
+typealias JobContainer = NonEmptyString | JobContainerAlternate1 | JobContainerAlternate2
 
-typealias JobStrategy = JobStrategyAlternate0|JobStrategyAlternate1
+typealias JobStrategy = JobStrategyAlternate0 | JobStrategyAlternate1
 
-typealias JobMatrix = Mapping<String(matches(Regex("^[A-Za-z0-9_]+$"))), MatrixProperties>(length >= 1)|NonEmptyString
+typealias JobMatrix =
+  Mapping<String(matches(Regex("^[A-Za-z0-9_]+$"))), MatrixProperties>(length >= 1) | NonEmptyString
 
 /// Variable-value pair to pass in this matrix instance
 typealias MatrixProperties = Mapping<String, Any>
 
 /// Environment details
-typealias DeploymentEnvironment = NonEmptyString|DeploymentEnvironmentAlternate1
+typealias DeploymentEnvironment = NonEmptyString | DeploymentEnvironmentAlternate1
 
-typealias DeploymentStrategy = DeploymentStrategyAlternate0|DeploymentStrategyAlternate1|DeploymentStrategyAlternate2
+typealias DeploymentStrategy =
+  DeploymentStrategyAlternate0 | DeploymentStrategyAlternate1 | DeploymentStrategyAlternate2
 
 typealias SequenceOfNonEmptyString = Listing<NonEmptyString>
 
@@ -2008,38 +1985,52 @@ typealias Phases = Listing<Phase>
 typealias Phase = *AgentPhase | ServerPhase | PhaseTemplate
 
 /// Queue details
-typealias PhaseQueueTarget = NonEmptyString|PhaseQueueTargetAlternate1
+typealias PhaseQueueTarget = NonEmptyString | PhaseQueueTargetAlternate1
 
-typealias PhaseServerTarget = NonEmptyString|PhaseServerTargetAlternate1
+typealias PhaseServerTarget = NonEmptyString | PhaseServerTargetAlternate1
 
 /// List of permutations of variable values to run
-typealias PhaseTargetMatrix = MappingOfStringString|NonEmptyString
+typealias PhaseTargetMatrix = MappingOfStringString | NonEmptyString
 
 typealias Steps = Listing<Step>
 
 typealias StepExpression = Mapping<String, Listing>
 
-typealias Step = *Task | ScriptStep | PowerShellStep | PwshStep | BashStep | CheckoutStep | DownloadStep | DownloadBuildStep | GetPackageStep | UploadStep | PublishStep | TemplateStep | ReviewAppStep | StepExpression
+typealias Step =
+  *Task
+    | ScriptStep
+    | PowerShellStep
+    | PwshStep
+    | BashStep
+    | CheckoutStep
+    | DownloadStep
+    | DownloadBuildStep
+    | GetPackageStep
+    | UploadStep
+    | PublishStep
+    | TemplateStep
+    | ReviewAppStep
+    | StepExpression
 
 /// Step target
-typealias StepTarget = NonEmptyString|StepTargetAlternate1
+typealias StepTarget = NonEmptyString | StepTargetAlternate1
 
-typealias VariableRestrictions = String(matches(Regex("^none$")))|SequenceOfNonEmptyString
+typealias VariableRestrictions = String(matches(Regex("^none$"))) | SequenceOfNonEmptyString
 
 typealias Tasks = Listing<Task>
 
-typealias JobDependsOn = NonEmptyString|Listing<NonEmptyString>
+typealias JobDependsOn = NonEmptyString | Listing<NonEmptyString>
 
 typealias ReferenceName = String(matches(Regex("^[-_A-Za-z0-9]*$")))
 
 typealias Boolean1 =
   String(matches(Regex("^true$")))
-  |String(matches(Regex("^y$")))
-  |String(matches(Regex("^yes$")))
-  |String(matches(Regex("^on$")))
-  |String(matches(Regex("^false$")))
-  |String(matches(Regex("^n$")))
-  |String(matches(Regex("^no$")))
-  |String(matches(Regex("^off$")))
+    | String(matches(Regex("^y$")))
+    | String(matches(Regex("^yes$")))
+    | String(matches(Regex("^on$")))
+    | String(matches(Regex("^false$")))
+    | String(matches(Regex("^n$")))
+    | String(matches(Regex("^no$")))
+    | String(matches(Regex("^off$")))
 
 typealias SequenceOfStringAllowExpressions = Listing<NonEmptyString>

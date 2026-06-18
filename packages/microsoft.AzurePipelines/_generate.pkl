@@ -219,6 +219,38 @@ local variableKeep: Mapping<String, String> = new {
   }
 }
 
+/// Stage `anyOf` branches → friendly names (keyed by discriminator). The `Stage`
+/// union is renamed to `StageEntry` so the main shape can be the `Stage` class.
+local stageNames: Mapping<String, String> = new {
+  ["stage"] = "Stage" // a normal stage
+  ["template"] = "StageTemplate" // stages template reference
+}
+local stageBranches: List<Mapping> =
+  (rawSchema["definitions"]["stage"]["anyOf"] as Listing).toList() as List<Mapping>
+
+local stageKeep: Mapping<String, String> = new {
+  for (i, branch in stageBranches) {
+    ["StageAlternate\(i)"] = stageNames[discriminatorOf(branch) as String]
+  }
+}
+
+/// Job `anyOf` branches. `job`/`deployment` share metadata, factored onto a
+/// synthesized `JobBase`; `template` is standalone. The `Job` union is renamed
+/// to `JobEntry`.
+local jobNames: Mapping<String, String> = new {
+  ["job"] = "Job" // a normal job
+  ["deployment"] = "DeploymentJob" // a deployment job
+  ["template"] = "JobTemplate" // jobs template reference
+}
+local jobBranches: List<Mapping> =
+  (rawSchema["definitions"]["job"]["anyOf"] as Listing).toList() as List<Mapping>
+
+local jobKeep: Mapping<String, String> = new {
+  for (i, branch in jobBranches) {
+    ["JobAlternate\(i)"] = jobNames[discriminatorOf(branch) as String]
+  }
+}
+
 /// Does the class declare any of [props]? Variants that share their base's
 /// props get factored onto it; those that don't are renamed only.
 local function sharesAnyProp(c: ClassNode, props: Set<String>): Boolean =
@@ -272,9 +304,22 @@ local function refactorClasses(node: ModuleNode): ModuleNode =
   )
   let (phaseBaseNode = synthesizeBase(node, phaseVariantNames, "PhaseBase"))
   let (phaseBaseProps = propNameSet(phaseBaseNode))
+  // job variants that share the common shape (`job`/`deployment`, not template)
+  let (
+    jobVariantNames =
+      jobBranches
+        .mapIndexed((i, b) ->
+          let (disc = discriminatorOf(b))
+            if (disc == "job" || disc == "deployment") "JobAlternate\(i)" else null
+        )
+        .filterNonNull() as List<String>
+  )
+  let (jobBaseNode = synthesizeBase(node, jobVariantNames, "JobBase"))
+  let (jobBaseProps = propNameSet(jobBaseNode))
     (node) {
       classes = new {
         phaseBaseNode
+        jobBaseNode
         for (c in node.classes!!) {
           when (
             c.classHeader.name.value == "PipelineBase" || c.classHeader.name.value == "TaskBase"
@@ -304,6 +349,17 @@ local function refactorClasses(node: ModuleNode): ModuleNode =
             // variable variants share no props — rename only
             (c) { classHeader { name { value = variableKeep[c.classHeader.name.value] } } }
           }
+          when (stageKeep.containsKey(c.classHeader.name.value)) {
+            // stage / stage-template share no props — rename only
+            (c) { classHeader { name { value = stageKeep[c.classHeader.name.value] } } }
+          }
+          when (jobKeep.containsKey(c.classHeader.name.value) && sharesAnyProp(c, jobBaseProps)) {
+            deriveFrom(c, "JobBase", jobBaseProps, jobKeep[c.classHeader.name.value])
+          }
+          when (jobKeep.containsKey(c.classHeader.name.value) && !sharesAnyProp(c, jobBaseProps)) {
+            // the job template — rename only
+            (c) { classHeader { name { value = jobKeep[c.classHeader.name.value] } } }
+          }
           when (
             c.classHeader.name.value != "PipelineBase"
               && c.classHeader.name.value != "TaskBase"
@@ -312,6 +368,8 @@ local function refactorClasses(node: ModuleNode): ModuleNode =
               && !stepKeep.containsKey(c.classHeader.name.value)
               && !phaseKeep.containsKey(c.classHeader.name.value)
               && !variableKeep.containsKey(c.classHeader.name.value)
+              && !stageKeep.containsKey(c.classHeader.name.value)
+              && !jobKeep.containsKey(c.classHeader.name.value)
           ) {
             c
           }
@@ -324,7 +382,8 @@ local function refactorClasses(node: ModuleNode): ModuleNode =
 // `StepExpression` carries compile-time `${{ if/each … }}:` insertion blocks
 // (a mapping from the expression key to a nested step list) that the schema
 // can't model as a typed step.
-local stepUnion: String = """
+local stepUnion: String =
+  """
   typealias StepExpression = Mapping<String, Listing>
 
   typealias Step = *Task | \(stepKeep.toMap().values.join(" | ")) | StepExpression
@@ -335,6 +394,10 @@ local phaseUnion: String = "typealias Phase = *" + phaseKeep.toMap().values.join
 // the `Variable` class (`new Variable { name = …; value = … }`).
 local variableUnion: String =
   "typealias VariableEntry = *" + variableKeep.toMap().values.join(" | ")
+// `Stage`/`Job` unions renamed to `StageEntry`/`JobEntry`, freeing those names
+// for the main `Stage`/`Job` classes.
+local stageUnion: String = "typealias StageEntry = *" + stageKeep.toMap().values.join(" | ")
+local jobUnion: String = "typealias JobEntry = *" + jobKeep.toMap().values.join(" | ")
 
 /// Apply the fixups the upstream json_schema generator can't do itself, so the
 /// regenerated module evaluates and integrates with the typed tasks.
@@ -352,23 +415,22 @@ local function fixupModule(rendered: String): String =
       ),
       "typealias AnyAllowExpressions = NonEmptyString|Listing<NonEmptyString|MappingOfStringString>|MappingOfStringString",
     )
-    // Mark the default member (`*`) of the `Stage`/`Job` unions so `new {}`
-    // entries in `stages`/`jobs` know which type to construct.
-    .replaceAllMapped(Regex(#"typealias (Stage|Job) =(\s+)(?!\*)"#), (m) ->
-      "typealias \(m.groups[1]!!.value) =\(m.groups[2]!!.value)*"
-    )
     // Rewrite the `Pipeline`/`Step`/`Phase` unions to reference the refactored,
     // renamed variant classes (with a `*` default member). `Pipeline`/`Step`
     // render multi-line; `Phase` is short enough to stay single-line.
     .replaceFirst(Regex(#"typealias Pipeline =(\n  \|?[A-Za-z0-9]+)+"#), pipelineUnion)
     .replaceFirst(Regex(#"typealias Step =(\n  \|?[A-Za-z0-9]+)+"#), stepUnion)
     .replaceFirst(Regex(#"typealias Phase = [\w|]+"#), phaseUnion)
-    // Rename the `Variable` union → `VariableEntry`, freeing `Variable` for the
-    // renamed value class, and repoint the `Variables` listing at it. The
-    // listing is made the default member (`*`) so `variables { new Variable {} }`
-    // works; the map form stays available as `variables = new Mapping { … }`.
+    // Rename the `Variable`/`Stage`/`Job` unions → `*Entry`, freeing those names
+    // for the main value classes, and repoint their `Listing`s. The listing is
+    // the default member (`*`) so `variables { new Variable {} }` etc. work; the
+    // map form stays available as `variables = new Mapping { … }`.
     .replaceFirst(Regex(#"typealias Variable = [\w|]+"#), variableUnion)
     .replaceFirst("Listing<Variable>", "*Listing<VariableEntry>")
+    .replaceFirst(Regex(#"typealias Stage = [\w|*]+"#), stageUnion)
+    .replaceFirst("Listing<Stage>", "Listing<StageEntry>")
+    .replaceFirst(Regex(#"typealias Job = [\w|*]+"#), jobUnion)
+    .replaceFirst("Listing<Job>", "Listing<JobEntry>")
 
 local modulesGenerator: ModulesGenerator = new {
   rootSchema = Parser.parse(schemaResource) as JsonSchema
