@@ -8,6 +8,14 @@
 /// WARN: unable to determine module-level properties on the root schema.
 open module ServiceSchema
 
+import "./Expressions.pkl"
+
+/// Renders a Pkl `Boolean` as Azure's string form (`true`/`false`).
+class BooleanToString extends ConvertProperty {
+  render = (property, _) ->
+    Pair(property.key, let (v = property.value) if (v == null) v else v.toString())
+}
+
 abstract class PhaseBase {
   /// ID of the phase
   phase: ReferenceName?
@@ -19,7 +27,7 @@ abstract class PhaseBase {
   displayName: NonEmptyString?
 
   /// Evaluate this condition expression to determine whether to run this phase
-  condition: NonEmptyString?
+  condition: Expressions.Expression?
 
   /// Continue running even on failure?
   continueOnError: NonEmptyString?
@@ -39,7 +47,7 @@ abstract class JobBase {
   dependsOn: JobDependsOn?
 
   /// Evaluate this condition expression to determine whether to run this job
-  condition: NonEmptyString?
+  condition: Expressions.Expression?
 
   /// Continue running even on failure?
   continueOnError: NonEmptyString?
@@ -117,7 +125,8 @@ abstract class PipelineBase {
   name: NonEmptyString?
 
   /// Append the commit message to the build number
-  appendCommitMessageToRunName: Boolean1?
+  @BooleanToString
+  appendCommitMessageToRunName: Boolean?
 
   /// Continuous integration triggers
   trigger: Trigger?
@@ -463,7 +472,8 @@ class PipelineAnyBase {
 
 class PrAlternate2 {
   /// Whether to cancel running PR builds when a new commit lands in the branch
-  autoCancel: Boolean1?
+  @BooleanToString
+  autoCancel: Boolean?
 
   /// Branch names to include or exclude for triggering a run
   branches: IncludeExcludeFilters?
@@ -472,12 +482,14 @@ class PrAlternate2 {
   paths: IncludeExcludeFilters?
 
   /// Whether to start a run when a draft PR is created
-  drafts: Boolean1?
+  @BooleanToString
+  drafts: Boolean?
 }
 
 class TriggerAlternate2 {
   /// Whether to batch changes per branch
-  batch: Boolean1?
+  @BooleanToString
+  batch: Boolean?
 
   branches: IncludeExcludeFilters?
 
@@ -539,11 +551,13 @@ class Schedule {
   /// When batch is true, a new pipeline run won't start due to the schedule if a previous pipeline run
   /// is still in-progress; the default is false. The batch property is affected by the setting of the
   /// always property
-  batch: Boolean1?
+  @BooleanToString
+  batch: Boolean?
 
   /// Whether to always run the pipeline or only if there have been source code or pipeline settings
   /// changes since the last successful scheduled run. The default is false
-  always: Boolean1?
+  @BooleanToString
+  always: Boolean?
 }
 
 class ResourcesAlternate0 {
@@ -635,7 +649,8 @@ class ContainerResource {
 
   /// When true, uses a locally tagged image instead of using docker pull to get the image; the default
   /// is false
-  localImage: Boolean1?
+  @BooleanToString
+  localImage: Boolean?
 
   /// ID of the service endpoint connecting to a private container registry
   endpoint: NonEmptyString?
@@ -648,7 +663,8 @@ class ContainerResource {
 
   /// Set this flag to false to force the agent not to setup the /var/run/docker.sock volume on container
   /// jobs
-  mapDockerSocket: Boolean1?
+  @BooleanToString
+  mapDockerSocket: Boolean?
 
   /// Options to pass into container host
   options: NonEmptyString?
@@ -664,7 +680,8 @@ class ContainerResource {
 }
 
 class ContainerResourceTriggerAlternate2 {
-  enabled: Boolean1?
+  @BooleanToString
+  enabled: Boolean?
 
   tags: IncludeExcludeStringFilters?
 }
@@ -695,7 +712,8 @@ class PipelineResource {
 
 class PipelineResourceTriggerAlternate2 {
   /// Whether the trigger is enabled; defaults to true
-  enabled: Boolean1?
+  @BooleanToString
+  enabled: Boolean?
 
   /// Branch names to include or exclude for triggering a run
   branches: TriggerBranchFilter?
@@ -804,7 +822,8 @@ class Variable {
 
   value: NonEmptyString?
 
-  readonly: Boolean1?
+  @BooleanToString
+  readonly: Boolean?
 }
 
 class VariableGroup {
@@ -841,7 +860,7 @@ class Stage {
   dependsOn: JobDependsOn?
 
   /// Evaluate this condition expression to determine whether to run this stage
-  condition: NonEmptyString?
+  condition: Expressions.Expression?
 
   /// Stage-specific variables
   variables: Variables?
@@ -856,7 +875,8 @@ class Stage {
   trigger: StageTrigger?
 
   /// Setting false prevents the stage from being skipped. By default it's always true
-  isSkippable: Boolean1?
+  @BooleanToString
+  isSkippable: Boolean?
 
   /// Setting false prevents the stage from being skipped. By default it's always true
   templateContext: MappingOfStringString?
@@ -1043,7 +1063,8 @@ class JobContainerAlternate2 {
 
   /// Set this flag to false to force the agent not to setup the /var/run/docker.sock volume on container
   /// jobs
-  mapDockerSocket: Boolean1?
+  @BooleanToString
+  mapDockerSocket: Boolean?
 
   /// Options to pass into container host
   options: NonEmptyString?
@@ -1070,7 +1091,8 @@ class ContainerBase {
 
   /// Set this flag to false to force the agent not to setup the /var/run/docker.sock volume on container
   /// jobs
-  mapDockerSocket: Boolean1?
+  @BooleanToString
+  mapDockerSocket: Boolean?
 
   /// Options to pass into container host
   options: NonEmptyString?
@@ -1087,16 +1109,20 @@ class ContainerBase {
 
 class ReadOnlyMounts {
   /// Mount the work directory as readonly
-  work: Boolean1?
+  @BooleanToString
+  work: Boolean?
 
   /// Mount the externals directory as readonly
-  externals: Boolean1?
+  @BooleanToString
+  externals: Boolean?
 
   /// Mount the tools directory as readonly
-  tools: Boolean1?
+  @BooleanToString
+  tools: Boolean?
 
   /// Mount the tasks directory as readonly
-  tasks: Boolean1?
+  @BooleanToString
+  tasks: Boolean?
 }
 
 class JobWorkspace {
@@ -1502,10 +1528,11 @@ class JobDecoratorSteps {
 
 abstract class TaskBase {
   /// Evaluate this condition expression to determine whether to run this task
-  condition: NonEmptyString?
+  condition: Expressions.Expression?
 
   /// Continue running even on failure?
-  continueOnError: Boolean1?
+  @BooleanToString
+  continueOnError: Boolean?
 
   /// Human-readable name for the task
   displayName: NonEmptyString?
@@ -1514,7 +1541,8 @@ abstract class TaskBase {
   target: StepTarget?
 
   /// Run this task when the job runs?
-  enabled: Boolean1?
+  @BooleanToString
+  enabled: Boolean?
 
   /// Variables to map into the process's environment
   env: MappingOfStringString?
@@ -1794,7 +1822,7 @@ open class Task {
   name: String(matches(Regex("^[_A-Za-z0-9]*$")))?
 
   /// Evaluate this condition expression to determine whether to run this task
-  condition: String?
+  condition: Expressions.Expression?
 
   /// Continue running the parent job even on failure?
   continueOnError: Boolean?
@@ -1826,9 +1854,9 @@ typealias AnyAllowExpressions =
 
 typealias Pipeline = *StagedPipeline | PipelineJobs | PipelineJob
 
-typealias Pr = String(matches(Regex("^none$"))) | BranchFilterArray | PrAlternate2
+typealias Pr = String(matches(Regex("^none$"))) | BranchFilterArray | *PrAlternate2
 
-typealias Trigger = String(matches(Regex("^none$"))) | BranchFilterArray | TriggerAlternate2
+typealias Trigger = String(matches(Regex("^none$"))) | BranchFilterArray | *TriggerAlternate2
 
 typealias IncludeExcludeStringFilters =
   SequenceOfNonEmptyString | IncludeExcludeStringFiltersAlternate1
@@ -1884,7 +1912,7 @@ typealias PipelineTemplateParameterType =
 
 typealias Schedules = Listing<Schedule>
 
-typealias Resources = ResourcesAlternate0 | Listing<LegacyResource>
+typealias Resources = *ResourcesAlternate0 | Listing<LegacyResource>
 
 typealias BuildResources = Listing<BuildResource>
 
@@ -2022,15 +2050,5 @@ typealias Tasks = Listing<Task>
 typealias JobDependsOn = NonEmptyString | Listing<NonEmptyString>
 
 typealias ReferenceName = String(matches(Regex("^[-_A-Za-z0-9]*$")))
-
-typealias Boolean1 =
-  String(matches(Regex("^true$")))
-    | String(matches(Regex("^y$")))
-    | String(matches(Regex("^yes$")))
-    | String(matches(Regex("^on$")))
-    | String(matches(Regex("^false$")))
-    | String(matches(Regex("^n$")))
-    | String(matches(Regex("^no$")))
-    | String(matches(Regex("^off$")))
 
 typealias SequenceOfStringAllowExpressions = Listing<NonEmptyString>

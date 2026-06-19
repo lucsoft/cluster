@@ -7,7 +7,7 @@
 /// ```
 /// condition = Expressions.and(List(
 ///   Expressions.succeeded(),
-///   Expressions.equals(Expressions.variable("Build.SourceBranch"), "refs/heads/main")
+///   Expressions.variable("Build.SourceBranch").equal("refs/heads/main")
 /// )).text
 /// ```
 ///
@@ -16,119 +16,120 @@ module microsoft.AzurePipelines.Expressions
 
 /// A composable Azure Pipelines expression. Render it with [text] (or string
 /// interpolation, which uses [toString]).
+///
+/// Expressions compose either with the n-ary [and]/[or] combinators or fluently as methods, e.g.
+/// `Expressions.parameter("foo").equal(Expressions.parameter("bar"))`.
 class Expression {
   /// The rendered Azure expression, e.g. `eq(variables['x'], 'y')`.
-  text: String
+  hidden text: String
 
   function toString(): String = text
+
+  // --- fluent operators ----------------------------------------------------
+  //
+  // The comparison/string operators accept either an `Expression` or a plain
+  // `String`; a `String` is lifted to a quoted literal (so `.equal("Linux")`
+  // means `eq(this, 'Linux')`).
+
+  /// Render `<name>(this, other)`, lifting a `String` `other` to a quoted literal.
+  local function binaryOp(name: String, other: Expression | String): Expression =
+    let (lhs = this.text) new Expression { text = "\(name)(\(lhs), \(module.expr(other).text))" }
+
+  /// `eq(this, other)`.
+  function equal(other: Expression | String): Expression = binaryOp("eq", other)
+
+  /// `ne(this, other)`.
+  function notEqual(other: Expression | String): Expression = binaryOp("ne", other)
+
+  function lessThan(other: Expression | String): Expression = binaryOp("lt", other)
+
+  function greaterThan(other: Expression | String): Expression = binaryOp("gt", other)
+
+  function lessOrEqual(other: Expression | String): Expression = binaryOp("le", other)
+
+  function greaterOrEqual(other: Expression | String): Expression = binaryOp("ge", other)
+
+  function contains(other: Expression | String): Expression = binaryOp("contains", other)
+
+  function startsWith(prefix: Expression | String): Expression = binaryOp("startsWith", prefix)
+
+  function endsWith(suffix: Expression | String): Expression = binaryOp("endsWith", suffix)
+
+  /// `and(this, other)` — combine many with [Expressions.and].
+  function and(other: Expression): Expression = module.and(List(this, other))
+
+  /// `or(this, other)` — combine many with [Expressions.or].
+  function or(other: Expression): Expression = module.or(List(this, other))
+
+  /// `not(this)`.
+  function not(): Expression = let (v = this.text) new Expression { text = "not(\(v))" }
+
+  /// `in(this, …)`.
+  function isIn(options: List<Expression>): Expression =
+    let (v = this.text)
+      new Expression { text = "in(\(v), \(options.map((o) -> o.text).join(", ")))" }
+
+  /// Wrap as a runtime expression `$[ … ]`.
+  function runtime(): String = "$[\(this.text)]"
+
+  /// Wrap as a compile-time/template expression `${{ … }}`.
+  function template(): String = "${{ \(this.text) }}"
 }
 
 // --- literals & references ------------------------------------------------
 
 /// Wrap an already-rendered expression string.
-function raw(expression: String): Expression = new { text = expression }
+const function raw(expression: String): Expression = new { text = expression }
 
 /// A single-quoted string literal: `str("main")` → `'main'`.
-function str(value: String): Expression = new { text = "'\(value)'" }
+const function str(value: String): Expression = new { text = "'\(value)'" }
+
+/// Lift a value to an [Expression]: a `String` becomes a quoted literal (via
+/// [str]), an `Expression` passes through. Used by the fluent operators so they
+/// accept either.
+const function expr(value: Expression | String): Expression =
+  if (value is String) str(value) else value
 
 /// Reference a variable: `variable("System.Debug")` → `variables['System.Debug']`.
-function variable(name: String): Expression = new { text = "variables['\(name)']" }
+const function variable(name: String): Expression = new { text = "variables['\(name)']" }
 
 /// Reference a template parameter: `parameter("env")` → `parameters['env']`.
-function parameter(name: String): Expression = new { text = "parameters['\(name)']" }
+const function parameter(name: String): Expression = new { text = "parameters['\(name)']" }
 
 // --- boolean logic --------------------------------------------------------
 
-function and(conditions: List<Expression>): Expression = new {
+const function and(conditions: List<Expression>): Expression = new {
   text = "and(\(conditions.map((c) -> c.text).join(", ")))"
 }
 
-function or(conditions: List<Expression>): Expression = new {
+const function or(conditions: List<Expression>): Expression = new {
   text = "or(\(conditions.map((c) -> c.text).join(", ")))"
-}
-
-function not(condition: Expression): Expression = new { text = "not(\(condition.text))" }
-
-// --- comparisons ----------------------------------------------------------
-
-function eq(left: Expression, right: Expression): Expression = new {
-  text = "eq(\(left.text), \(right.text))"
-}
-
-function ne(left: Expression, right: Expression): Expression = new {
-  text = "ne(\(left.text), \(right.text))"
-}
-
-function lt(left: Expression, right: Expression): Expression = new {
-  text = "lt(\(left.text), \(right.text))"
-}
-
-function gt(left: Expression, right: Expression): Expression = new {
-  text = "gt(\(left.text), \(right.text))"
-}
-
-function le(left: Expression, right: Expression): Expression = new {
-  text = "le(\(left.text), \(right.text))"
-}
-
-function ge(left: Expression, right: Expression): Expression = new {
-  text = "ge(\(left.text), \(right.text))"
-}
-
-// --- string helpers -------------------------------------------------------
-
-function contains(haystack: Expression, needle: Expression): Expression = new {
-  text = "contains(\(haystack.text), \(needle.text))"
-}
-
-function startsWith(value: Expression, prefix: Expression): Expression = new {
-  text = "startsWith(\(value.text), \(prefix.text))"
-}
-
-function endsWith(value: Expression, suffix: Expression): Expression = new {
-  text = "endsWith(\(value.text), \(suffix.text))"
-}
-
-/// `in(value, a, b, …)` — true if `value` equals any of the options.
-function isIn(value: Expression, options: List<Expression>): Expression = new {
-  text = "in(\(value.text), \(options.map((o) -> o.text).join(", ")))"
 }
 
 // --- job/stage status (for `condition`) -----------------------------------
 
 /// Run if all previous steps/jobs/stages succeeded (the implicit default).
-function succeeded(): Expression = raw("succeeded()")
+const function succeeded(): Expression = raw("succeeded()")
 
 /// Run if any previous step/job/stage failed.
-function failed(): Expression = raw("failed()")
+const function failed(): Expression = raw("failed()")
 
 /// Always run, even after failure or cancellation.
-function always(): Expression = raw("always()")
+const function always(): Expression = raw("always()")
 
 /// Run only if the pipeline was canceled.
-function canceled(): Expression = raw("canceled()")
+const function canceled(): Expression = raw("canceled()")
 
 /// Run regardless of success/failure, but not if canceled.
-function succeededOrFailed(): Expression = raw("succeededOrFailed()")
+const function succeededOrFailed(): Expression = raw("succeededOrFailed()")
 
 // --- shortcuts ------------------------------------------------------------
 
-/// `eq` against a string literal: `equals(variable("Build.Reason"), "PullRequest")`.
-function equals(left: Expression, literal: String): Expression = eq(left, str(literal))
-
 /// True when running on the given branch ref, e.g. `onBranch("refs/heads/main")`.
-function onBranch(ref: String): Expression = equals(variable("Build.SourceBranch"), ref)
-
-// --- wrappers -------------------------------------------------------------
-
-/// Wrap as a runtime expression: `runtime(eq(a, b))` → `$[eq(a, b)]`.
-function runtime(expression: Expression): String = "$[\(expression.text)]"
-
-/// Wrap as a compile-time/template expression → `${{ … }}`.
-function template(expression: Expression): String = "${{ \(expression.text) }}"
+const function onBranch(ref: String): Expression = variable("Build.SourceBranch").equal(ref)
 
 /// Wrap as a macro: `macro("Build.BuildId")` → `$(Build.BuildId)`.
-function macro(name: String): String = "$(\(name))"
+const function macro(name: String): String = "$(\(name))"
 
 // --- compile-time insertion -----------------------------------------------
 
@@ -141,7 +142,7 @@ function macro(name: String): String = "$(\(name))"
 /// ```
 /// stages {
 ///   ...new Expressions.Conditional {
-///     condition = Expressions.equals(Expressions.parameter("env"), "prod")
+///     condition = Expressions.parameter("env").equal("prod")
 ///     then { new Stage { stage = "Deploy" } }
 ///     otherwise { new Stage { stage = "Preview" } }
 ///   }.entries
@@ -168,22 +169,51 @@ class Conditional {
   }
 }
 
-/// A compile-time `${{ if <condition> }}:` block (low-level; prefer [Conditional]).
-function ifBlock(condition: Expression, entries: Listing): Mapping = new Mapping {
+/// Declarative compile-time `${{ each <var> in <collection> }}:` loop. Works
+/// anywhere Azure allows insertion into a list (`steps`, `jobs`, `stages`, …) by
+/// spreading its [entries]; the body references the loop variable as
+/// `${{ <variable>… }}` (Class-As-Function, like [Conditional]):
+///
+/// ```
+/// jobs {
+///   ...new Expressions.Each {
+///     variable = "env"
+///     collection = Expressions.parameter("environments")
+///     body { new Job { job = "deploy_${{ env }}" } }
+///   }.entries
+/// }
+/// ```
+class Each {
+  /// The loop variable name (referenced in [body] as `${{ <variable>… }}`).
+  variable: String
+  /// The collection expression to iterate.
+  collection: Expression
+  /// Entries inserted for each iteration.
+  body: Listing
+  /// The rendered insertion entries — spread these into the target listing.
+  fixed entries: Listing = new {
+    new Mapping { ["${{ each \(variable) in \(collection.text) }}"] = body }
+  }
+}
+
+// --- low-level block builders (prefer the classes above) ------------------
+
+/// A compile-time `${{ if <condition> }}:` block.
+const function ifBlock(condition: Expression, entries: Listing): Mapping = new Mapping {
   ["${{ if \(condition.text) }}"] = entries
 }
 
 /// A compile-time `${{ elseif <condition> }}:` branch.
-function elseifBlock(condition: Expression, entries: Listing): Mapping = new Mapping {
+const function elseifBlock(condition: Expression, entries: Listing): Mapping = new Mapping {
   ["${{ elseif \(condition.text) }}"] = entries
 }
 
 /// A compile-time `${{ else }}:` branch.
-function elseBlock(entries: Listing): Mapping = new Mapping {
+const function elseBlock(entries: Listing): Mapping = new Mapping {
   ["${{ else }}"] = entries
 }
 
 /// A compile-time `${{ each <var> in <collection> }}:` loop.
-function eachBlock(variable: String, collection: Expression, entries: Listing): Mapping = new Mapping {
+const function eachBlock(variable: String, collection: Expression, entries: Listing): Mapping = new Mapping {
   ["${{ each \(variable) in \(collection.text) }}"] = entries
 }

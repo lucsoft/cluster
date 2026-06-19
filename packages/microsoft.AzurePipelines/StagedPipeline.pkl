@@ -1,14 +1,16 @@
 module microsoft.StagedPipeline
 
 extends "./ServiceSchema.pkl"
-
+import "./Expressions.pkl"
 hidden fileName = "CI"
+hidden templateFileName = "azure-pipeline-\(fileName).generated.yaml"
 
 /// Pipeline name
 name: NonEmptyString?
 
 /// Append the commit message to the build number
-appendCommitMessageToRunName: Boolean1?
+@BooleanToString
+appendCommitMessageToRunName: Boolean?
 
 /// Continuous integration triggers
 trigger: Trigger?
@@ -39,9 +41,13 @@ pool: Pool?
 
 output {
   files {
-    ["azure-pipeline-\(fileName).generated.yaml"] {
+    [templateFileName] {
       value = module
-      renderer = new YamlRenderer {}
+      renderer = new YamlRenderer {
+        converters {
+          [Expressions.Expression] = (it) -> it.toString()
+        }
+      }
     }
   }
 }

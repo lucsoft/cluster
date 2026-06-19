@@ -23,7 +23,7 @@ stages {
           // Declarative compile-time `${{ if }}` / `${{ else }}` insertion,
           // built with the Class-As-Function `Conditional`.
           ...new Expressions.Conditional {
-            condition = Expressions.equals(Expressions.variable("Agent.OS"), "Linux")
+            condition = Expressions.variable("Agent.OS").equal("Linux")
             then {
               new BashStep { bash = "echo running on linux" }
             }
@@ -37,7 +37,7 @@ stages {
   }
   // The same `Conditional` also inserts whole stages.
   ...new Expressions.Conditional {
-    condition = Expressions.equals(Expressions.parameter("env"), "prod")
+    condition = Expressions.parameter("env").equal("prod")
     then {
       new Stage { stage = "Deploy" }
     }

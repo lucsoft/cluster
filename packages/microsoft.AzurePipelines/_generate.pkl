@@ -434,6 +434,41 @@ local function fixupModule(rendered: String): String =
     .replaceFirst("Listing<Stage>", "Listing<StageEntry>")
     .replaceFirst(Regex(#"typealias Job = [\w|*]+"#), jobUnion)
     .replaceFirst("Listing<Job>", "Listing<JobEntry>")
+    // Force `condition` to a typed `Expressions.Expression` (rendered to a string
+    // by `StagedPipeline`'s converter) instead of a raw string — use
+    // `Expressions.raw("…")` for a literal. Stays optional: Azure defaults to
+    // `succeeded()` when a condition is omitted.
+    // After the module declaration, import `Expressions` (for typed `condition`)
+    // and define `BooleanToString`, which renders a Pkl `Boolean` as Azure's
+    // string form (`true`/`false`) via `@ConvertProperty`.
+    .replaceFirstMapped(Regex(#"(?m)^open module \w+$"#), (m) ->
+      m.value
+        + "\n\n"
+        + "import \"./Expressions.pkl\"\n\n"
+        + "/// Renders a Pkl `Boolean` as Azure's string form (`true`/`false`).\n"
+        + "class BooleanToString extends ConvertProperty {\n"
+        + "  render = (property, _) -> Pair(property.key, let (v = property.value) if (v == null) v else v.toString())\n"
+        + "}"
+    )
+    .replaceAll("condition: NonEmptyString?", "condition: Expressions.Expression?")
+    .replaceAll("condition: String?", "condition: Expressions.Expression?")
+    // Replace the stringly `Boolean1` with a plain `Boolean`, annotated to render
+    // back to Azure's string form.
+    .replaceAllMapped(Regex(#"(?m)^(\s+)(\w+): Boolean1\?"#), (m) ->
+      "\(m.groups[1]!!.value)@BooleanToString\n\(m.groups[1]!!.value)\(m.groups[2]!!.value): Boolean?"
+    )
+    // Drop the now-dead `Boolean1` typealias (all uses replaced above).
+    .replaceFirst(Regex(#"typealias Boolean1 =(\n  [^\n]+)+\n"#), "")
+    // Default the rich object form of these config unions so `trigger { … }` /
+    // `pr { … }` / `resources { … }` amend into the full shape. The fields stay
+    // optional, so leaving them unset still omits them (Azure's defaults). The
+    // raw renderer uses spaceless pipes (`A|B`); `pkl format` adds the spaces.
+    .replaceFirst("|TriggerAlternate2", "|*TriggerAlternate2")
+    .replaceFirst("|PrAlternate2", "|*PrAlternate2")
+    .replaceFirst(
+      "typealias Resources = ResourcesAlternate0",
+      "typealias Resources = *ResourcesAlternate0",
+    )
 
 local modulesGenerator: ModulesGenerator = new {
   rootSchema = Parser.parse(schemaResource) as JsonSchema
