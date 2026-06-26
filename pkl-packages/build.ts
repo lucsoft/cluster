@@ -1,4 +1,5 @@
 import { assert } from "@std/assert";
+import { storePackageFile } from "./storage.ts";
 
 const repoUrl = "https://github.com/lucsoft/cluster";
 const matching = /.out\/.*\/(?<fileName>.*)/;
@@ -30,7 +31,8 @@ export async function buildPackage(kv: Deno.Kv, version: string, packageName: st
             const realName = element.match(matching)?.groups?.fileName;
             assert(realName, `Failed to extract file name from: ${element}`);
             const data = await Deno.readFile(`${packageDir}/${element.trim()}`);
-            await kv.set([ "packages", packageName, version, realName ], { data });
+            // Artifacts can exceed KV's 64 KB value limit, so they live on the PVC.
+            await storePackageFile(packageName, version, realName, data);
         }
 
         return output;

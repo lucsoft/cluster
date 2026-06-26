@@ -6,6 +6,7 @@ import { getAllPackages, getAllTags } from "./github.ts";
 import icon from "./icon.svg" with { type: "text" };
 import { respondHtml } from "./respondHtml.ts";
 import { safeGet } from "./kv.ts";
+import { readPackageFile } from "./storage.ts";
 
 const matching = /.out\/.*\/(?<fileName>.*)/;
 const fullPattern = new URLPattern({ pathname: "/packages/:packageName@:version/*?" });
@@ -54,10 +55,16 @@ Deno.serve(async (req: Request) => {
 
         if (!fileName) return notFoundError;
 
-        const file = await safeGet<{ data: Uint8Array<ArrayBuffer>; }>(kv, [ "packages", packageName, version, fileName ]);
-        if (!file.value) return notFoundError;
+        let data = await readPackageFile(packageName, version, fileName);
+        if (!data) {
+            // The output is cached in KV but the artifact is missing on disk
+            // (e.g. a fresh PVC). Rebuild to repopulate it, then re-read.
+            await buildPackage(kv, version, packageName);
+            data = await readPackageFile(packageName, version, fileName);
+        }
+        if (!data) return notFoundError;
 
-        return new Response(file.value.data, {
+        return new Response(data, {
             headers: { "Content-Type": "application/octet-stream" },
         });
     }

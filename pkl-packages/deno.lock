@@ -3,6 +3,8 @@
   "specifiers": {
     "jsr:@std/assert@^1.0.18": "1.0.19",
     "jsr:@std/internal@^1.0.12": "1.0.14",
+    "jsr:@std/internal@^1.0.14": "1.0.14",
+    "jsr:@std/path@^1.1.2": "1.1.5",
     "jsr:@std/semver@^1.0.8": "1.0.8",
     "npm:@lit-labs/ssr@4": "4.0.0",
     "npm:@lit/task@^1.0.3": "1.0.3",
@@ -12,11 +14,17 @@
     "@std/assert@1.0.19": {
       "integrity": "eaada96ee120cb980bc47e040f82814d786fe8162ecc53c91d8df60b8755991e",
       "dependencies": [
-        "jsr:@std/internal"
+        "jsr:@std/internal@^1.0.12"
       ]
     },
     "@std/internal@1.0.14": {
       "integrity": "291516b3d4c35024d6ffbc0a9df5bf4c64116e05b50012cf846710152d2ffdf7"
+    },
+    "@std/path@1.1.5": {
+      "integrity": "ccea00982ea28c36becaf6e62f855406c76a8c32d462f66f415bbb7d83a271bc",
+      "dependencies": [
+        "jsr:@std/internal@^1.0.14"
+      ]
     },
     "@std/semver@1.0.8": {
       "integrity": "dc830e8b8b6a380c895d53fbfd1258dc253704ca57bbe1629ac65fd7830179b7"
@@ -150,6 +158,7 @@
     "dependencies": [
       "jsr:@std/assert@^1.0.18",
       "jsr:@std/http@^1.0.24",
+      "jsr:@std/path@^1.1.2",
       "jsr:@std/semver@^1.0.8",
       "npm:@lit-labs/ssr@4",
       "npm:@lit/task@^1.0.3",
