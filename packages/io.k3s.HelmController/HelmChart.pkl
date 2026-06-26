@@ -6,10 +6,11 @@ module io.cattle.helm.v1.HelmChart
 
 extends "@k8s/K8sResource.pkl"
 
-import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+import "pkl:base"
+
 import "@k8s/api/core/v1/PodSpec.pkl"
 import "@k8s/api/core/v1/SecurityContext.pkl"
-import "pkl:base"
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
 
 fixed apiVersion: "helm.cattle.io/v1"
 
@@ -62,12 +63,12 @@ class Spec {
   /// Kubernetes Secrets (default). `configmap` stores releases in ConfigMaps. This field is effectively
   /// immutable after the first install; changing the storage backend is not a supported migration path.
   /// Helm CLI environment variable: `HELM_DRIVER`
-  driver: ("secret"|"configmap")?
+  driver: ("secret" | "configmap")?
 
   /// Configures handling of failed chart installation or upgrades. - `reinstall` will perform a clean
   /// uninstall and reinstall of the chart. - `abort` will take no action and leave the chart in a failed
   /// state so that the administrator can manually resolve the error.
-  failurePolicy: ("abort"|"reinstall")?
+  failurePolicy: ("abort" | "reinstall")?
 
   /// DEPRECATED. Helm version to use. Only v3 is currently supported.
   helmVersion: String?
@@ -102,7 +103,7 @@ class Spec {
 
   /// Override simple Chart values. These take precedence over options set via values or valuesContent.
   /// Helm CLI positional argument/flag: `--set`, `--set-string`
-  set: Mapping<String, Int|String>?
+  set: Mapping<String, Int | String>?
 
   /// Set to True if helm should take ownership of existing resources when installing/upgrading the
   /// chart. Helm CLI positional argument/flag: `--take-ownership`

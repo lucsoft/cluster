@@ -1,7 +1,7 @@
 amends "@Workload/Workload.pkl"
 
-import "@k8s/api/core/v1/Service.pkl"
 import "@k8s/api/core/v1/PersistentVolumeClaim.pkl"
+import "@k8s/api/core/v1/Service.pkl"
 import "@k8s/api/networking/v1/Ingress.pkl"
 import "@k8s/K8sResource.pkl"
 

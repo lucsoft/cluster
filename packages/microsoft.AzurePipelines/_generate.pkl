@@ -425,15 +425,23 @@ local function fixupModule(rendered: String): String =
     .replaceFirst(Regex(#"typealias Step =(\n  \|?[A-Za-z0-9]+)+"#), stepUnion)
     .replaceFirst(Regex(#"typealias Phase = [\w|]+"#), phaseUnion)
     // Rename the `Variable`/`Stage`/`Job` unions → `*Entry`, freeing those names
-    // for the main value classes, and repoint their `Listing`s. The listing is
-    // the default member (`*`) so `variables { new Variable {} }` etc. work; the
-    // map form stays available as `variables = new Mapping { … }`.
+    // for the main value classes, and repoint their `Listing`s. `variables`
+    // defaults to the `name = value` map form (`variables { ["x"] = "y" }`); for
+    // the list form use `variables = new Listing { new Variable { … } }`.
     .replaceFirst(Regex(#"typealias Variable = [\w|]+"#), variableUnion)
-    .replaceFirst("Listing<Variable>", "*Listing<VariableEntry>")
+    .replaceFirst(
+      "MappingOfStringString|Listing<Variable>",
+      "*MappingOfStringString|Listing<VariableEntry>",
+    )
     .replaceFirst(Regex(#"typealias Stage = [\w|*]+"#), stageUnion)
     .replaceFirst("Listing<Stage>", "Listing<StageEntry>")
     .replaceFirst(Regex(#"typealias Job = [\w|*]+"#), jobUnion)
     .replaceFirst("Listing<Job>", "Listing<JobEntry>")
+    // Default `dependsOn` to the listing form so `dependsOn { "BuildStage" }` works.
+    .replaceFirst(
+      "typealias JobDependsOn = NonEmptyString|Listing<NonEmptyString>",
+      "typealias JobDependsOn = NonEmptyString|*Listing<NonEmptyString>",
+    )
     // Force `condition` to a typed `Expressions.Expression` (rendered to a string
     // by `StagedPipeline`'s converter) instead of a raw string — use
     // `Expressions.raw("…")` for a literal. Stays optional: Azure defaults to

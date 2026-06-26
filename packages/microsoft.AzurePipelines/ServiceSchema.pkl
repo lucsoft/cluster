@@ -1947,7 +1947,7 @@ typealias WebhookResources = Listing<WebhookResource>
 
 typealias WebhookFilters = Listing<WebhookFilter>
 
-typealias Variables = MappingOfStringString | *Listing<VariableEntry>
+typealias Variables = *MappingOfStringString | Listing<VariableEntry>
 
 typealias VariableEntry = *Variable | VariableGroup | VariableTemplate
 
@@ -2047,7 +2047,7 @@ typealias VariableRestrictions = String(matches(Regex("^none$"))) | SequenceOfNo
 
 typealias Tasks = Listing<Task>
 
-typealias JobDependsOn = NonEmptyString | Listing<NonEmptyString>
+typealias JobDependsOn = NonEmptyString | *Listing<NonEmptyString>
 
 typealias ReferenceName = String(matches(Regex("^[-_A-Za-z0-9]*$")))
 
