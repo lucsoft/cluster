@@ -2,7 +2,7 @@ amends "package://pkg.pkl-lang.org/pkl-pantry/k8s.contrib.crd@4.2.1#/generate.pk
 import "pkl:yaml"
 
 // renovate: datasource=github-releases packageName=isindir/sops-secrets-operator
-local version = "0.21.0"
+local version = "0.21.1"
 local baseUrl =
   "https://raw.githubusercontent.com/isindir/sops-secrets-operator/\(version)/config/crd/bases"
 

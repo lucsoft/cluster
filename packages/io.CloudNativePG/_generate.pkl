@@ -2,7 +2,7 @@ amends "package://pkg.pkl-lang.org/pkl-pantry/k8s.contrib.crd@4.2.1#/generate.pk
 import "pkl:yaml"
 
 // renovate: datasource=github-releases packageName=cloudnative-pg/cloudnative-pg
-local version = "v1.29.1"
+local version = "v1.30.0"
 local baseUrl =
   "https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/\(version)/config/crd"
 // noinspection UnresolvedElement
