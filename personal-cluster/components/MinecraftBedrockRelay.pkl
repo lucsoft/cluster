@@ -1,0 +1,179 @@
+/// Geyser Standalone: lets Bedrock clients play on the Java servers.
+///
+/// Geyser upstreams into mc-router rather than straight at a server. mc-router is
+/// Java-only, but by that point the connection *is* Java, so a Bedrock join fires the
+/// same autoscale webhook and wakes `main` exactly like a Java join does.
+///
+/// Depends on components/MinecraftServer.pkl for the namespace, the mc-router
+/// Service, and the shared Floodgate key.
+amends "@Resource/Entrypoint.pkl"
+
+import "@itzg.minecraft/Geyser.pkl"
+import "@k8s/api/core/v1/ConfigMap.pkl"
+import "@Workload/Workload.pkl"
+
+local mcNamespace = "minecraft"
+
+// Both defined by components/MinecraftServer.pkl — keep in sync with it.
+local upstreamHost = "minecraft-router.\(mcNamespace).svc.cluster.local"
+local floodgateKeySecret = "geyser-floodgate-key"
+
+local bedrockPort = 19132
+
+// No official Geyser image exists, so run the official jar on a stock JRE. Unpinned
+// on purpose: Bedrock force-updates clients, and a stale Geyser stops accepting them.
+local jarUrl =
+  "https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/standalone"
+
+local config = new Geyser {
+  bedrock {
+    port = bedrockPort
+  }
+  java {
+    address = upstreamHost
+    authType = "floodgate"
+  }
+  motd {
+    // Must stay off: polling the Java server would keep mc-router's idle timer alive.
+    passthroughMotd = false
+    passthroughPlayerCounts = false
+    primaryMotd = "main.lucsoft.de"
+    secondaryMotd = "Join to wake the server up!"
+  }
+  gameplay {
+    serverName = "main"
+  }
+}
+
+local geyser = new Workload {
+  name = "geyser"
+  namespace = mcNamespace
+  type = "Deployment"
+  spec {
+    securityContext {
+      runAsUser = 1000
+      runAsGroup = 1000
+      fsGroup = 1000
+      runAsNonRoot = true
+      seccompProfile {
+        type = "RuntimeDefault"
+      }
+    }
+    volumes {
+      new {
+        name = "jar"
+        emptyDir {}
+      }
+      new {
+        name = "data"
+        emptyDir {}
+      }
+      new {
+        name = "config"
+        configMap {
+          name = "geyser-config"
+        }
+      }
+      new {
+        name = "floodgate-key"
+        secret {
+          secretName = floodgateKeySecret
+        }
+      }
+    }
+    initContainers {
+      new {
+        name = "fetch-geyser"
+        // renovate: datasource=docker packageName=curlimages/curl
+        image = "docker.io/curlimages/curl:8.21.0"
+        args {
+          "-fsSL"
+          "-o"
+          "/jar/Geyser.jar"
+          jarUrl
+        }
+        securityContext {
+          allowPrivilegeEscalation = false
+        }
+        volumeMounts {
+          new {
+            name = "jar"
+            mountPath = "/jar"
+          }
+        }
+      }
+    }
+    containers {
+      new {
+        name = "geyser"
+        // renovate: datasource=docker packageName=eclipse-temurin
+        image = "docker.io/library/eclipse-temurin:21-jre"
+        // Geyser rewrites config.yml in its workdir, so copy both out of the mounts.
+        command {
+          "/bin/sh"
+          "-c"
+        }
+        args {
+          """
+          set -eu
+          cp /config/config.yml /geyser/config.yml
+          cp /floodgate/key.pem /geyser/key.pem
+          exec java -XX:MaxRAMPercentage=75 -jar /jar/Geyser.jar --nogui
+          """
+        }
+        workingDir = "/geyser"
+        securityContext {
+          allowPrivilegeEscalation = false
+        }
+        ports {
+          // Bedrock is RakNet over UDP; hostPort mirrors mc-router and svc-router.
+          new {
+            name = "bedrock"
+            containerPort = bedrockPort
+            hostPort = bedrockPort
+            protocol = "UDP"
+          }
+        }
+        resources {
+          requests {
+            ["memory"] = "512M"
+          }
+        }
+        volumeMounts {
+          new {
+            name = "jar"
+            mountPath = "/jar"
+            readOnly = true
+          }
+          new {
+            name = "data"
+            mountPath = "/geyser"
+          }
+          new {
+            name = "config"
+            mountPath = "/config"
+            readOnly = true
+          }
+          new {
+            name = "floodgate-key"
+            mountPath = "/floodgate"
+            readOnly = true
+          }
+        }
+      }
+    }
+  }
+}
+
+resources {
+  ...geyser.resources
+  new ConfigMap {
+    metadata {
+      name = "geyser-config"
+      namespace = geyser.namespace
+    }
+    data {
+      ["config.yml"] = config.output.text
+    }
+  }
+}

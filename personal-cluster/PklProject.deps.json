@@ -3,9 +3,9 @@
   "resolvedDependencies": {
     "package://pkl-pkgs.lucsoft.de/packages/itzg.minecraft@0": {
       "type": "remote",
-      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/itzg.minecraft@0.5.5",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/itzg.minecraft@0.5.13",
       "checksums": {
-        "sha256": "8b324f56122c8c1cf44914a530f82ef9c9666c3b9f79463f819cde6c48406f1a"
+        "sha256": "4e4bcf9b03ee456a61e716e25d5b14f118093ca095593a55ccd8436ddcfb7762"
       }
     },
     "package://pkg.pkl-lang.org/pkl-k8s/k8s@1": {

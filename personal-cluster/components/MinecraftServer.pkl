@@ -7,15 +7,49 @@ import "@k8s/api/core/v1/Service.pkl"
 import "@sops/includeSopsSecret.pkl"
 import "@Workload/Workload.pkl"
 
-local mcServers: Listing<McServer> = new {
-  new {
-    eula = true
-    type = "VANILLA"
-    workload {
-      name = "main"
-      namespace = "minecraft"
+// Shared AES-128 key (16 raw bytes) Floodgate and Geyser sign the handshake with.
+local floodgateKeySecret = "geyser-floodgate-key"
+
+local mainServer: McServer = new {
+  eula = true
+  type = "FABRIC"
+  version = "26.2"
+  // Bedrock players have no chat-signing keys and are kicked otherwise.
+  enforceSecureProfile = false
+  modrinthProjects {
+    "fabric-api:0.156.0+26.2"
+    "floodgate:2.2.6-b67"
+  }
+  workload {
+    name = "main"
+    namespace = "minecraft"
+    spec {
+      volumes {
+        new {
+          name = "floodgate-key"
+          secret {
+            secretName = floodgateKeySecret
+          }
+        }
+      }
+      containers {
+        [0] {
+          volumeMounts {
+            new {
+              name = "floodgate-key"
+              mountPath = "/data/config/floodgate/key.pem"
+              subPath = "key.pem"
+              readOnly = true
+            }
+          }
+        }
+      }
     }
   }
+}
+
+local mcServers: Listing<McServer> = new {
+  mainServer
   new {
     type = "AUTO_CURSEFORGE"
     eula = true
@@ -95,8 +129,16 @@ local mcServers: Listing<McServer> = new {
 
 local voicePort = 24454
 
+local mcRouterName = "minecraft-router"
+
+// Geyser (components/MinecraftBedrockRelay.pkl) dials mc-router by this name, so it
+// needs a route + scale mapping of its own. Sending Bedrock through the Java-only
+// router is what keeps main scaling to zero.
+local geyserUpstreamHost = "\(mcRouterName).minecraft.svc.cluster.local"
+
 local mcRouter = new McRouter {
   workload {
+    name = mcRouterName
     deployment {
       spec {
         strategy {
@@ -145,6 +187,7 @@ local mcRouter = new McRouter {
     for (server in mcServers) {
       [server.workload.name + ".lucsoft.de"] = server.address
     }
+    [geyserUpstreamHost] = mainServer.address
   }
 }
 
@@ -171,6 +214,7 @@ local mcRouterScaler = new Workload {
                 for (server in mcServers) {
                   [server.workload.name + ".lucsoft.de"] = server.workload.name
                 }
+                [geyserUpstreamHost] = mainServer.workload.name
               })
           }
         }
@@ -226,6 +270,25 @@ resources {
     }
   }
   ...mcRouter.resources
+  // In-cluster entrypoint to mc-router for Geyser; Java players still use hostPort.
+  new Service {
+    metadata {
+      name = mcRouterName
+      namespace = "minecraft"
+    }
+    spec {
+      selector {
+        ["app.kubernetes.io/name"] = mcRouterName
+      }
+      ports {
+        new {
+          name = "minecraft"
+          port = 25565
+          targetPort = "mc-proxy"
+        }
+      }
+    }
+  }
   for (mcServer in mcServers) {
     // svc-router forwards voice UDP to "<server>.minecraft.svc:\(voicePort)"; expose it
     // on each backend service. No-op for servers without the Simple Voice Chat mod.
@@ -246,4 +309,5 @@ resources {
   }
   ...mcRouterScaler.resources
   includeSopsSecret.includeSopsSecret(read("../secrets/curseforge-apikey.sops.yaml"))
+  includeSopsSecret.includeSopsSecret(read("../secrets/geyser-floodgate-key.sops.yaml"))
 }
