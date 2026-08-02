@@ -1,0 +1,125 @@
+/// Geyser Standalone `config.yml`.
+///
+/// Renders straight from the property tree — Geyser's keys are the kebab-cased
+/// property names. Anything not modelled here falls back to Geyser's own defaults.
+module itzg.docker.Geyser
+
+local const function toKebab(name: String): String =
+  name.replaceAllMapped(Regex(#"\p{Upper}"#), (it) -> "-" + it.value.toLowerCase())
+
+/// Renders `fooBar` as `foo-bar`.
+local class Kebab extends ConvertProperty {
+  render = (property, _) -> Pair(toKebab(property.key), property.value)
+}
+
+/// Renders `fooBar: 3.s` as `foo-bar: 3`.
+local class KebabSeconds extends ConvertProperty {
+  render = (property, _) ->
+    Pair(toKebab(property.key), (property.value as Duration).toUnit("s").value.toInt())
+}
+
+/// Listener for incoming Bedrock clients. Bedrock is RakNet, so this port is UDP.
+class Bedrock {
+  address: String = "0.0.0.0"
+  port: UInt16 = 19132
+}
+
+/// The Java server Geyser connects to on a Bedrock player's behalf.
+class Java {
+  address: String = "127.0.0.1"
+  port: UInt16 = 25565
+
+  /// `floodgate` needs the Floodgate mod on the Java server sharing Geyser's key
+  /// file; `online` makes every Bedrock player log in with their own Java account.
+  @Kebab
+  authType: "floodgate" | "online" | "offline" = "online"
+
+  /// Forward the hostname the Bedrock client connected with, for proxy forced hosts.
+  @Kebab
+  forwardHostname: Boolean = false
+}
+
+class Motd {
+  @Kebab
+  primaryMotd: String = "Geyser"
+
+  @Kebab
+  secondaryMotd: String = "Another Geyser server."
+
+  /// Relay the Java server's MOTD. Costs a ping every `pingPassthroughInterval`,
+  /// which counts as activity against anything idle-tracking the Java server.
+  @Kebab
+  passthroughMotd: Boolean = true
+
+  @Kebab
+  passthroughPlayerCounts: Boolean = true
+
+  /// Cosmetic, and only used when `passthroughPlayerCounts` is off.
+  @Kebab
+  maxPlayers: Int = 100
+
+  @KebabSeconds
+  pingPassthroughInterval: Duration = 3.s
+}
+
+class Gameplay {
+  /// Shown to Bedrock players in the pause and settings menus.
+  @Kebab
+  serverName: String = "Geyser"
+
+  @Kebab
+  showCoordinates: Boolean = true
+
+  @Kebab
+  commandSuggestions: Boolean = true
+
+  @Kebab
+  forceResourcePacks: Boolean = true
+
+  @Kebab
+  xboxAchievementsEnabled: Boolean = false
+
+  @Kebab
+  emotesEnabled: Boolean = true
+}
+
+class Advanced {
+  /// Shared Floodgate key, resolved against Geyser's working directory.
+  @Kebab
+  floodgateKeyFile: String = "key.pem"
+}
+
+bedrock: Bedrock = new {}
+
+java: Java = new {}
+
+motd: Motd = new {}
+
+gameplay: Gameplay = new {}
+
+advanced: Advanced = new {}
+
+/// `system` follows the host locale.
+@Kebab
+defaultLocale: String = "system"
+
+@Kebab
+logPlayerIpAddresses: Boolean = true
+
+@Kebab
+notifyOnNewBedrockUpdate: Boolean = true
+
+@Kebab
+enableMetrics: Boolean = true
+
+@Kebab
+debugMode: Boolean = false
+
+/// Geyser's own schema version, checked on startup. Bump alongside a Geyser
+/// upgrade that migrates the config format.
+@Kebab
+fixed configVersion: Int = 7
+
+output {
+  renderer = new YamlRenderer {}
+}
