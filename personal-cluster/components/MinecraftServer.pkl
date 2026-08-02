@@ -32,13 +32,36 @@ local mainServer: McServer = new {
           }
         }
       }
-      containers {
-        [0] {
+      // Copied onto the PVC rather than mounted at /data/config/floodgate/key.pem:
+      // kubelet creates a subPath's parent dirs as root, leaving Floodgate unable to
+      // write its own config.yml beside the key.
+      initContainers {
+        new {
+          name = "floodgate-key"
+          // renovate: datasource=docker packageName=busybox
+          image = "docker.io/library/busybox:1.38.0"
+          command {
+            "/bin/sh"
+            "-c"
+          }
+          args {
+            """
+            set -eu
+            mkdir -p /data/config/floodgate
+            cp /floodgate/key.pem /data/config/floodgate/key.pem
+            """
+          }
+          securityContext {
+            allowPrivilegeEscalation = false
+          }
           volumeMounts {
             new {
+              name = "storage"
+              mountPath = "/data"
+            }
+            new {
               name = "floodgate-key"
-              mountPath = "/data/config/floodgate/key.pem"
-              subPath = "key.pem"
+              mountPath = "/floodgate"
               readOnly = true
             }
           }

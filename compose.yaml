@@ -7,9 +7,16 @@ services:
       platforms:
         - linux/amd64
   pkl-packages:
-    image: ghcr.io/lucsoft/pkl-packages:0.31.1
+    image: ghcr.io/lucsoft/pkl-packages:latest
     build:
       context: pkl-packages
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+  pkl-argo-plugin:
+    image: ghcr.io/lucsoft/pkl-argo-plugin:0.31.1
+    build:
+      context: pkl-argo-plugin
       dockerfile: Dockerfile
       platforms:
         - linux/amd64
