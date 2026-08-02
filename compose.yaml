@@ -14,7 +14,7 @@ services:
       platforms:
         - linux/amd64
   pkl-argo-plugin:
-    image: ghcr.io/lucsoft/argo-pkl-plugin:0.31.1
+    image: ghcr.io/lucsoft/argo-pkl-plugin:0.32.1
     build:
       context: pkl-argo-plugin
       dockerfile: Dockerfile
