@@ -1,7 +1,7 @@
 /// Pooler is the Schema for the poolers API
 ///
 /// This module was generated from the CustomResourceDefinition at
-/// <https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/v1.29.1/config/crd/kustomization.yaml>.
+/// <https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/v1.30.0/config/crd/kustomization.yaml>.
 module io.cnpg.postgresql.v1.Pooler
 
 extends "@k8s/K8sResource.pkl"
@@ -40,9 +40,6 @@ class Spec {
   instances: Int?
 
   /// The configuration of the monitoring infrastructure of this pooler.
-  ///
-  /// Deprecated: This feature will be removed in an upcoming release. If you need this functionality,
-  /// you can create a PodMonitor manually.
   monitoring: Monitoring?
 
   /// The PgBouncer configuration
@@ -102,18 +99,28 @@ class RollingUpdate {
 }
 
 /// The configuration of the monitoring infrastructure of this pooler.
-///
-/// Deprecated: This feature will be removed in an upcoming release. If you need this functionality, you
-/// can create a PodMonitor manually.
 class Monitoring {
   /// Enable or disable the `PodMonitor`
+  ///
+  /// Deprecated: This feature will be removed in an upcoming release. If you need this functionality,
+  /// you can create a PodMonitor manually.
   enablePodMonitor: Boolean?
 
   /// The list of metric relabelings for the `PodMonitor`. Applied to samples before ingestion.
+  ///
+  /// Deprecated: This feature will be removed in an upcoming release. If you need this functionality,
+  /// you can create a PodMonitor manually.
   podMonitorMetricRelabelings: Listing<PodMonitorRelabeling>?
 
   /// The list of relabelings for the `PodMonitor`. Applied to samples before scraping.
+  ///
+  /// Deprecated: This feature will be removed in an upcoming release. If you need this functionality,
+  /// you can create a PodMonitor manually.
   podMonitorRelabelings: Listing<PodMonitorRelabeling>?
+
+  /// Configure TLS communication for the metrics endpoint. Changing tls.enabled option will force a
+  /// rollout of all instances.
+  tls: Tls?
 }
 
 /// RelabelConfig allows dynamic rewriting of the label set for targets, alerts, scraped samples and
@@ -181,6 +188,13 @@ class PodMonitorRelabeling {
   targetLabel: String?
 }
 
+/// Configure TLS communication for the metrics endpoint. Changing tls.enabled option will force a
+/// rollout of all instances.
+class Tls {
+  /// Enable TLS for the monitoring endpoint. Changing this option will force a rollout of all instances.
+  enabled: Boolean?
+}
+
 /// The PgBouncer configuration
 class Pgbouncer {
   /// The query that will be used to download the hash of the password of a certain user. Default:
@@ -202,6 +216,14 @@ class Pgbouncer {
   /// ClientTLSSecret provides PgBouncer’s client_tls_key_file (private key) and client_tls_cert_file
   /// (certificate) used to accept client connections
   clientTLSSecret: ClientTLSSecret?
+
+  /// Image is the pgbouncer container image to use. When set, it takes precedence over ImageCatalogRef
+  /// and the operator default, but is overridden by an explicit image set in the pod template.
+  image: String?
+
+  /// ImageCatalogRef points to an entry in an ImageCatalog or ClusterImageCatalog. Mutually exclusive
+  /// with Image.
+  imageCatalogRef: ImageCatalogRef?
 
   /// Additional parameters to be passed to PgBouncer - please check the CNPG documentation for a list of
   /// options you can configure
@@ -248,6 +270,24 @@ class ClientCASecret {
 /// (certificate) used to accept client connections
 class ClientTLSSecret {
   /// Name of the referent.
+  name: String
+}
+
+/// ImageCatalogRef points to an entry in an ImageCatalog or ClusterImageCatalog. Mutually exclusive with
+/// Image.
+class ImageCatalogRef {
+  /// APIGroup is the group for the resource being referenced. If APIGroup is not specified, the
+  /// specified Kind must be in the core API group. For any other third-party types, APIGroup is
+  /// required.
+  apiGroup: String?
+
+  /// Key identifies the entry within the catalog's componentImages list.
+  key: String(length <= 63, matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))
+
+  /// Kind is the type of resource being referenced
+  kind: String
+
+  /// Name is the name of resource being referenced
   name: String
 }
 
@@ -584,7 +624,7 @@ class TemplateSpec {
 
   /// HostAliases is an optional list of hosts and IPs that will be injected into the pod's hosts file if
   /// specified.
-  hostAliases: Listing<HostAliase>?
+  hostAliases: Listing<HostAlias>?
 
   /// Use the host's ipc namespace. Optional: Default to false.
   hostIPC: Boolean?
@@ -2277,7 +2317,7 @@ class EphemeralContainerSecurityContext {
 
 /// HostAlias holds the mapping between IP and hostnames that will be injected as an entry in the pod's
 /// hosts file.
-class HostAliase {
+class HostAlias {
   /// Hostnames for the above IP address.
   hostnames: Listing<String>?
 
@@ -4162,8 +4202,23 @@ class VsphereVolume {
 /// system. Read-only. More info:
 /// https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status
 class Status {
+  /// Error is the latest admission validation error
+  error: String?
+
+  /// Image is the resolved pgbouncer container image that the operator is using for this Pooler,
+  /// including any override coming from spec.template. While Phase is Active or Paused this field
+  /// reflects what the Deployment actually runs; while Phase is Inactive or Failed it may carry the last
+  /// successfully resolved value (or be empty if the Pooler has never reconciled successfully).
+  image: String?
+
   /// The number of pods trying to be scheduled
   instances: Int?
+
+  /// Phase summarizes the overall lifecycle state of the Pooler.
+  phase: ("active" | "paused" | "inactive" | "failed")?
+
+  /// PhaseReason is a human-readable explanation of the current Phase.
+  phaseReason: String?
 
   /// The resource version of the config object
   secrets: Secrets?

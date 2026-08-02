@@ -28,10 +28,22 @@ spec: Spec?
 /// Helm chart release. These fields are merged with or override the corresponding fields on the related
 /// HelmChart resource.
 class Spec {
-  /// Configures handling of failed chart installation or upgrades. - `reinstall` will perform a clean
-  /// uninstall and reinstall of the chart. - `abort` will take no action and leave the chart in a failed
-  /// state so that the administrator can manually resolve the error.
-  failurePolicy: ("abort" | "reinstall")?
+  /// Configures handling of failed chart installation or upgrades. - `abort` will take no action and
+  /// leave the chart in a failed state so that the administrator can manually resolve the error. -
+  /// `reinstall` will perform a clean uninstall and reinstall of the chart; this is the default
+  /// behavior. - `retry` will attempt to retry the install or upgrade whenever chart configuration
+  /// changes.
+  failurePolicy: ("abort" | "reinstall" | "retry")?
+
+  /// Set to true if helm should configure server-side apply to force changes when conflicts arise in
+  /// ownership of managed fields. Helm CLI positional argument/flag: `--force-conflicts`
+  forceConflicts: Boolean?
+
+  /// Set to true if helm should enable server-side apply when updating objects. Defaults to `true` for
+  /// install, and `auto` for upgrade. - `true` enables server-side apply. - `false` disables server-side
+  /// apply. - `auto` enables server-side apply if the chart was installed with server-side apply
+  /// enabled. Helm CLI positional argument/flag: `--server-side`
+  serverSide: ("true" | "false" | "auto")?
 
   /// Override complex Chart values via structured YAML. Takes precedence over options set via
   /// valuesContent. Helm CLI positional argument/flag: `--values`

@@ -1,7 +1,7 @@
 /// ScheduledBackup is the Schema for the scheduledbackups API
 ///
 /// This module was generated from the CustomResourceDefinition at
-/// <https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/v1.29.1/config/crd/kustomization.yaml>.
+/// <https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/v1.30.0/config/crd/kustomization.yaml>.
 module io.cnpg.postgresql.v1.ScheduledBackup
 
 extends "@k8s/K8sResource.pkl"
@@ -110,6 +110,9 @@ class PluginConfiguration {
 /// the system. Read-only. More info:
 /// https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status
 class Status {
+  /// Error is the latest admission validation error
+  error: String?
+
   /// The latest time the schedule
   lastCheckTime: String?
 

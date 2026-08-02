@@ -1,5 +1,5 @@
 /// This module was generated from the CustomResourceDefinition at
-/// <https://raw.githubusercontent.com/argoproj/argo-cd/v3.4.2/manifests/crds/kustomization.yaml>.
+/// <https://raw.githubusercontent.com/argoproj/argo-cd/v3.4.6/manifests/crds/kustomization.yaml>.
 module io.argoproj.v1alpha1.ApplicationSet
 
 extends "@k8s/K8sResource.pkl"
@@ -192,14 +192,14 @@ class SourceDirectory {
 }
 
 class DirectoryJsonnet {
-  extVars: Listing<Tla>?
+  extVars: Listing<Tlas>?
 
   libs: Listing<String>?
 
-  tlas: Listing<Tla>?
+  tlas: Listing<Tlas>?
 }
 
-class Tla {
+class Tlas {
   code: Boolean?
 
   name: String
@@ -838,7 +838,7 @@ class SpecSyncPolicy {
 }
 
 class Status {
-  applicationStatus: Listing<ApplicationStatu>?
+  applicationStatus: Listing<ApplicationStatus>?
 
   conditions: Listing<Condition>?
 
@@ -849,7 +849,7 @@ class Status {
   resourcesCount: Int?
 }
 
-class ApplicationStatu {
+class ApplicationStatus {
   application: String
 
   lastTransitionTime: String?

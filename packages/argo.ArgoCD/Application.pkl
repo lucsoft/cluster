@@ -1,7 +1,7 @@
 /// Application is a definition of Application resource.
 ///
 /// This module was generated from the CustomResourceDefinition at
-/// <https://raw.githubusercontent.com/argoproj/argo-cd/v3.4.2/manifests/crds/kustomization.yaml>.
+/// <https://raw.githubusercontent.com/argoproj/argo-cd/v3.4.6/manifests/crds/kustomization.yaml>.
 module io.argoproj.v1alpha1.Application
 
 extends "@k8s/K8sResource.pkl"
@@ -194,17 +194,17 @@ class SourceDirectory {
 /// Jsonnet holds options specific to Jsonnet
 class Jsonnet {
   /// ExtVars is a list of Jsonnet External Variables
-  extVars: Listing<Tla>?
+  extVars: Listing<Tlas>?
 
   /// Additional library search dirs
   libs: Listing<String>?
 
   /// TLAS is a list of Jsonnet Top-level Arguments
-  tlas: Listing<Tla>?
+  tlas: Listing<Tlas>?
 }
 
 /// JsonnetVar represents a variable to be passed to jsonnet during manifest generation
-class Tla {
+class Tlas {
   code: Boolean?
 
   name: String

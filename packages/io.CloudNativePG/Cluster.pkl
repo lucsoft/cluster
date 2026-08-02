@@ -2,7 +2,7 @@
 /// CloudNativePG.
 ///
 /// This module was generated from the CustomResourceDefinition at
-/// <https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/v1.29.1/config/crd/kustomization.yaml>.
+/// <https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/v1.30.0/config/crd/kustomization.yaml>.
 module io.cnpg.postgresql.v1.Cluster
 
 extends "@k8s/K8sResource.pkl"
@@ -148,6 +148,11 @@ class Spec {
 
   /// Configuration of the PostgreSQL server
   postgresql: Postgresql?
+
+  /// Configuration of the Kubernetes `Lease` used to coordinate safe primary election within the
+  /// cluster. When omitted, the operator applies built-in defaults; tune these values only if you
+  /// understand the consequences for failover timing.
+  primaryLease: PrimaryLease?
 
   /// Method to follow to upgrade the primary server during a rolling update procedure, after all
   /// replicas have been successfully updated: it can be with a switchover (`switchover`) or in-place
@@ -710,8 +715,8 @@ class BarmanObjectStoreData {
   additionalCommandArgs: Listing<String>?
 
   /// Compress a backup file (a tar file per tablespace) while streaming it to the object store.
-  /// Available options are empty string (no compression, default), `gzip`, `bzip2`, and `snappy`.
-  compression: ("bzip2" | "gzip" | "snappy")?
+  /// Available options are empty string (no compression, default), `gzip`, `bzip2`, `lz4`, and `snappy`.
+  compression: ("bzip2" | "gzip" | "lz4" | "snappy")?
 
   /// Whenever to force the encryption of files (if the bucket is not already configured for that).
   /// Allowed options are empty string (use the bucket policy, default), `AES256` and `aws:kms`
@@ -1871,10 +1876,11 @@ class Role {
   ensure: ("present" | "absent")?
 
   /// List of one or more existing roles to which this role will be immediately added as a new member.
-  /// Default empty.
+  /// Default empty. Changes to the list are applied to an existing role through `GRANT` and `REVOKE`
+  /// statements, not only at role creation.
   inRoles: Listing<String>?
 
-  /// Whether a role "inherits" the privileges of roles it is a member of. Defaults is `true`.
+  /// Whether a role "inherits" the privileges of roles it is a member of. Default is `true`.
   inherit: Boolean?
 
   /// Whether the role is allowed to log in. A role having the `login` attribute can be thought of as a
@@ -1885,8 +1891,9 @@ class Role {
   /// Name of the role
   name: String
 
-  /// Secret containing the password of the role (if present) If null, the password will be ignored
-  /// unless DisablePassword is set
+  /// Secret containing the password of the role (if present). If null, the password will be ignored
+  /// unless DisablePassword is set. When set, the secret must follow the `kubernetes.io/basic-auth`
+  /// format and contain both a `username` and a `password` field.
   passwordSecret: PasswordSecret?
 
   /// Whether a role is a replication role. A role must have this attribute (or be a superuser) in order
@@ -1906,8 +1913,9 @@ class Role {
   validUntil: String?
 }
 
-/// Secret containing the password of the role (if present) If null, the password will be ignored unless
-/// DisablePassword is set
+/// Secret containing the password of the role (if present). If null, the password will be ignored unless
+/// DisablePassword is set. When set, the secret must follow the `kubernetes.io/basic-auth` format and
+/// contain both a `username` and a `password` field.
 class PasswordSecret {
   /// Name of the referent.
   name: String
@@ -2564,7 +2572,7 @@ class Postgresql {
   enableAlterSystem: Boolean?
 
   /// The configuration of the extensions to be added
-  extensions: Listing<PgDataImageInfoExtension>?
+  extensions: Listing<Extension>?
 
   /// Options to specify LDAP configuration
   ldap: Ldap?
@@ -2596,7 +2604,7 @@ class Postgresql {
 }
 
 /// ExtensionConfiguration is the configuration used to add PostgreSQL extensions to the Cluster.
-class PgDataImageInfoExtension {
+class Extension {
   /// A list of directories within the image to be appended to the PostgreSQL process's `PATH`
   /// environment variable.
   bin_path: Listing<String>?
@@ -2609,24 +2617,25 @@ class PgDataImageInfoExtension {
   /// extension. It is the responsibility of the cluster administrator to ensure the variables are
   /// correct for the specific extension. Note that changes to these variables require a manual cluster
   /// restart to take effect.
-  env: Listing<PgDataImageInfoExtensionEnv>?
+  env: Listing<ExtensionEnv>?
 
   /// The list of directories inside the image which should be added to extension_control_path. If not
   /// defined, defaults to "/share".
   extension_control_path: Listing<String>?
 
   /// The image containing the extension.
-  image: ExtensionImage?
+  image: Image?
 
   /// The list of directories inside the image which should be added to ld_library_path.
   ld_library_path: Listing<String>?
 
-  /// The name of the extension, required
-  name: String(!isEmpty, matches(Regex("^[a-z0-9]([-a-z0-9_]*[a-z0-9])?$")))
+  /// The name of the extension, required. The limit of 59 characters leaves room for the prefix the
+  /// operator adds when deriving the extension's Kubernetes Volume name (capped at 63 characters).
+  name: String(length.isBetween(1, 59), matches(Regex("^[a-z0-9]([-a-z0-9_]*[a-z0-9])?$")))
 }
 
 /// ExtensionEnvVar defines an environment variable for a specific extension image volume.
-class PgDataImageInfoExtensionEnv {
+class ExtensionEnv {
   /// Name of the environment variable to be injected into the PostgreSQL process.
   name: String(!isEmpty, matches(Regex("^[a-zA-Z_][a-zA-Z0-9_]*$")))
 
@@ -2640,7 +2649,7 @@ class PgDataImageInfoExtensionEnv {
 }
 
 /// The image containing the extension.
-class ExtensionImage {
+class Image {
   /// Policy for pulling OCI objects. Possible values are: Always: the kubelet always attempts to pull
   /// the reference. Container creation will fail If the pull fails. Never: the kubelet never pulls the
   /// reference and only uses a local image or artifact. Container creation will fail if the reference
@@ -2765,6 +2774,27 @@ class Synchronous {
   /// A user-defined list of application names to be added to `synchronous_standby_names` before local
   /// cluster pods (the order is only useful for priority-based synchronous replication).
   standbyNamesPre: Listing<String>?
+}
+
+/// Configuration of the Kubernetes `Lease` used to coordinate safe primary election within the cluster.
+/// When omitted, the operator applies built-in defaults; tune these values only if you understand the
+/// consequences for failover timing.
+class PrimaryLease {
+  /// How long, in seconds, the primary lease is considered valid before it expires and another instance
+  /// may acquire it. It must be greater than `renewDeadlineSeconds`. Defaults to 15.
+  leaseDurationSeconds: Int(this >= 1)?
+
+  /// The TTL, in seconds, written when the primary explicitly releases the lease on a clean shutdown,
+  /// allowing a replica to promote without waiting for the full lease duration to expire. Defaults to 1.
+  releasedLeaseDurationSeconds: Int(this >= 1)?
+
+  /// How long, in seconds, the current primary keeps retrying to renew the lease before giving up and
+  /// stopping. It must be smaller than `leaseDurationSeconds`. Defaults to 10.
+  renewDeadlineSeconds: Int(this >= 1)?
+
+  /// How frequently, in seconds, a non-holder instance retries acquiring or renewing the lease. Defaults
+  /// to 2.
+  retryPeriodSeconds: Int(this >= 1)?
 }
 
 /// The configuration of the probes to be injected in the PostgreSQL Pods.
@@ -3879,6 +3909,8 @@ class Status {
   lastSuccessfulBackupByMethod: Mapping<String, String>?
 
   /// ID of the latest generated node (used to avoid node name clashing)
+  ///
+  /// Deprecated: this field is not set anymore
   latestGeneratedNode: Int?
 
   /// ManagedRolesStatus reports the state of the managed roles in the cluster
@@ -3886,6 +3918,11 @@ class Status {
 
   /// OnlineUpdateEnabled shows if the online upgrade is enabled inside the cluster
   onlineUpdateEnabled: Boolean?
+
+  /// OperatorCertificateFingerprint is the SHA256 fingerprint of the operator's in-memory client
+  /// certificate public key. The instance manager pins this fingerprint to authenticate requests from
+  /// the operator.
+  operatorCertificateFingerprint: String?
 
   /// PGDataImageInfo contains the details of the latest image that has run on the current data
   /// directory.
@@ -3898,7 +3935,7 @@ class Status {
   phaseReason: String?
 
   /// PluginStatus is the status of the loaded plugins
-  pluginStatus: Listing<PluginStatu>?
+  pluginStatus: Listing<PluginStatus>?
 
   /// PodSelectorRefs contains the resolved pod IPs for each named selector defined in
   /// spec.podSelectorRefs.
@@ -3924,6 +3961,11 @@ class Status {
   /// the interest of the instance manager, which will refresh the secret data
   secretsResourceVersion: SecretsResourceVersion?
 
+  /// Selector is the serialized form of the label selector that identifies the pods managed by this
+  /// cluster. Populated by the operator and exposed through the scale sub-resource so an autoscaler
+  /// (such as HPA or VPA) can discover the managed instance pods.
+  selector: String?
+
   /// SwitchReplicaClusterStatus is the status of the switch to replica cluster
   switchReplicaClusterStatus: SwitchReplicaClusterStatus?
 
@@ -3931,7 +3973,12 @@ class Status {
   systemID: String?
 
   /// TablespacesStatus reports the state of the declarative tablespaces in the cluster
-  tablespacesStatus: Listing<TablespacesStatu>?
+  tablespacesStatus: Listing<TablespacesStatus>?
+
+  /// TargetPGDataImageInfo contains the details of the target image for an in-progress major upgrade. It
+  /// is set before the upgrade Job is created, and cleared on successful completion or when the upgrade
+  /// is rolled back.
+  targetPgDataImageInfo: TargetPgDataImageInfo?
 
   /// Target primary instance, this is different from the previous one during a switchover or a failover
   targetPrimary: String?
@@ -4060,8 +4107,9 @@ class ManagedRolesStatus {
   /// ByStatus gives the list of roles in each state
   byStatus: Mapping<String, Listing<String>>?
 
-  /// CannotReconcile lists roles that cannot be reconciled in PostgreSQL, with an explanation of the
-  /// cause
+  /// CannotReconcile lists roles that cannot be reconciled, with an explanation of the cause. Failures
+  /// may originate in PostgreSQL (e.g. dropping a role that owns objects) or in Kubernetes (e.g. the
+  /// referenced password Secret cannot be fetched).
   cannotReconcile: Mapping<String, Listing<String>>?
 
   /// PasswordStatus gives the last transaction id and password secret version for each managed role
@@ -4080,7 +4128,7 @@ class PasswordStatus {
 /// PGDataImageInfo contains the details of the latest image that has run on the current data directory.
 class PgDataImageInfo {
   /// Extensions contains the container image extensions available for the current Image
-  extensions: Listing<PgDataImageInfoExtension>?
+  extensions: Listing<Extension>?
 
   /// Image is the image name
   image: String
@@ -4090,7 +4138,7 @@ class PgDataImageInfo {
 }
 
 /// PluginStatus is the status of a loaded plugin
-class PluginStatu {
+class PluginStatus {
   /// BackupCapabilities are the list of capabilities of the plugin regarding the Backup management
   backupCapabilities: Listing<String>?
 
@@ -4184,7 +4232,7 @@ class SwitchReplicaClusterStatus {
 }
 
 /// TablespaceState represents the state of a tablespace in a cluster
-class TablespacesStatu {
+class TablespacesStatus {
   /// Error is the reconciliation error, if any
   error: String?
 
@@ -4196,6 +4244,20 @@ class TablespacesStatu {
 
   /// State is the latest reconciliation state
   state: String
+}
+
+/// TargetPGDataImageInfo contains the details of the target image for an in-progress major upgrade. It
+/// is set before the upgrade Job is created, and cleared on successful completion or when the upgrade is
+/// rolled back.
+class TargetPgDataImageInfo {
+  /// Extensions contains the container image extensions available for the current Image
+  extensions: Listing<Extension>?
+
+  /// Image is the image name
+  image: String
+
+  /// MajorVersion is the major version of the image
+  majorVersion: Int
 }
 
 /// Instances topology.

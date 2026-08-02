@@ -3,7 +3,7 @@
 /// an update.
 ///
 /// This module was generated from the CustomResourceDefinition at
-/// <https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/v1.29.1/config/crd/kustomization.yaml>.
+/// <https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/v1.30.0/config/crd/kustomization.yaml>.
 module io.cnpg.postgresql.v1.FailoverQuorum
 
 extends "@k8s/K8sResource.pkl"

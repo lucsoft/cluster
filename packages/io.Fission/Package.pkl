@@ -43,7 +43,7 @@ class Spec {
 /// Deployment is the deployable archive that environment runtime used to run user function.
 class Deployment {
   /// Checksum ensures the integrity of packages referenced by URL. Ignored for literals.
-  checksum: Checksum?
+  checksum: SourceChecksum?
 
   /// Literal contents of the package. Can be used for encoding packages below TODO (256 KB?) size.
   literal: String?
@@ -56,7 +56,7 @@ class Deployment {
 }
 
 /// Checksum ensures the integrity of packages referenced by URL. Ignored for literals.
-class Checksum {
+class SourceChecksum {
   sum: String?
 
   /// ChecksumType specifies the checksum algorithm, such as sha256, used for a checksum.
@@ -75,7 +75,7 @@ class Environment {
 /// archive.
 class Source {
   /// Checksum ensures the integrity of packages referenced by URL. Ignored for literals.
-  checksum: Checksum?
+  checksum: SourceChecksum?
 
   /// Literal contents of the package. Can be used for encoding packages below TODO (256 KB?) size.
   literal: String?
