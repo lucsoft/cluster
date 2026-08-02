@@ -17,16 +17,16 @@
     },
     "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Workload@0": {
       "type": "remote",
-      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Workload@0.5.0",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Workload@0.5.13",
       "checksums": {
-        "sha256": "a24716677a502c2e0f55363948ebe46b698c10a8544edc95a7d259ac3b6b52a9"
+        "sha256": "2ecd2322879183a9c671629c90810fa77d5d2210c94eda7903850f45381d89ed"
       }
     },
     "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Resource@0": {
       "type": "remote",
-      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Resource@0.3.0",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Resource@0.5.13",
       "checksums": {
-        "sha256": "30531b38fe533c2a43338e3d24dc01480fdc082a674412bcb63e354cc7a3c579"
+        "sha256": "6fcf0a3c64a94c0f37fa5bbf3eafa2dc130cc366ed952104bf6664ba8ff4cf78"
       }
     },
     "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.NetworkPolicies@0": {
@@ -38,9 +38,9 @@
     },
     "package://pkl-pkgs.lucsoft.de/packages/com.SopsSecretsOperator@0": {
       "type": "remote",
-      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/com.SopsSecretsOperator@0.5.3",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/com.SopsSecretsOperator@0.5.13",
       "checksums": {
-        "sha256": "0959cbff6142a3d24740622ecfd2fdadecaa70c603f36103512d3f095fde61c7"
+        "sha256": "c974393b79052fb50a9d4e4288e9e9c5c9e0e1df697c4806feb6da267fee1891"
       }
     },
     "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.deepToTyped@1": {
@@ -52,16 +52,16 @@
     },
     "package://pkl-pkgs.lucsoft.de/packages/argo.ArgoCD@0": {
       "type": "remote",
-      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/argo.ArgoCD@0.3.0",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/argo.ArgoCD@0.5.13",
       "checksums": {
-        "sha256": "d54608b5de4bd2d4d0bfbd4ae706cf0cdbad6d662a74db617d127673be4f65ca"
+        "sha256": "39ca9c267170175c013c7cf3a9058447aba5f7c7fbd738c0b98a050539e62f33"
       }
     },
     "package://pkl-pkgs.lucsoft.de/packages/io.Fission@0": {
       "type": "remote",
-      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/io.Fission@0.3.0",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/io.Fission@0.5.13",
       "checksums": {
-        "sha256": "c9e3fb1f81c1a81ec4503293a9a04f774fb9f9fa172212f14887a5ab77b057f6"
+        "sha256": "c158c34a35d7dcbbac4e3a343dde977ce3b6ddb0dc73e3b8a2ec9482057b4e22"
       }
     }
   }

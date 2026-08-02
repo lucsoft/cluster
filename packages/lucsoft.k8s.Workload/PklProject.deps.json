@@ -10,16 +10,16 @@
     },
     "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Resource@0": {
       "type": "remote",
-      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Resource@0.3.0",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Resource@0.5.13",
       "checksums": {
-        "sha256": "30531b38fe533c2a43338e3d24dc01480fdc082a674412bcb63e354cc7a3c579"
+        "sha256": "6fcf0a3c64a94c0f37fa5bbf3eafa2dc130cc366ed952104bf6664ba8ff4cf78"
       }
     },
     "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.NetworkPolicies@0": {
       "type": "remote",
-      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.NetworkPolicies@0.3.0",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.NetworkPolicies@0.5.13",
       "checksums": {
-        "sha256": "8366d0203bc4c0e373e59148f93e13d90196d0bed50d446920df7e2cbfe8258a"
+        "sha256": "1fedf14e5f72e714e58156851c03bec29d0b4a5fe2a54edfa9b892b327807e58"
       }
     }
   }
