@@ -1,4 +1,5 @@
 amends "package://pkg.pkl-lang.org/pkl-pantry/k8s.contrib.crd@4.2.6#/generate.pkl"
+
 import "pkl:yaml"
 
 // renovate: datasource=github-releases packageName=cert-manager/cert-manager

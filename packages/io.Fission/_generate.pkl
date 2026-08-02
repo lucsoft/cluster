@@ -1,7 +1,9 @@
 amends "package://pkg.pkl-lang.org/pkl-pantry/k8s.contrib.crd@4.2.6#/generate.pkl"
+
 import "pkl:yaml"
 
 import "@k8s/api/core/v1/PodSpec.pkl"
+
 local fissionTarget = "v1.22.0"
 local fissionCrdBasePath =
   "https://raw.githubusercontent.com/fission/fission/\(fissionTarget)/crds/v1"
@@ -12,6 +14,7 @@ local fissionKustomize: Listing<String> =
 source = ""
 
 k8sImportPath = "@k8s"
+baseApiGroup = "v1.fission.io"
 
 sourceContents =
   new YamlRenderer {

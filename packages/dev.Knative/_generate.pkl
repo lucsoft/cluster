@@ -1,4 +1,5 @@
 amends "package://pkg.pkl-lang.org/pkl-pantry/k8s.contrib.crd@4.2.6#/generate.pkl"
+
 import "pkl:yaml"
 
 import "@k8s/api/apps/v1/Deployment.pkl"
@@ -14,7 +15,7 @@ local kustomize: Listing<String> =
 source = ""
 
 k8sImportPath = "@k8s"
-
+baseApiGroup = "v1beta1.operator.knative.dev"
 sourceContents =
   new YamlRenderer {
     isStream = true

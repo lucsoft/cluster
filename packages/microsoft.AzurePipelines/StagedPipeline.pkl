@@ -1,7 +1,9 @@
 module microsoft.StagedPipeline
 
 extends "./ServiceSchema.pkl"
+
 import "./Expressions.pkl"
+
 hidden fileName = "CI"
 hidden templateFileName = "azure-pipeline-\(fileName).generated.yaml"
 
