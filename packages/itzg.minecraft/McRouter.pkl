@@ -6,8 +6,6 @@ import "@Workload/Workload.pkl"
 
 servers: Mapping<String, String> = new {}
 
-local moduleThis = this
-
 // renovate: datasource=docker packageName=itzg/mc-router
 image: String = "docker.io/itzg/mc-router:1.43.0"
 
@@ -32,7 +30,7 @@ fixed podSpec = new PodSpec {
   containers {
     new {
       name = "mc-proxy"
-      image = "docker.io/itzg/mc-router"
+      image = module.image
       ports {
         new {
           name = "mc-proxy"
