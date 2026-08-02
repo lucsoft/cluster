@@ -27,7 +27,7 @@ source {
         extraContainers {
           new {
             name = "pkl"
-            image = "ghcr.io/lucsoft/argo-pkl-plugin:latest"
+            image = "ghcr.io/lucsoft/argo-pkl-plugin:0.31.1"
             securityContext {
               runAsNonRoot = true
               runAsUser = 999

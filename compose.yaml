@@ -7,7 +7,7 @@ services:
       platforms:
         - linux/amd64
   pkl-packages:
-    image: ghcr.io/lucsoft/pkl-packages:latest
+    image: ghcr.io/lucsoft/pkl-packages:0.31.1
     build:
       context: pkl-packages
       dockerfile: Dockerfile
