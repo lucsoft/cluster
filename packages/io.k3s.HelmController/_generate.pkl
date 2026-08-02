@@ -1,11 +1,11 @@
-amends "package://pkg.pkl-lang.org/pkl-pantry/k8s.contrib.crd@4.2.1#/generate.pkl"
+amends "package://pkg.pkl-lang.org/pkl-pantry/k8s.contrib.crd@4.2.6#/generate.pkl"
 import "pkl:yaml"
 
 import "@k8s/api/core/v1/PodSpec.pkl"
 import "@k8s/api/core/v1/SecurityContext.pkl"
 
 // renovate: datasource=github-releases packageName=k3s-io/helm-controller
-local version = "v0.17.2"
+local version = "v0.17.7"
 local baseUrl =
   "https://raw.githubusercontent.com/k3s-io/helm-controller/\(version)/pkg/crds/yaml/generated"
 

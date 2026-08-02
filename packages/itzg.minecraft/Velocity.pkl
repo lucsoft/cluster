@@ -1,4 +1,4 @@
-import "package://pkg.pkl-lang.org/pkl-pantry/pkl.toml@1.0.2#/toml.pkl"
+import "package://pkg.pkl-lang.org/pkl-pantry/pkl.toml@1.0.3#/toml.pkl"
 
 fixed `config-version`: String = "2.7"
 

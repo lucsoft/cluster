@@ -27,20 +27,20 @@
 module microsoft.AzurePipelines.generate
 
 import
-  "package://pkg.pkl-lang.org/pkl-pantry/org.json_schema.contrib@1.2.0#/internal/ModulesGenerator.pkl"
-import "package://pkg.pkl-lang.org/pkl-pantry/org.json_schema@1.1.0#/JsonSchema.pkl"
-import "package://pkg.pkl-lang.org/pkl-pantry/org.json_schema@1.1.0#/Parser.pkl"
-import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.1.0#/ClassNode.pkl"
-import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.1.0#/ClassOrModuleNode.pkl"
-import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.1.0#/DocCommentNode.pkl"
-import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.1.0#/ExpressionNode.pkl"
-import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.1.0#/IdentifierNode.pkl"
-import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.1.0#/ModuleNode.pkl"
+  "package://pkg.pkl-lang.org/pkl-pantry/org.json_schema.contrib@1.2.4#/internal/ModulesGenerator.pkl"
+import "package://pkg.pkl-lang.org/pkl-pantry/org.json_schema@1.1.1#/JsonSchema.pkl"
+import "package://pkg.pkl-lang.org/pkl-pantry/org.json_schema@1.1.1#/Parser.pkl"
+import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.2.1#/ClassNode.pkl"
+import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.2.1#/ClassOrModuleNode.pkl"
+import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.2.1#/DocCommentNode.pkl"
+import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.2.1#/ExpressionNode.pkl"
+import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.2.1#/IdentifierNode.pkl"
+import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.2.1#/ModuleNode.pkl"
 import
-  "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.1.0#/QualifiedIdentifierNode.pkl"
-import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.1.0#/TypeAnnotationNode.pkl"
-import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.1.0#/TypeNode.pkl"
-import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.uri@1.0.3#/URI.pkl"
+  "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.2.1#/QualifiedIdentifierNode.pkl"
+import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.2.1#/TypeAnnotationNode.pkl"
+import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.syntax@1.2.1#/TypeNode.pkl"
+import "package://pkg.pkl-lang.org/pkl-pantry/pkl.experimental.uri@1.0.4#/URI.pkl"
 import "pkl:json"
 import "pkl:platform"
 
