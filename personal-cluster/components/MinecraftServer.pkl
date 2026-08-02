@@ -175,7 +175,7 @@ local mcRouter = new McRouter {
     spec {
       containers {
         [0] {
-          image = "docker.io/itzg/mc-router:1.46.0-rc1"
+          image = "docker.io/itzg/mc-router:1.45.2"
           env {
             new {
               name = "WEBHOOK_URL"
