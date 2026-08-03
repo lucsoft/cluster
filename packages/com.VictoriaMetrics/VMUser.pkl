@@ -1,0 +1,504 @@
+/// VMUser is the Schema for the vmusers API
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <https://raw.githubusercontent.com/VictoriaMetrics/operator/v0.72.0/config/crd/overlay/crd.yaml>.
+module com.victoriametrics.operator.v1beta1.VMUser
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "operator.victoriametrics.com/v1beta1"
+
+fixed kind: "VMUser"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// VMUserSpec defines the desired state of VMUser
+spec: Spec?
+
+/// VMUserStatus defines the observed state of VMUser
+status: Status?
+
+/// VMUserSpec defines the desired state of VMUser
+class Spec {
+  /// BearerToken Authorization header value for accessing protected endpoint.
+  bearerToken: String?
+
+  /// DefaultURLs backend url for non-matching paths filter usually used for default backend with error
+  /// message
+  default_url: Listing<String>?
+
+  /// DisableSecretCreation skips related secret creation for vmuser
+  disable_secret_creation: Boolean?
+
+  /// DiscoverBackendIPs instructs discovering URLPrefix backend IPs via DNS.
+  discover_backend_ips: Boolean?
+
+  /// DropSrcPathPrefixParts is the number of `/`-delimited request path prefix parts to drop before
+  /// proxying the request to backend. See
+  /// [here](https://docs.victoriametrics.com/victoriametrics/vmauth/#dropping-request-path-prefix) for
+  /// more details.
+  drop_src_path_prefix_parts: Int?
+
+  /// DumpRequestOnErrors instructs vmauth to return detailed request params to the client if routing
+  /// rules don't allow to forward request to the backends. Useful for debugging `src_hosts` and
+  /// `src_headers` based routing rules
+  ///
+  /// available since v1.107.0 vmauth version
+  dump_request_on_errors: Boolean?
+
+  /// GeneratePassword instructs operator to generate password for user if spec.password if empty.
+  generatePassword: Boolean?
+
+  /// Headers represent additional http headers, that vmauth uses in form of ["header_key: header_value"]
+  /// multiple values for header key: ["header_key: value1,value2"] it's available since 1.68.0 version
+  /// of vmauth
+  headers: Listing<String>?
+
+  /// IPFilters defines per target src ip filters supported only with enterprise version of
+  /// [vmauth](https://docs.victoriametrics.com/victoriametrics/vmauth/#ip-filters)
+  ip_filters: IpFilters?
+
+  /// JWT defines JWT based auth for a user
+  jwt: Jwt?
+
+  /// LoadBalancingPolicy defines load balancing policy to use for backend urls. Supported policies:
+  /// least_loaded, first_available. See
+  /// [here](https://docs.victoriametrics.com/victoriametrics/vmauth/#load-balancing) for more details
+  /// (default "least_loaded")
+  load_balancing_policy: ("least_loaded"|"first_available")?
+
+  /// ManagedMetadata defines metadata that will be added to the all objects created by operator for the
+  /// given CustomResource
+  managedMetadata: ManagedMetadata?
+
+  /// MaxConcurrentRequests defines max concurrent requests per user 300 is default value for vmauth
+  max_concurrent_requests: Int?
+
+  /// MetricLabels - additional labels for metrics exported by vmauth for given user.
+  metric_labels: Mapping<String, String>?
+
+  /// Name of the VMUser object.
+  name: String?
+
+  /// Password basic auth password for accessing protected endpoint.
+  password: String?
+
+  /// PasswordRef allows fetching password from user-create secret by its name and key.
+  passwordRef: PasswordRef?
+
+  /// ResponseHeaders represent additional http headers, that vmauth adds for request response in form of
+  /// ["header_key: header_value"] multiple values for header key: ["header_key: value1,value2"] it's
+  /// available since 1.93.0 version of vmauth
+  response_headers: Listing<String>?
+
+  /// RetryStatusCodes defines http status codes in numeric format for request retries e.g. [429,503]
+  retry_status_codes: Listing<Int>?
+
+  /// TargetRefs - reference to endpoints, which user may access.
+  targetRefs: Listing<TargetRef>
+
+  /// TLSConfig defines tls configuration for the backend connection
+  tlsConfig: TlsConfig?
+
+  /// TokenRef allows fetching token from user-created secrets by its name and key.
+  tokenRef: TokenRef?
+
+  /// Username basic auth user name for accessing protected endpoint, will be replaced with metadata.name
+  /// of VMUser if omitted.
+  username: String?
+}
+
+/// IPFilters defines per target src ip filters supported only with enterprise version of
+/// [vmauth](https://docs.victoriametrics.com/victoriametrics/vmauth/#ip-filters)
+class IpFilters {
+  allow_list: Listing<String>?
+
+  deny_list: Listing<String>?
+}
+
+/// JWT defines JWT based auth for a user
+class Jwt {
+  /// MatchClaims enables claim based routing
+  matchClaims: Mapping<String, String>?
+
+  /// OIDC defines OIDC configuration section
+  oidc: Oidc?
+
+  /// PublicKeyRefs defines a list of Secret selectors that reference public keys
+  publicKeyRefs: Listing<PublicKeyRef>?
+
+  /// PublicKeys defines a list of public keys that are used for signature verification
+  publicKeys: Listing<String>?
+
+  /// SkipVerify skips signature verification for testing purposes
+  skipVerify: Boolean?
+}
+
+/// OIDC defines OIDC configuration section
+class Oidc {
+  /// Issuer defines issuer URL for OIDC
+  issuer: String
+}
+
+/// SecretKeySelector selects a key of a Secret.
+class PublicKeyRef {
+  /// The key of the secret to select from. Must be a valid secret key.
+  key: String
+
+  /// Name of the referent. This field is effectively required, but due to backwards compatibility is
+  /// allowed to be empty. Instances of this type with an empty value here are almost certainly wrong.
+  /// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+  name: String?
+
+  /// Specify whether the Secret or its key must be defined
+  optional: Boolean?
+}
+
+/// ManagedMetadata defines metadata that will be added to the all objects created by operator for the
+/// given CustomResource
+class ManagedMetadata {
+  /// Annotations is an unstructured key value map stored with a resource that may be set by external
+  /// tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when
+  /// modifying objects. More info:
+  /// https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations
+  annotations: Mapping<String, String>?
+
+  /// Labels Map of string keys and values that can be used to organize and categorize (scope and select)
+  /// objects. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels
+  labels: Mapping<String, String>?
+}
+
+/// PasswordRef allows fetching password from user-create secret by its name and key.
+class PasswordRef {
+  /// The key of the secret to select from. Must be a valid secret key.
+  key: String
+
+  /// Name of the referent. This field is effectively required, but due to backwards compatibility is
+  /// allowed to be empty. Instances of this type with an empty value here are almost certainly wrong.
+  /// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+  name: String?
+
+  /// Specify whether the Secret or its key must be defined
+  optional: Boolean?
+}
+
+/// TargetRef describes target for user traffic forwarding. one of target types can be chosen: crd or
+/// static per targetRef. user can define multiple targetRefs with different ref Types.
+class TargetRef {
+  /// CRD describes exist operator's CRD object, operator generates access url based on CRD params.
+  crd: Crd?
+
+  /// DiscoverBackendIPs instructs discovering URLPrefix backend IPs via DNS.
+  discover_backend_ips: Boolean?
+
+  /// DropSrcPathPrefixParts is the number of `/`-delimited request path prefix parts to drop before
+  /// proxying the request to backend. See
+  /// [here](https://docs.victoriametrics.com/victoriametrics/vmauth/#dropping-request-path-prefix) for
+  /// more details.
+  drop_src_path_prefix_parts: Int?
+
+  /// RequestHeaders represent additional http headers, that vmauth uses in form of ["header_key:
+  /// header_value"] multiple values for header key: ["header_key: value1,value2"] it's available since
+  /// 1.68.0 version of vmauth
+  headers: Listing<String>?
+
+  hosts: Listing<String>?
+
+  /// LoadBalancingPolicy defines load balancing policy to use for backend urls. Supported policies:
+  /// least_loaded, first_available. See
+  /// [here](https://docs.victoriametrics.com/victoriametrics/vmauth/#load-balancing) for more details
+  /// (default "least_loaded")
+  load_balancing_policy: ("least_loaded"|"first_available")?
+
+  /// Name references item at VMAuths spec.defaultTargetRefs map, with name set other attributes are
+  /// skipped
+  name: String?
+
+  /// Paths - matched path to route.
+  paths: Listing<String>?
+
+  /// QueryArgs appends list of query arguments to generated URL
+  query_args: Listing<QueryArg>?
+
+  /// ResponseHeaders represent additional http headers, that vmauth adds for request response in form of
+  /// ["header_key: header_value"] multiple values for header key: ["header_key: value1,value2"] it's
+  /// available since 1.93.0 version of vmauth
+  response_headers: Listing<String>?
+
+  /// RetryStatusCodes defines http status codes in numeric format for request retries Can be defined per
+  /// target or at VMUser.spec level e.g. [429,503]
+  retry_status_codes: Listing<Int>?
+
+  /// SrcHeaders is an optional list of headers, which must match request headers.
+  src_headers: Listing<String>?
+
+  /// SrcQueryArgs is an optional list of query args, which must match request URL query args.
+  src_query_args: Listing<String>?
+
+  /// Static - user defined url for traffic forward, for instance http://vmsingle:8428
+  static: Static?
+
+  /// TargetPathSuffix allows to add some suffix to the target path It allows to hide tenant
+  /// configuration from user with crd as ref. it also may contain any url encoded params.
+  target_path_suffix: String?
+
+  /// TargetRefBasicAuth allow an target endpoint to authenticate over basic authentication
+  targetRefBasicAuth: TargetRefBasicAuth?
+}
+
+/// CRD describes exist operator's CRD object, operator generates access url based on CRD params.
+class Crd {
+  /// Kind one of: VMAgent,VMAlert, VMSingle, VMCluster/vmselect,
+  /// VMCluster/vmstorage,VMCluster/vminsert,VMAlertManager, VLSingle, VLCluster/vlinsert,
+  /// VLCluster/vlselect, VLCluster/vlstorage, VTSingle, VTCluster/vtinsert, VTCluster/vtselect,
+  /// VTCluster/vtstorage VMAnomaly and VLAgent
+  kind: 
+    "VMAgent"
+    |"VMAlert"
+    |"VMSingle"
+    |"VLogs"
+    |"VMAlertManager"
+    |"VMAlertmanager"
+    |"VMCluster/vmselect"
+    |"VMCluster/vmstorage"
+    |"VMCluster/vminsert"
+    |"VLSingle"
+    |"VLCluster/vlinsert"
+    |"VLCluster/vlselect"
+    |"VLCluster/vlstorage"
+    |"VLAgent"
+    |"VTCluster/vtinsert"
+    |"VTCluster/vtselect"
+    |"VTCluster/vtstorage"
+    |"VTSingle"
+    |"VMAnomaly"
+
+  /// Name of the target Kubernetes object
+  name: String
+
+  /// Namespace of the target Kubernetes object
+  namespace: String
+
+  /// Objects defines list of name/namespace pairs that define existing k8s object
+  objects: Listing<Object>?
+}
+
+/// NamespacedName defines name and namespace pairs to reference k8s object
+class Object {
+  /// Name of the target Kubernetes object
+  name: String
+
+  /// Namespace of the target Kubernetes object
+  namespace: String
+}
+
+/// QueryArg defines item for query arguments
+class QueryArg {
+  /// Name of query argument
+  name: String
+
+  /// Values of query argument
+  values: Listing<String>
+}
+
+/// Static - user defined url for traffic forward, for instance http://vmsingle:8428
+class Static {
+  /// URL http url for given staticRef.
+  url: String?
+
+  /// URLs allows setting multiple urls for load-balancing at vmauth-side.
+  urls: Listing<String>?
+}
+
+/// TargetRefBasicAuth allow an target endpoint to authenticate over basic authentication
+class TargetRefBasicAuth {
+  /// The secret in the service scrape namespace that contains the password for authentication. It must
+  /// be at them same namespace as CRD
+  password: Password
+
+  /// The secret in the service scrape namespace that contains the username for authentication. It must
+  /// be at them same namespace as CRD
+  username: Username
+}
+
+/// The secret in the service scrape namespace that contains the password for authentication. It must be
+/// at them same namespace as CRD
+class Password {
+  /// The key of the secret to select from. Must be a valid secret key.
+  key: String
+
+  /// Name of the referent. This field is effectively required, but due to backwards compatibility is
+  /// allowed to be empty. Instances of this type with an empty value here are almost certainly wrong.
+  /// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+  name: String?
+
+  /// Specify whether the Secret or its key must be defined
+  optional: Boolean?
+}
+
+/// The secret in the service scrape namespace that contains the username for authentication. It must be
+/// at them same namespace as CRD
+class Username {
+  /// The key of the secret to select from. Must be a valid secret key.
+  key: String
+
+  /// Name of the referent. This field is effectively required, but due to backwards compatibility is
+  /// allowed to be empty. Instances of this type with an empty value here are almost certainly wrong.
+  /// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+  name: String?
+
+  /// Specify whether the Secret or its key must be defined
+  optional: Boolean?
+}
+
+/// TLSConfig defines tls configuration for the backend connection
+class TlsConfig {
+  /// Struct containing the CA cert to use for the targets.
+  ca: Ca?
+
+  /// Path to the CA cert in the container to use for the targets.
+  caFile: String?
+
+  /// Struct containing the client cert file for the targets.
+  cert: Cert?
+
+  /// Path to the client cert file in the container for the targets.
+  certFile: String?
+
+  /// Disable target certificate validation.
+  insecureSkipVerify: Boolean?
+
+  /// Path to the client key file in the container for the targets.
+  keyFile: String?
+
+  /// Secret containing the client key file for the targets.
+  keySecret: KeySecret?
+
+  /// Used to verify the hostname for the targets.
+  serverName: String?
+}
+
+/// Struct containing the CA cert to use for the targets.
+class Ca {
+  /// ConfigMap containing data to use for the targets.
+  configMap: CertConfigMap?
+
+  /// Secret containing data to use for the targets.
+  secret: CertSecret?
+}
+
+/// ConfigMap containing data to use for the targets.
+class CertConfigMap {
+  /// The key to select.
+  key: String
+
+  /// Name of the referent. This field is effectively required, but due to backwards compatibility is
+  /// allowed to be empty. Instances of this type with an empty value here are almost certainly wrong.
+  /// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+  name: String?
+
+  /// Specify whether the ConfigMap or its key must be defined
+  optional: Boolean?
+}
+
+/// Secret containing data to use for the targets.
+class CertSecret {
+  /// The key of the secret to select from. Must be a valid secret key.
+  key: String
+
+  /// Name of the referent. This field is effectively required, but due to backwards compatibility is
+  /// allowed to be empty. Instances of this type with an empty value here are almost certainly wrong.
+  /// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+  name: String?
+
+  /// Specify whether the Secret or its key must be defined
+  optional: Boolean?
+}
+
+/// Struct containing the client cert file for the targets.
+class Cert {
+  /// ConfigMap containing data to use for the targets.
+  configMap: CertConfigMap?
+
+  /// Secret containing data to use for the targets.
+  secret: CertSecret?
+}
+
+/// Secret containing the client key file for the targets.
+class KeySecret {
+  /// The key of the secret to select from. Must be a valid secret key.
+  key: String
+
+  /// Name of the referent. This field is effectively required, but due to backwards compatibility is
+  /// allowed to be empty. Instances of this type with an empty value here are almost certainly wrong.
+  /// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+  name: String?
+
+  /// Specify whether the Secret or its key must be defined
+  optional: Boolean?
+}
+
+/// TokenRef allows fetching token from user-created secrets by its name and key.
+class TokenRef {
+  /// The key of the secret to select from. Must be a valid secret key.
+  key: String
+
+  /// Name of the referent. This field is effectively required, but due to backwards compatibility is
+  /// allowed to be empty. Instances of this type with an empty value here are almost certainly wrong.
+  /// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+  name: String?
+
+  /// Specify whether the Secret or its key must be defined
+  optional: Boolean?
+}
+
+/// VMUserStatus defines the observed state of VMUser
+class Status {
+  /// Known .status.conditions.type are: "Available", "Progressing", and "Degraded"
+  conditions: Listing<Condition>?
+
+  /// ObservedGeneration defines current generation picked by operator for the reconcile
+  observedGeneration: Int?
+
+  /// Reason defines human readable error reason
+  reason: String?
+
+  /// UpdateStatus defines a status for update rollout
+  updateStatus: String?
+}
+
+/// Condition defines status condition of the resource
+class Condition {
+  /// lastTransitionTime is the last time the condition transitioned from one status to another.
+  lastTransitionTime: String
+
+  /// LastUpdateTime is the last time of given type update. This value is used for status TTL update and
+  /// removal
+  lastUpdateTime: String
+
+  /// message is a human readable message indicating details about the transition. This may be an empty
+  /// string.
+  message: String(length <= 32768)?
+
+  /// observedGeneration represents the .metadata.generation that the condition was set based upon. For
+  /// instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration
+  /// is 9, the condition is out of date with respect to the current state of the instance.
+  observedGeneration: Int(isPositive)?
+
+  /// reason contains a programmatic identifier indicating the reason for the condition's last
+  /// transition. Producers of specific condition types may define expected values and meanings for this
+  /// field, and whether the values are considered a guaranteed API. The value should be a CamelCase
+  /// string. This field may not be empty.
+  reason: String(length.isBetween(1, 1024))
+
+  /// status of the condition, one of True, False, Unknown.
+  status: "True"|"False"|"Unknown"
+
+  /// Type of condition in CamelCase or in name.namespace.resource.victoriametrics.com/CamelCase.
+  type: String(length <= 316)
+}

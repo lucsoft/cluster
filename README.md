@@ -22,6 +22,7 @@ The following Pkl packages are available under `/packages`:
 
 - **argo.ArgoCD** — Deploying and managing ArgoCD.
 - **com.SopsSecretsOperator** — SOPS-encrypted secrets management.
+- **com.VictoriaMetrics** — VictoriaMetrics operator CRDs (alerting, scrape targets, storage).
 - **dev.Knative** — Knative serverless workloads.
 - **io.CertManager** — TLS certificate management with cert-manager.
 - **io.CloudNativePG** — PostgreSQL clusters via CloudNativePG.

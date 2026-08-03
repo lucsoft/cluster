@@ -1,0 +1,540 @@
+/// VMNodeScrape defines discovery for targets placed on kubernetes nodes, usually its node-exporters and
+/// other host services. InternalIP is used as __address__ for scraping.
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <https://raw.githubusercontent.com/VictoriaMetrics/operator/v0.72.0/config/crd/overlay/crd.yaml>.
+module com.victoriametrics.operator.v1beta1.VMNodeScrape
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+import "pkl:base"
+
+fixed apiVersion: "operator.victoriametrics.com/v1beta1"
+
+fixed kind: "VMNodeScrape"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// VMNodeScrapeSpec defines specification for VMNodeScrape.
+spec: Spec?
+
+/// ScrapeObjectStatus defines the observed state of ScrapeObjects
+status: Status?
+
+/// VMNodeScrapeSpec defines specification for VMNodeScrape.
+class Spec {
+  /// Authorization with http header Authorization
+  authorization: ProxyClientConfigAuthorization?
+
+  /// BasicAuth allow an endpoint to authenticate over basic authentication
+  basicAuth: BasicAuth?
+
+  /// File to read bearer token for scraping targets.
+  bearerTokenFile: String?
+
+  /// Secret to mount to read bearer token for scraping targets. The secret needs to be in the same
+  /// namespace as the scrape object and accessible by the victoria-metrics operator.
+  bearerTokenSecret: BearerTokenSecret?
+
+  /// FollowRedirects controls redirects for scraping.
+  follow_redirects: Boolean?
+
+  /// HonorLabels chooses the metric's labels on collisions with target labels.
+  honorLabels: Boolean?
+
+  /// HonorTimestamps controls whether vmagent or vmsingle respects the timestamps present in scraped
+  /// data.
+  honorTimestamps: Boolean?
+
+  /// Interval at which metrics should be scraped
+  interval: String?
+
+  /// The label to use to retrieve the job name from.
+  jobLabel: String?
+
+  /// MaxScrapeSize defines a maximum size of scraped data for a job
+  max_scrape_size: String?
+
+  /// MetricRelabelConfigs to apply to samples after scrapping.
+  metricRelabelConfigs: Listing<RelabelConfig>?
+
+  /// OAuth2 defines auth configuration
+  oauth2: ProxyClientConfigOauth2?
+
+  /// Optional HTTP URL parameters
+  params: Mapping<String, Listing<String>>?
+
+  /// HTTP path to scrape for metrics.
+  path: String?
+
+  /// Name of the port exposed at Node.
+  port: String?
+
+  /// ProxyURL eg http://proxyserver:2195 Directs scrapes to proxy through this endpoint.
+  proxyURL: String?
+
+  /// RelabelConfigs to apply to samples during service discovery.
+  relabelConfigs: Listing<RelabelConfig>?
+
+  /// SampleLimit defines per-scrape limit on number of scraped samples that will be accepted.
+  sampleLimit: Int?
+
+  /// HTTP scheme to use for scraping.
+  scheme: ("http"|"https"|"HTTPS"|"HTTP")?
+
+  /// ScrapeInterval is the same as Interval and has priority over it. one of scrape_interval or interval
+  /// can be used
+  scrape_interval: String?
+
+  /// ScrapeClass defined scrape class to apply
+  scrapeClass: String?
+
+  /// Timeout after which the scrape is ended
+  scrapeTimeout: String?
+
+  /// Selector to select kubernetes Nodes.
+  selector: Selector?
+
+  /// SeriesLimit defines per-scrape limit on number of unique time series a single target can expose
+  /// during all the scrapes on the time window of 24h.
+  seriesLimit: Int?
+
+  /// TargetLabels transfers labels on the Kubernetes Node onto the target.
+  targetLabels: Listing<String>?
+
+  /// TLSConfig configuration to use when scraping the endpoint
+  tlsConfig: TlsConfig?
+
+  /// VMScrapeParams defines VictoriaMetrics specific scrape parameters
+  vm_scrape_params: VmScrapeParams?
+}
+
+/// Authorization with http header Authorization
+class ProxyClientConfigAuthorization {
+  /// Reference to the secret with value for authorization
+  credentials: AuthorizationCredentials?
+
+  /// File with value for authorization
+  credentialsFile: String?
+
+  /// Type of authorization, default to bearer
+  type: String?
+}
+
+/// Reference to the secret with value for authorization
+class AuthorizationCredentials {
+  /// The key of the secret to select from. Must be a valid secret key.
+  key: String
+
+  /// Name of the referent. This field is effectively required, but due to backwards compatibility is
+  /// allowed to be empty. Instances of this type with an empty value here are almost certainly wrong.
+  /// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+  name: String?
+
+  /// Specify whether the Secret or its key must be defined
+  optional: Boolean?
+}
+
+/// BasicAuth allow an endpoint to authenticate over basic authentication
+class BasicAuth {
+  /// Password defines reference for secret with password value The secret needs to be in the same
+  /// namespace as scrape object
+  password: BasicAuthPassword?
+
+  /// PasswordFile defines path to password file at disk must be pre-mounted
+  password_file: String?
+
+  /// Username defines reference for secret with username value The secret needs to be in the same
+  /// namespace as scrape object
+  username: BasicAuthUsername?
+}
+
+/// Password defines reference for secret with password value The secret needs to be in the same
+/// namespace as scrape object
+class BasicAuthPassword {
+  /// The key of the secret to select from. Must be a valid secret key.
+  key: String
+
+  /// Name of the referent. This field is effectively required, but due to backwards compatibility is
+  /// allowed to be empty. Instances of this type with an empty value here are almost certainly wrong.
+  /// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+  name: String?
+
+  /// Specify whether the Secret or its key must be defined
+  optional: Boolean?
+}
+
+/// Username defines reference for secret with username value The secret needs to be in the same
+/// namespace as scrape object
+class BasicAuthUsername {
+  /// The key of the secret to select from. Must be a valid secret key.
+  key: String
+
+  /// Name of the referent. This field is effectively required, but due to backwards compatibility is
+  /// allowed to be empty. Instances of this type with an empty value here are almost certainly wrong.
+  /// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+  name: String?
+
+  /// Specify whether the Secret or its key must be defined
+  optional: Boolean?
+}
+
+/// Secret to mount to read bearer token for scraping targets. The secret needs to be in the same
+/// namespace as the scrape object and accessible by the victoria-metrics operator.
+class BearerTokenSecret {
+  /// The key of the secret to select from. Must be a valid secret key.
+  key: String
+
+  /// Name of the referent. This field is effectively required, but due to backwards compatibility is
+  /// allowed to be empty. Instances of this type with an empty value here are almost certainly wrong.
+  /// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+  name: String?
+
+  /// Specify whether the Secret or its key must be defined
+  optional: Boolean?
+}
+
+/// RelabelConfig allows dynamic rewriting of the label set More info:
+/// https://docs.victoriametrics.com/victoriametrics/#relabeling
+class RelabelConfig {
+  /// Action to perform based on regex matching. Default is 'replace'
+  action: String?
+
+  /// If represents metricsQL match expression (or list of expressions): '{__name__=~"foo_.*"}'
+  `if`: base.Dynamic?
+
+  /// Labels is used together with Match for `action: graphite`
+  labels: Mapping<String, String>?
+
+  /// Match is used together with Labels for `action: graphite`
+  match: String?
+
+  /// Modulus to take of the hash of the source label values.
+  modulus: Int?
+
+  /// Regular expression against which the extracted value is matched. Default is '(.*)' victoriaMetrics
+  /// supports multiline regex joined with |
+  /// https://docs.victoriametrics.com/victoriametrics/vmagent/#relabeling-enhancements
+  regex: base.Dynamic?
+
+  /// Replacement value against which a regex replace is performed if the regular expression matches.
+  /// Regex capture groups are available. Default is '$1'
+  replacement: String?
+
+  /// Separator placed between concatenated source label values. default is ';'.
+  separator: String?
+
+  /// UnderScoreSourceLabels - additional form of source labels source_labels for compatibility with
+  /// original relabel config. if set both sourceLabels and source_labels, sourceLabels has priority. for
+  /// details https://github.com/VictoriaMetrics/operator/issues/131
+  source_labels: Listing<String>?
+
+  /// The source labels select values from existing labels. Their content is concatenated using the
+  /// configured separator and matched against the configured regular expression for the replace, keep,
+  /// and drop actions.
+  sourceLabels: Listing<String>?
+
+  /// UnderScoreTargetLabel - additional form of target label - target_label for compatibility with
+  /// original relabel config. if set both targetLabel and target_label, targetLabel has priority. for
+  /// details https://github.com/VictoriaMetrics/operator/issues/131
+  target_label: String?
+
+  /// Label to which the resulting value is written in a replace action. It is mandatory for replace
+  /// actions. Regex capture groups are available.
+  targetLabel: String?
+}
+
+/// OAuth2 defines auth configuration
+class ProxyClientConfigOauth2 {
+  /// The secret or configmap containing the OAuth2 client id
+  client_id: Oauth2ClientId
+
+  /// The secret containing the OAuth2 client secret
+  client_secret: Oauth2ClientSecret?
+
+  /// ClientSecretFile defines path for client secret file.
+  client_secret_file: String?
+
+  /// Parameters to append to the token URL
+  endpoint_params: Mapping<String, String>?
+
+  /// The proxy URL for token_url connection ( available from v0.55.0). Is only supported by Scrape
+  /// objects family
+  proxy_url: String?
+
+  /// OAuth2 scopes used for the token request
+  scopes: Listing<String>?
+
+  /// TLSConfig for token_url connection ( available from v0.55.0). Is only supported by Scrape objects
+  /// family
+  tls_config: base.Dynamic?
+
+  /// The URL to fetch the token from
+  token_url: String(!isEmpty)
+}
+
+/// The secret or configmap containing the OAuth2 client id
+class Oauth2ClientId {
+  /// ConfigMap containing data to use for the targets.
+  configMap: ClientIdConfigMap?
+
+  /// Secret containing data to use for the targets.
+  secret: ClientIdSecret?
+}
+
+/// ConfigMap containing data to use for the targets.
+class ClientIdConfigMap {
+  /// The key to select.
+  key: String
+
+  /// Name of the referent. This field is effectively required, but due to backwards compatibility is
+  /// allowed to be empty. Instances of this type with an empty value here are almost certainly wrong.
+  /// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+  name: String?
+
+  /// Specify whether the ConfigMap or its key must be defined
+  optional: Boolean?
+}
+
+/// Secret containing data to use for the targets.
+class ClientIdSecret {
+  /// The key of the secret to select from. Must be a valid secret key.
+  key: String
+
+  /// Name of the referent. This field is effectively required, but due to backwards compatibility is
+  /// allowed to be empty. Instances of this type with an empty value here are almost certainly wrong.
+  /// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+  name: String?
+
+  /// Specify whether the Secret or its key must be defined
+  optional: Boolean?
+}
+
+/// The secret containing the OAuth2 client secret
+class Oauth2ClientSecret {
+  /// The key of the secret to select from. Must be a valid secret key.
+  key: String
+
+  /// Name of the referent. This field is effectively required, but due to backwards compatibility is
+  /// allowed to be empty. Instances of this type with an empty value here are almost certainly wrong.
+  /// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+  name: String?
+
+  /// Specify whether the Secret or its key must be defined
+  optional: Boolean?
+}
+
+/// Selector to select kubernetes Nodes.
+class Selector {
+  /// matchExpressions is a list of label selector requirements. The requirements are ANDed.
+  matchExpressions: Listing<MatchExpression>?
+
+  /// matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is
+  /// equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and
+  /// the values array contains only "value". The requirements are ANDed.
+  matchLabels: Mapping<String, String>?
+}
+
+/// A label selector requirement is a selector that contains values, a key, and an operator that relates
+/// the key and values.
+class MatchExpression {
+  /// key is the label key that the selector applies to.
+  key: String
+
+  /// operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists
+  /// and DoesNotExist.
+  operator: String
+
+  /// values is an array of string values. If the operator is In or NotIn, the values array must be
+  /// non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is
+  /// replaced during a strategic merge patch.
+  values: Listing<String>?
+}
+
+/// TLSConfig configuration to use when scraping the endpoint
+class TlsConfig {
+  /// Struct containing the CA cert to use for the targets.
+  ca: Ca?
+
+  /// Path to the CA cert in the container to use for the targets.
+  caFile: String?
+
+  /// Struct containing the client cert file for the targets.
+  cert: Cert?
+
+  /// Path to the client cert file in the container for the targets.
+  certFile: String?
+
+  /// Disable target certificate validation.
+  insecureSkipVerify: Boolean?
+
+  /// Path to the client key file in the container for the targets.
+  keyFile: String?
+
+  /// Secret containing the client key file for the targets.
+  keySecret: KeySecret?
+
+  /// Used to verify the hostname for the targets.
+  serverName: String?
+}
+
+/// Struct containing the CA cert to use for the targets.
+class Ca {
+  /// ConfigMap containing data to use for the targets.
+  configMap: ClientIdConfigMap?
+
+  /// Secret containing data to use for the targets.
+  secret: ClientIdSecret?
+}
+
+/// Struct containing the client cert file for the targets.
+class Cert {
+  /// ConfigMap containing data to use for the targets.
+  configMap: ClientIdConfigMap?
+
+  /// Secret containing data to use for the targets.
+  secret: ClientIdSecret?
+}
+
+/// Secret containing the client key file for the targets.
+class KeySecret {
+  /// The key of the secret to select from. Must be a valid secret key.
+  key: String
+
+  /// Name of the referent. This field is effectively required, but due to backwards compatibility is
+  /// allowed to be empty. Instances of this type with an empty value here are almost certainly wrong.
+  /// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+  name: String?
+
+  /// Specify whether the Secret or its key must be defined
+  optional: Boolean?
+}
+
+/// VMScrapeParams defines VictoriaMetrics specific scrape parameters
+class VmScrapeParams {
+  /// DisableCompression
+  disable_compression: Boolean?
+
+  /// disable_keepalive allows disabling HTTP keep-alive when scraping targets. By default, HTTP
+  /// keep-alive is enabled, so TCP connections to scrape targets could be reused. See
+  /// https://docs.victoriametrics.com/victoriametrics/vmagent/#scrape_config-enhancements
+  disable_keep_alive: Boolean?
+
+  /// Headers allows sending custom headers to scrape targets must be in of semicolon separated header
+  /// with it's value eg: headerName: headerValue vmagent and vmsingle support since 1.79.0 version
+  headers: Listing<String>?
+
+  no_stale_markers: Boolean?
+
+  /// ProxyClientConfig configures proxy auth settings for scraping See feature description
+  /// https://docs.victoriametrics.com/victoriametrics/vmagent/#scraping-targets-via-a-proxy
+  proxy_client_config: ProxyClientConfig?
+
+  scrape_align_interval: String?
+
+  scrape_offset: String?
+
+  stream_parse: Boolean?
+}
+
+/// ProxyClientConfig configures proxy auth settings for scraping See feature description
+/// https://docs.victoriametrics.com/victoriametrics/vmagent/#scraping-targets-via-a-proxy
+class ProxyClientConfig {
+  /// Authorization with http header Authorization
+  authorization: ProxyClientConfigAuthorization?
+
+  /// BasicAuth allows proxy to authenticate over basic authentication
+  basic_auth: ProxyClientConfigBasicAuth?
+
+  /// Secret to mount to read bearer token for scraping targets proxy auth. The secret needs to be in the
+  /// same namespace as the scrape object and accessible by the victoria-metrics operator.
+  bearer_token: BearerToken?
+
+  /// BearerTokenFile defines file to read bearer token from for proxy auth.
+  bearer_token_file: String?
+
+  /// OAuth2 defines auth configuration
+  oauth2: ProxyClientConfigOauth2?
+
+  /// TLSConfig configuration to use when scraping the endpoint
+  tls_config: base.Dynamic?
+}
+
+/// BasicAuth allows proxy to authenticate over basic authentication
+class ProxyClientConfigBasicAuth {
+  /// Password defines reference for secret with password value The secret needs to be in the same
+  /// namespace as scrape object
+  password: BasicAuthPassword?
+
+  /// PasswordFile defines path to password file at disk must be pre-mounted
+  password_file: String?
+
+  /// Username defines reference for secret with username value The secret needs to be in the same
+  /// namespace as scrape object
+  username: BasicAuthUsername?
+}
+
+/// Secret to mount to read bearer token for scraping targets proxy auth. The secret needs to be in the
+/// same namespace as the scrape object and accessible by the victoria-metrics operator.
+class BearerToken {
+  /// The key of the secret to select from. Must be a valid secret key.
+  key: String
+
+  /// Name of the referent. This field is effectively required, but due to backwards compatibility is
+  /// allowed to be empty. Instances of this type with an empty value here are almost certainly wrong.
+  /// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+  name: String?
+
+  /// Specify whether the Secret or its key must be defined
+  optional: Boolean?
+}
+
+/// ScrapeObjectStatus defines the observed state of ScrapeObjects
+class Status {
+  /// Known .status.conditions.type are: "Available", "Progressing", and "Degraded"
+  conditions: Listing<Condition>?
+
+  /// ObservedGeneration defines current generation picked by operator for the reconcile
+  observedGeneration: Int?
+
+  /// Reason defines human readable error reason
+  reason: String?
+
+  /// UpdateStatus defines a status for update rollout
+  updateStatus: String?
+}
+
+/// Condition defines status condition of the resource
+class Condition {
+  /// lastTransitionTime is the last time the condition transitioned from one status to another.
+  lastTransitionTime: String
+
+  /// LastUpdateTime is the last time of given type update. This value is used for status TTL update and
+  /// removal
+  lastUpdateTime: String
+
+  /// message is a human readable message indicating details about the transition. This may be an empty
+  /// string.
+  message: String(length <= 32768)?
+
+  /// observedGeneration represents the .metadata.generation that the condition was set based upon. For
+  /// instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration
+  /// is 9, the condition is out of date with respect to the current state of the instance.
+  observedGeneration: Int(isPositive)?
+
+  /// reason contains a programmatic identifier indicating the reason for the condition's last
+  /// transition. Producers of specific condition types may define expected values and meanings for this
+  /// field, and whether the values are considered a guaranteed API. The value should be a CamelCase
+  /// string. This field may not be empty.
+  reason: String(length.isBetween(1, 1024))
+
+  /// status of the condition, one of True, False, Unknown.
+  status: "True"|"False"|"Unknown"
+
+  /// Type of condition in CamelCase or in name.namespace.resource.victoriametrics.com/CamelCase.
+  type: String(length <= 316)
+}

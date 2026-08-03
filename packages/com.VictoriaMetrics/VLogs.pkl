@@ -1,0 +1,72 @@
+/// VLogs is fast, cost-effective and scalable logs database. VLogs is the Schema for the vlogs API
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <https://raw.githubusercontent.com/VictoriaMetrics/operator/v0.72.0/config/crd/overlay/crd.yaml>.
+module com.victoriametrics.operator.v1beta1.VLogs
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "operator.victoriametrics.com/v1beta1"
+
+fixed kind: "VLogs"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// VLogsSpec defines the desired state of VLogs VLogs is deprecated, migrate to the VLSingle
+spec: Dynamic?
+
+/// VLogsStatus defines the observed state of VLogs
+status: Status?
+
+/// VLogsStatus defines the observed state of VLogs
+class Status {
+  /// Known .status.conditions.type are: "Available", "Progressing", and "Degraded"
+  conditions: Listing<Condition>?
+
+  lastAppliedSpec: Null?
+
+  /// ObservedGeneration defines current generation picked by operator for the reconcile
+  observedGeneration: Int?
+
+  /// Reason defines human readable error reason
+  reason: String?
+
+  /// UpdateStatus defines a status for update rollout
+  updateStatus: String?
+}
+
+/// Condition defines status condition of the resource
+class Condition {
+  /// lastTransitionTime is the last time the condition transitioned from one status to another.
+  lastTransitionTime: String
+
+  /// LastUpdateTime is the last time of given type update. This value is used for status TTL update and
+  /// removal
+  lastUpdateTime: String
+
+  /// message is a human readable message indicating details about the transition. This may be an empty
+  /// string.
+  message: String(length <= 32768)?
+
+  /// observedGeneration represents the .metadata.generation that the condition was set based upon. For
+  /// instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration
+  /// is 9, the condition is out of date with respect to the current state of the instance.
+  observedGeneration: Int(isPositive)?
+
+  /// reason contains a programmatic identifier indicating the reason for the condition's last
+  /// transition. Producers of specific condition types may define expected values and meanings for this
+  /// field, and whether the values are considered a guaranteed API. The value should be a CamelCase
+  /// string. This field may not be empty.
+  reason: String(length.isBetween(1, 1024))
+
+  /// status of the condition, one of True, False, Unknown.
+  status: "True"|"False"|"Unknown"
+
+  /// Type of condition in CamelCase or in name.namespace.resource.victoriametrics.com/CamelCase.
+  type: String(length <= 316)
+}

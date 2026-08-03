@@ -5,6 +5,12 @@
     ],
     "packageRules": [
         {
+            "matchUpdateTypes": [
+                "patch"
+            ],
+            "enabled": false
+        },
+        {
             "groupName": "mono-repo packages",
             "matchFileNames": [
                 "packages/**"
@@ -15,8 +21,15 @@
             "matchDatasources": ["github-releases", "github-tags"],
             "matchManagers": ["custom.regex"],
             "postUpgradeTasks": {
-                "commands": ["pkl project resolve packages/*/"],
-                "fileFilters": ["packages/**/PklProject.deps.json"],
+                "commands": [
+                    "pkl project resolve packages/*/",
+                    "for f in packages/*/_generate.pkl; do (cd \"${f%/*}\" && pkl eval -m . ./_generate.pkl); done",
+                    "pkl format -w packages/"
+                ],
+                "fileFilters": [
+                    "packages/**/PklProject.deps.json",
+                    "packages/**/*.pkl"
+                ],
                 "executionMode": "branch"
             }
         },

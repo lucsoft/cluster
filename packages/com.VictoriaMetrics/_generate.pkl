@@ -1,0 +1,386 @@
+amends "package://pkg.pkl-lang.org/pkl-pantry/k8s.contrib.crd@4.2.6#/generate.pkl"
+
+import "pkl:yaml"
+
+import "@k8s/api/autoscaling/v2/HorizontalPodAutoscaler.pkl"
+import "@k8s/api/core/v1/PersistentVolumeClaim.pkl"
+import "@k8s/api/core/v1/PodSpec.pkl"
+import "@k8s/api/core/v1/Probe.pkl"
+import "@k8s/api/core/v1/Service.pkl"
+import "@k8s/api/core/v1/Volume.pkl"
+
+// renovate: datasource=github-releases packageName=VictoriaMetrics/operator
+local version = "v0.72.0"
+local crdBundle =
+  "https://raw.githubusercontent.com/VictoriaMetrics/operator/\(version)/config/crd/overlay/crd.yaml"
+
+/// Unlike most operators, VictoriaMetrics does not commit `config/crd/bases/*.yaml` — those are
+/// generated at build time. The only CRD source in the tagged tree is a single ~6 MB bundle holding
+/// all 24 CRDs, so we parse it once and pick the kinds we model.
+///
+/// This is every CRD in the **`v1beta1`** group, which is the group `baseApiGroup` below flattens
+/// to the package root. The eight remaining kinds (`vlagents`, `vlclusters`, `vlsingles`,
+/// `vmanomalies`, `vmanomalyconfigs`, `vmdistributed`, `vtclusters`, `vtsingles`) serve `v1` /
+/// `v1alpha1` and would generate into a nested `com/victoriametrics/operator/v1/` directory,
+/// forcing consumers into imports like `@VictoriaMetrics/com/victoriametrics/operator/v1/VTSingle.pkl`.
+/// Adding them means a second generator pass with its own `baseApiGroup`, not another line here.
+local wanted = List(
+  "vlogs.operator.victoriametrics.com",
+  "vmagents.operator.victoriametrics.com",
+  "vmalertmanagerconfigs.operator.victoriametrics.com",
+  "vmalertmanagers.operator.victoriametrics.com",
+  "vmalerts.operator.victoriametrics.com",
+  "vmauths.operator.victoriametrics.com",
+  "vmclusters.operator.victoriametrics.com",
+  "vmnodescrapes.operator.victoriametrics.com",
+  "vmpodscrapes.operator.victoriametrics.com",
+  "vmprobes.operator.victoriametrics.com",
+  "vmrules.operator.victoriametrics.com",
+  "vmscrapeconfigs.operator.victoriametrics.com",
+  "vmservicescrapes.operator.victoriametrics.com",
+  "vmsingles.operator.victoriametrics.com",
+  "vmstaticscrapes.operator.victoriametrics.com",
+  "vmusers.operator.victoriametrics.com",
+)
+
+source = crdBundle
+baseApiGroup = "v1beta1.operator.victoriametrics.com"
+
+k8sImportPath = "@k8s"
+
+sourceContents =
+  new YamlRenderer {
+    isStream = true
+  }.renderDocument(
+    new yaml.Parser {}
+      .parseAll(read(crdBundle))
+      .toList()
+      .filter((doc) -> wanted.contains((doc as Dynamic).metadata.name)),
+  )
+
+/// Without these the generated modules are close to unusable in two ways.
+///
+/// 1. Every workload CRD declares its embedded Kubernetes objects (`containers`, `volumes`,
+///    `affinity`, the probes, `serviceSpec.spec`, …) as bare opaque objects, which generate as
+///    `Dynamic` — no field names, no validation. They are mapped back onto the real `@k8s` types.
+/// 2. Roughly 180 fields are `x-kubernetes-preserve-unknown-fields` *without* a `type`, and those
+///    generate as `Null` — a field whose only legal value is `null`. That covers things you cannot
+///    do without: every relabel config's `regex` and `if`, every `tls_config`, VMAuth's
+///    `url_prefix`, and `gceSDConfigs[].zone`, which is *required*, making that class impossible to
+///    construct at all. They become `Dynamic`, which is as precise as the CRD allows.
+///
+/// Left deliberately as `Dynamic`: `http_config`, `tlsConfig`, `oauth2`, VMAuth's `extraRules`, the
+/// whole of VLogs' `spec`, and `serviceScrapeSpec` — these are VictoriaMetrics' own untyped
+/// escape hatches with no schema to recover.
+
+converters {
+  ["vmagents.operator.victoriametrics.com"] {
+    // Embedded Kubernetes objects the CRD declares as opaque.
+    [List("spec", "affinity")] = PodSpec.Affinity
+    [List("spec", "claimTemplates", "[]")] = PersistentVolumeClaim
+    [List("spec", "containers", "[]")] = PodSpec.Container
+    [List("spec", "initContainers", "[]")] = PodSpec.Container
+    [List("spec", "livenessProbe")] = Probe
+    [List("spec", "readinessProbe")] = Probe
+    [List("spec", "securityContext")] = PodSpec.PodSecurityContext
+    [List("spec", "serviceSpec", "spec")] = Service.ServiceSpec
+    [List("spec", "startupProbe")] = Probe
+    [List("spec", "topologySpreadConstraints", "[]")] = PodSpec.TopologySpreadConstraint
+    [List("spec", "volumes", "[]")] = Volume
+    // Untyped in the CRD — generated as `Null` (unsettable) without this.
+    [List("spec", "globalScrapeMetricRelabelConfigs", "[]", "if")] = Dynamic
+    [List("spec", "globalScrapeMetricRelabelConfigs", "[]", "regex")] = Dynamic
+    [List("spec", "globalScrapeRelabelConfigs", "[]", "if")] = Dynamic
+    [List("spec", "globalScrapeRelabelConfigs", "[]", "regex")] = Dynamic
+    [List("spec", "inlineRelabelConfig", "[]", "if")] = Dynamic
+    [List("spec", "inlineRelabelConfig", "[]", "regex")] = Dynamic
+    [List("spec", "nodeScrapeRelabelTemplate", "[]", "if")] = Dynamic
+    [List("spec", "nodeScrapeRelabelTemplate", "[]", "regex")] = Dynamic
+    [List("spec", "podScrapeRelabelTemplate", "[]", "if")] = Dynamic
+    [List("spec", "podScrapeRelabelTemplate", "[]", "regex")] = Dynamic
+    [List("spec", "probeScrapeRelabelTemplate", "[]", "if")] = Dynamic
+    [List("spec", "probeScrapeRelabelTemplate", "[]", "regex")] = Dynamic
+    [List("spec", "remoteWrite", "[]", "inlineUrlRelabelConfig", "[]", "if")] = Dynamic
+    [List("spec", "remoteWrite", "[]", "inlineUrlRelabelConfig", "[]", "regex")] = Dynamic
+    [List("spec", "remoteWrite", "[]", "maxDiskUsage")] = Dynamic
+    [List("spec", "remoteWrite", "[]", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "remoteWrite", "[]", "streamAggrConfig", "rules", "[]", "input_relabel_configs", "[]", "if")] = Dynamic
+    [List("spec", "remoteWrite", "[]", "streamAggrConfig", "rules", "[]", "input_relabel_configs", "[]", "regex")] = Dynamic
+    [List("spec", "remoteWrite", "[]", "streamAggrConfig", "rules", "[]", "match")] = Dynamic
+    [List("spec", "remoteWrite", "[]", "streamAggrConfig", "rules", "[]", "output_relabel_configs", "[]", "if")] = Dynamic
+    [List("spec", "remoteWrite", "[]", "streamAggrConfig", "rules", "[]", "output_relabel_configs", "[]", "regex")] = Dynamic
+    [List("spec", "remoteWriteSettings", "maxDiskUsagePerURL")] = Dynamic
+    [List("spec", "scrapeClasses", "[]", "metricRelabelConfigs", "[]", "if")] = Dynamic
+    [List("spec", "scrapeClasses", "[]", "metricRelabelConfigs", "[]", "regex")] = Dynamic
+    [List("spec", "scrapeClasses", "[]", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "scrapeClasses", "[]", "relabelConfigs", "[]", "if")] = Dynamic
+    [List("spec", "scrapeClasses", "[]", "relabelConfigs", "[]", "regex")] = Dynamic
+    [List("spec", "scrapeConfigRelabelTemplate", "[]", "if")] = Dynamic
+    [List("spec", "scrapeConfigRelabelTemplate", "[]", "regex")] = Dynamic
+    [List("spec", "serviceScrapeRelabelTemplate", "[]", "if")] = Dynamic
+    [List("spec", "serviceScrapeRelabelTemplate", "[]", "regex")] = Dynamic
+    [List("spec", "staticScrapeRelabelTemplate", "[]", "if")] = Dynamic
+    [List("spec", "staticScrapeRelabelTemplate", "[]", "regex")] = Dynamic
+    [List("spec", "streamAggrConfig", "rules", "[]", "input_relabel_configs", "[]", "if")] = Dynamic
+    [List("spec", "streamAggrConfig", "rules", "[]", "input_relabel_configs", "[]", "regex")] = Dynamic
+    [List("spec", "streamAggrConfig", "rules", "[]", "match")] = Dynamic
+    [List("spec", "streamAggrConfig", "rules", "[]", "output_relabel_configs", "[]", "if")] = Dynamic
+    [List("spec", "streamAggrConfig", "rules", "[]", "output_relabel_configs", "[]", "regex")] = Dynamic
+  }
+  ["vmalertmanagerconfigs.operator.victoriametrics.com"] {
+    // Untyped in the CRD — generated as `Null` (unsettable) without this.
+    [List("spec", "receivers", "[]", "discord_configs", "[]", "http_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "receivers", "[]", "incidentio_configs", "[]", "http_config")] = Dynamic
+    [List("spec", "receivers", "[]", "jira_configs", "[]", "custom_fields", "*")] = Dynamic
+    [List("spec", "receivers", "[]", "jira_configs", "[]", "http_config")] = Dynamic
+    [List("spec", "receivers", "[]", "mattermost_configs", "[]", "http_config")] = Dynamic
+    [List("spec", "receivers", "[]", "msteams_configs", "[]", "http_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "receivers", "[]", "msteamsv2_configs", "[]", "http_config")] = Dynamic
+    [List("spec", "receivers", "[]", "rocketchat_configs", "[]", "http_config")] = Dynamic
+    [List("spec", "receivers", "[]", "sns_configs", "[]", "http_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "receivers", "[]", "victorops_configs", "[]", "http_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "receivers", "[]", "webex_configs", "[]", "http_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "receivers", "[]", "wechat_configs", "[]", "http_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "route", "routes", "[]")] = Dynamic
+  }
+  ["vmalertmanagers.operator.victoriametrics.com"] {
+    // Embedded Kubernetes objects the CRD declares as opaque.
+    [List("spec", "affinity")] = PodSpec.Affinity
+    [List("spec", "claimTemplates", "[]")] = PersistentVolumeClaim
+    [List("spec", "containers", "[]")] = PodSpec.Container
+    [List("spec", "initContainers", "[]")] = PodSpec.Container
+    [List("spec", "livenessProbe")] = Probe
+    [List("spec", "readinessProbe")] = Probe
+    [List("spec", "securityContext")] = PodSpec.PodSecurityContext
+    [List("spec", "serviceSpec", "spec")] = Service.ServiceSpec
+    [List("spec", "startupProbe")] = Probe
+    [List("spec", "topologySpreadConstraints", "[]")] = PodSpec.TopologySpreadConstraint
+    [List("spec", "volumes", "[]")] = Volume
+  }
+  ["vmalerts.operator.victoriametrics.com"] {
+    // Embedded Kubernetes objects the CRD declares as opaque.
+    [List("spec", "affinity")] = PodSpec.Affinity
+    [List("spec", "containers", "[]")] = PodSpec.Container
+    [List("spec", "initContainers", "[]")] = PodSpec.Container
+    [List("spec", "livenessProbe")] = Probe
+    [List("spec", "readinessProbe")] = Probe
+    [List("spec", "securityContext")] = PodSpec.PodSecurityContext
+    [List("spec", "serviceSpec", "spec")] = Service.ServiceSpec
+    [List("spec", "startupProbe")] = Probe
+    [List("spec", "topologySpreadConstraints", "[]")] = PodSpec.TopologySpreadConstraint
+    [List("spec", "volumes", "[]")] = Volume
+  }
+  ["vmauths.operator.victoriametrics.com"] {
+    // Embedded Kubernetes objects the CRD declares as opaque.
+    [List("spec", "affinity")] = PodSpec.Affinity
+    [List("spec", "containers", "[]")] = PodSpec.Container
+    [List("spec", "initContainers", "[]")] = PodSpec.Container
+    [List("spec", "livenessProbe")] = Probe
+    [List("spec", "readinessProbe")] = Probe
+    [List("spec", "securityContext")] = PodSpec.PodSecurityContext
+    [List("spec", "serviceSpec", "spec")] = Service.ServiceSpec
+    [List("spec", "startupProbe")] = Probe
+    [List("spec", "topologySpreadConstraints", "[]")] = PodSpec.TopologySpreadConstraint
+    [List("spec", "volumes", "[]")] = Volume
+    // Untyped in the CRD — generated as `Null` (unsettable) without this.
+    [List("spec", "unauthorizedAccessConfig")] = Dynamic
+    [List("spec", "unauthorizedUserAccessSpec", "url_map", "[]", "url_prefix")] = Dynamic
+    [List("spec", "unauthorizedUserAccessSpec", "url_prefix")] = Dynamic
+  }
+  ["vmclusters.operator.victoriametrics.com"] {
+    // Embedded Kubernetes objects the CRD declares as opaque.
+    [List("spec", "requestsLoadBalancer", "spec")] = Service.ServiceSpec
+    [List("spec", "vminsert", "affinity")] = PodSpec.Affinity
+    [List("spec", "vminsert", "containers", "[]")] = PodSpec.Container
+    [List("spec", "vminsert", "hpa")] = HorizontalPodAutoscaler.HorizontalPodAutoscalerSpec
+    [List("spec", "vminsert", "initContainers", "[]")] = PodSpec.Container
+    [List("spec", "vminsert", "livenessProbe")] = Probe
+    [List("spec", "vminsert", "readinessProbe")] = Probe
+    [List("spec", "vminsert", "securityContext")] = PodSpec.PodSecurityContext
+    [List("spec", "vminsert", "serviceSpec", "spec")] = Service.ServiceSpec
+    [List("spec", "vminsert", "startupProbe")] = Probe
+    [List("spec", "vminsert", "topologySpreadConstraints", "[]")] = PodSpec.TopologySpreadConstraint
+    [List("spec", "vminsert", "volumes", "[]")] = Volume
+    [List("spec", "vmselect", "affinity")] = PodSpec.Affinity
+    [List("spec", "vmselect", "claimTemplates", "[]")] = PersistentVolumeClaim
+    [List("spec", "vmselect", "containers", "[]")] = PodSpec.Container
+    [List("spec", "vmselect", "hpa")] = HorizontalPodAutoscaler.HorizontalPodAutoscalerSpec
+    [List("spec", "vmselect", "initContainers", "[]")] = PodSpec.Container
+    [List("spec", "vmselect", "livenessProbe")] = Probe
+    [List("spec", "vmselect", "readinessProbe")] = Probe
+    [List("spec", "vmselect", "securityContext")] = PodSpec.PodSecurityContext
+    [List("spec", "vmselect", "serviceSpec", "spec")] = Service.ServiceSpec
+    [List("spec", "vmselect", "startupProbe")] = Probe
+    [List("spec", "vmselect", "topologySpreadConstraints", "[]")] = PodSpec.TopologySpreadConstraint
+    [List("spec", "vmselect", "volumes", "[]")] = Volume
+    [List("spec", "vmstorage", "affinity")] = PodSpec.Affinity
+    [List("spec", "vmstorage", "claimTemplates", "[]")] = PersistentVolumeClaim
+    [List("spec", "vmstorage", "containers", "[]")] = PodSpec.Container
+    [List("spec", "vmstorage", "initContainers", "[]")] = PodSpec.Container
+    [List("spec", "vmstorage", "livenessProbe")] = Probe
+    [List("spec", "vmstorage", "readinessProbe")] = Probe
+    [List("spec", "vmstorage", "securityContext")] = PodSpec.PodSecurityContext
+    [List("spec", "vmstorage", "serviceSpec", "spec")] = Service.ServiceSpec
+    [List("spec", "vmstorage", "startupProbe")] = Probe
+    [List("spec", "vmstorage", "storage", "volumeClaimTemplate")] = PersistentVolumeClaim
+    [List("spec", "vmstorage", "topologySpreadConstraints", "[]")] = PodSpec.TopologySpreadConstraint
+    [List("spec", "vmstorage", "volumes", "[]")] = Volume
+  }
+  ["vmnodescrapes.operator.victoriametrics.com"] {
+    // Untyped in the CRD — generated as `Null` (unsettable) without this.
+    [List("spec", "metricRelabelConfigs", "[]", "if")] = Dynamic
+    [List("spec", "metricRelabelConfigs", "[]", "regex")] = Dynamic
+    [List("spec", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "relabelConfigs", "[]", "if")] = Dynamic
+    [List("spec", "relabelConfigs", "[]", "regex")] = Dynamic
+    [List("spec", "vm_scrape_params", "proxy_client_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "vm_scrape_params", "proxy_client_config", "tls_config")] = Dynamic
+  }
+  ["vmpodscrapes.operator.victoriametrics.com"] {
+    // Untyped in the CRD — generated as `Null` (unsettable) without this.
+    [List("spec", "podMetricsEndpoints", "[]", "metricRelabelConfigs", "[]", "if")] = Dynamic
+    [List("spec", "podMetricsEndpoints", "[]", "metricRelabelConfigs", "[]", "regex")] = Dynamic
+    [List("spec", "podMetricsEndpoints", "[]", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "podMetricsEndpoints", "[]", "relabelConfigs", "[]", "if")] = Dynamic
+    [List("spec", "podMetricsEndpoints", "[]", "relabelConfigs", "[]", "regex")] = Dynamic
+    [List("spec", "podMetricsEndpoints", "[]", "vm_scrape_params", "proxy_client_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "podMetricsEndpoints", "[]", "vm_scrape_params", "proxy_client_config", "tls_config")] = Dynamic
+  }
+  ["vmprobes.operator.victoriametrics.com"] {
+    // Untyped in the CRD — generated as `Null` (unsettable) without this.
+    [List("spec", "metricRelabelConfigs", "[]", "if")] = Dynamic
+    [List("spec", "metricRelabelConfigs", "[]", "regex")] = Dynamic
+    [List("spec", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "targets", "ingress", "relabelingConfigs", "[]", "if")] = Dynamic
+    [List("spec", "targets", "ingress", "relabelingConfigs", "[]", "regex")] = Dynamic
+    [List("spec", "targets", "kubernetes", "[]", "relabelingConfigs", "[]", "if")] = Dynamic
+    [List("spec", "targets", "kubernetes", "[]", "relabelingConfigs", "[]", "regex")] = Dynamic
+    [List("spec", "targets", "static", "relabelingConfigs", "[]", "if")] = Dynamic
+    [List("spec", "targets", "static", "relabelingConfigs", "[]", "regex")] = Dynamic
+    [List("spec", "targets", "staticConfig", "relabelingConfigs", "[]", "if")] = Dynamic
+    [List("spec", "targets", "staticConfig", "relabelingConfigs", "[]", "regex")] = Dynamic
+    [List("spec", "vm_scrape_params", "proxy_client_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "vm_scrape_params", "proxy_client_config", "tls_config")] = Dynamic
+  }
+  ["vmscrapeconfigs.operator.victoriametrics.com"] {
+    // Untyped in the CRD — generated as `Null` (unsettable) without this.
+    [List("spec", "azureSDConfigs", "[]", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "azureSDConfigs", "[]", "proxy_client_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "azureSDConfigs", "[]", "proxy_client_config", "tls_config")] = Dynamic
+    [List("spec", "consulAgentSDConfigs", "[]", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "consulAgentSDConfigs", "[]", "proxy_client_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "consulAgentSDConfigs", "[]", "proxy_client_config", "tls_config")] = Dynamic
+    [List("spec", "consulSDConfigs", "[]", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "consulSDConfigs", "[]", "proxy_client_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "consulSDConfigs", "[]", "proxy_client_config", "tls_config")] = Dynamic
+    [List("spec", "digitalOceanSDConfigs", "[]", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "digitalOceanSDConfigs", "[]", "proxy_client_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "digitalOceanSDConfigs", "[]", "proxy_client_config", "tls_config")] = Dynamic
+    [List("spec", "dockerSDConfigs", "[]", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "dockerSDConfigs", "[]", "proxy_client_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "dockerSDConfigs", "[]", "proxy_client_config", "tls_config")] = Dynamic
+    [List("spec", "dockerSwarmSDConfigs", "[]", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "dockerSwarmSDConfigs", "[]", "proxy_client_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "dockerSwarmSDConfigs", "[]", "proxy_client_config", "tls_config")] = Dynamic
+    [List("spec", "eurekaSDConfigs", "[]", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "eurekaSDConfigs", "[]", "proxy_client_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "eurekaSDConfigs", "[]", "proxy_client_config", "tls_config")] = Dynamic
+    [List("spec", "gceSDConfigs", "[]", "zone")] = Dynamic
+    [List("spec", "hetznerSDConfigs", "[]", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "hetznerSDConfigs", "[]", "proxy_client_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "hetznerSDConfigs", "[]", "proxy_client_config", "tls_config")] = Dynamic
+    [List("spec", "httpSDConfigs", "[]", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "httpSDConfigs", "[]", "proxy_client_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "httpSDConfigs", "[]", "proxy_client_config", "tls_config")] = Dynamic
+    [List("spec", "kubernetesSDConfigs", "[]", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "kubernetesSDConfigs", "[]", "proxy_client_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "kubernetesSDConfigs", "[]", "proxy_client_config", "tls_config")] = Dynamic
+    [List("spec", "kumaSDConfigs", "[]", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "kumaSDConfigs", "[]", "proxy_client_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "kumaSDConfigs", "[]", "proxy_client_config", "tls_config")] = Dynamic
+    [List("spec", "marathonSDConfigs", "[]", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "marathonSDConfigs", "[]", "proxy_client_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "marathonSDConfigs", "[]", "proxy_client_config", "tls_config")] = Dynamic
+    [List("spec", "metricRelabelConfigs", "[]", "if")] = Dynamic
+    [List("spec", "metricRelabelConfigs", "[]", "regex")] = Dynamic
+    [List("spec", "nomadSDConfigs", "[]", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "nomadSDConfigs", "[]", "proxy_client_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "nomadSDConfigs", "[]", "proxy_client_config", "tls_config")] = Dynamic
+    [List("spec", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "ovhcloudSDConfigs", "[]", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "ovhcloudSDConfigs", "[]", "proxy_client_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "ovhcloudSDConfigs", "[]", "proxy_client_config", "tls_config")] = Dynamic
+    [List("spec", "puppetDBSDConfigs", "[]", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "puppetDBSDConfigs", "[]", "proxy_client_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "puppetDBSDConfigs", "[]", "proxy_client_config", "tls_config")] = Dynamic
+    [List("spec", "relabelConfigs", "[]", "if")] = Dynamic
+    [List("spec", "relabelConfigs", "[]", "regex")] = Dynamic
+    [List("spec", "vm_scrape_params", "proxy_client_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "vm_scrape_params", "proxy_client_config", "tls_config")] = Dynamic
+    [List("spec", "vultrSDConfigs", "[]", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "vultrSDConfigs", "[]", "proxy_client_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "vultrSDConfigs", "[]", "proxy_client_config", "tls_config")] = Dynamic
+  }
+  ["vmservicescrapes.operator.victoriametrics.com"] {
+    // Untyped in the CRD — generated as `Null` (unsettable) without this.
+    [List("spec", "endpoints", "[]", "metricRelabelConfigs", "[]", "if")] = Dynamic
+    [List("spec", "endpoints", "[]", "metricRelabelConfigs", "[]", "regex")] = Dynamic
+    [List("spec", "endpoints", "[]", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "endpoints", "[]", "relabelConfigs", "[]", "if")] = Dynamic
+    [List("spec", "endpoints", "[]", "relabelConfigs", "[]", "regex")] = Dynamic
+    [List("spec", "endpoints", "[]", "vm_scrape_params", "proxy_client_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "endpoints", "[]", "vm_scrape_params", "proxy_client_config", "tls_config")] = Dynamic
+  }
+  ["vmsingles.operator.victoriametrics.com"] {
+    // Embedded Kubernetes objects the CRD declares as opaque.
+    [List("spec", "affinity")] = PodSpec.Affinity
+    [List("spec", "containers", "[]")] = PodSpec.Container
+    [List("spec", "initContainers", "[]")] = PodSpec.Container
+    [List("spec", "livenessProbe")] = Probe
+    [List("spec", "readinessProbe")] = Probe
+    [List("spec", "securityContext")] = PodSpec.PodSecurityContext
+    [List("spec", "serviceSpec", "spec")] = Service.ServiceSpec
+    [List("spec", "startupProbe")] = Probe
+    [List("spec", "topologySpreadConstraints", "[]")] = PodSpec.TopologySpreadConstraint
+    [List("spec", "volumes", "[]")] = Volume
+    // Untyped in the CRD — generated as `Null` (unsettable) without this.
+    [List("spec", "globalScrapeMetricRelabelConfigs", "[]", "if")] = Dynamic
+    [List("spec", "globalScrapeMetricRelabelConfigs", "[]", "regex")] = Dynamic
+    [List("spec", "globalScrapeRelabelConfigs", "[]", "if")] = Dynamic
+    [List("spec", "globalScrapeRelabelConfigs", "[]", "regex")] = Dynamic
+    [List("spec", "inlineRelabelConfig", "[]", "if")] = Dynamic
+    [List("spec", "inlineRelabelConfig", "[]", "regex")] = Dynamic
+    [List("spec", "nodeScrapeRelabelTemplate", "[]", "if")] = Dynamic
+    [List("spec", "nodeScrapeRelabelTemplate", "[]", "regex")] = Dynamic
+    [List("spec", "podScrapeRelabelTemplate", "[]", "if")] = Dynamic
+    [List("spec", "podScrapeRelabelTemplate", "[]", "regex")] = Dynamic
+    [List("spec", "probeScrapeRelabelTemplate", "[]", "if")] = Dynamic
+    [List("spec", "probeScrapeRelabelTemplate", "[]", "regex")] = Dynamic
+    [List("spec", "scrapeClasses", "[]", "metricRelabelConfigs", "[]", "if")] = Dynamic
+    [List("spec", "scrapeClasses", "[]", "metricRelabelConfigs", "[]", "regex")] = Dynamic
+    [List("spec", "scrapeClasses", "[]", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "scrapeClasses", "[]", "relabelConfigs", "[]", "if")] = Dynamic
+    [List("spec", "scrapeClasses", "[]", "relabelConfigs", "[]", "regex")] = Dynamic
+    [List("spec", "scrapeConfigRelabelTemplate", "[]", "if")] = Dynamic
+    [List("spec", "scrapeConfigRelabelTemplate", "[]", "regex")] = Dynamic
+    [List("spec", "serviceScrapeRelabelTemplate", "[]", "if")] = Dynamic
+    [List("spec", "serviceScrapeRelabelTemplate", "[]", "regex")] = Dynamic
+    [List("spec", "staticScrapeRelabelTemplate", "[]", "if")] = Dynamic
+    [List("spec", "staticScrapeRelabelTemplate", "[]", "regex")] = Dynamic
+    [List("spec", "streamAggrConfig", "rules", "[]", "input_relabel_configs", "[]", "if")] = Dynamic
+    [List("spec", "streamAggrConfig", "rules", "[]", "input_relabel_configs", "[]", "regex")] = Dynamic
+    [List("spec", "streamAggrConfig", "rules", "[]", "match")] = Dynamic
+    [List("spec", "streamAggrConfig", "rules", "[]", "output_relabel_configs", "[]", "if")] = Dynamic
+    [List("spec", "streamAggrConfig", "rules", "[]", "output_relabel_configs", "[]", "regex")] = Dynamic
+  }
+  ["vmstaticscrapes.operator.victoriametrics.com"] {
+    // Untyped in the CRD — generated as `Null` (unsettable) without this.
+    [List("spec", "targetEndpoints", "[]", "metricRelabelConfigs", "[]", "if")] = Dynamic
+    [List("spec", "targetEndpoints", "[]", "metricRelabelConfigs", "[]", "regex")] = Dynamic
+    [List("spec", "targetEndpoints", "[]", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "targetEndpoints", "[]", "relabelConfigs", "[]", "if")] = Dynamic
+    [List("spec", "targetEndpoints", "[]", "relabelConfigs", "[]", "regex")] = Dynamic
+    [List("spec", "targetEndpoints", "[]", "vm_scrape_params", "proxy_client_config", "oauth2", "tls_config")] = Dynamic
+    [List("spec", "targetEndpoints", "[]", "vm_scrape_params", "proxy_client_config", "tls_config")] = Dynamic
+  }
+}
