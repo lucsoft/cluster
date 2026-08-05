@@ -8,7 +8,7 @@ source {
   repoURL = "https://argoproj.github.io/argo-helm"
   chart = "argo-cd"
   // renovate: datasource=helm registryUrl=https://argoproj.github.io/argo-helm packageName=argo-cd
-  targetRevision = "9.7.1"
+  targetRevision = "10.3.0"
   helm {
     releaseName = "argocd"
     valuesObject {
