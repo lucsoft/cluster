@@ -1,4 +1,4 @@
-from denoland/deno:2.8.2
+from denoland/deno:2.9.5
 
 # renovate: datasource=github-releases depName=pkl packageName=apple/pkl
 env PKL_VERSION=0.32.1

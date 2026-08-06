@@ -10,7 +10,7 @@ run <<-EOF
 EOF
 
 # Cache Deno's deps in their own layer.
-from denoland/deno:2.8.2 as cache
+from denoland/deno:2.9.5 as cache
 workdir /app
 copy main.ts .
 run deno cache main.ts
