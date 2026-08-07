@@ -1,0 +1,29 @@
+amends "@ArgoCD/App.pkl"
+
+name = "emqx"
+namespace = "emqx"
+
+sources {
+  new {
+    repoURL = "https://github.com/lucsoft/cluster"
+    targetRevision = "main"
+    path = "personal-cluster"
+    plugin {
+      parameters {
+        new {
+          name = "path"
+          string = "components/Emqx.pkl"
+        }
+      }
+    }
+  }
+  // Sealed credentials the StatefulSet mounts; decrypted in-cluster by sops-secrets-operator.
+  new {
+    repoURL = "https://github.com/lucsoft/cluster"
+    targetRevision = "main"
+    path = "personal-cluster/secrets"
+    directory {
+      include = "emqx-auth.sops.yaml"
+    }
+  }
+}

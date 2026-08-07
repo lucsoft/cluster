@@ -1,0 +1,323 @@
+/// EMQX MQTT broker, single node.
+///
+/// Clustering left the free tier in EMQX 5.9 (BSL 1.1) — the Community License grants
+/// a single node only, so this is a 1-replica StatefulSet with `cluster.discovery_strategy`
+/// left at its `manual` default.
+///
+/// Configured entirely through env vars rather than a mounted emqx.conf: env sits highest
+/// in EMQX's precedence chain, and it keeps config in the pod spec so a change rolls the
+/// pod instead of silently sitting on disk.
+///
+/// Credentials come from the `emqx-auth` Secret sealed in secrets/emqx-auth.sops.yaml,
+/// applied by the second source of apps/Emqx.pkl.
+amends "@Workload/Workload.pkl"
+
+import "@k8s/api/core/v1/Service.pkl"
+import "@k8s/api/networking/v1/Ingress.pkl"
+import "@k8s/K8sResource.pkl"
+
+local moduleThis = this
+
+local hostName = "mqtt.lucsoft.de"
+
+local mqttPort = 1883
+local wsPort = 8083
+local dashboardPort = 18083
+
+// EMQX's built-in ws listener serves MQTT at /mqtt; the dashboard takes everything else.
+local wsPath = "/mqtt"
+
+local dataVolume = "emqx-data"
+local authVolume = "auth"
+local authPath = "/opt/emqx/auth"
+
+local authSecret = "emqx-auth"
+
+// Both keys live in the sealed Secret — see secrets/emqx-auth.sops.yaml.
+local bootstrapFileKey = "users.json"
+local cookieKey = "EMQX_NODE__COOKIE"
+local dashboardPasswordKey = "EMQX_DASHBOARD__DEFAULT_PASSWORD"
+
+// Seeds the built-in auth database on first boot. Bootstrap runs once, when the
+// authenticator is created — editing the Secret later does NOT re-import users;
+// change them through the dashboard or the /api/v5/authentication endpoint.
+local authentication = """
+  [{mechanism = password_based, backend = built_in_database, user_id_type = username, password_hash_algorithm = {name = sha256, salt_position = suffix}, bootstrap_file = "\(authPath)/\(bootstrapFileKey)", bootstrap_type = plain}]
+  """
+
+type = "StatefulSet"
+name = "emqx"
+namespace = "emqx"
+
+spec {
+  securityContext {
+    runAsUser = 1000
+    runAsGroup = 1000
+    // The image runs as uid 1000; fsGroup hands it the data PVC.
+    fsGroup = 1000
+    runAsNonRoot = true
+    seccompProfile {
+      type = "RuntimeDefault"
+    }
+  }
+  volumes {
+    new {
+      name = authVolume
+      secret {
+        secretName = authSecret
+        // Project only the bootstrap file — the other keys are env, not files.
+        items {
+          new {
+            key = bootstrapFileKey
+            path = bootstrapFileKey
+          }
+        }
+      }
+    }
+  }
+  containers {
+    new {
+      name = moduleThis.name
+      // renovate: datasource=docker packageName=emqx/emqx
+      image = "docker.io/emqx/emqx:6.2.2"
+      securityContext {
+        allowPrivilegeEscalation = false
+      }
+      ports {
+        new {
+          name = "mqtt"
+          containerPort = mqttPort
+          protocol = "TCP"
+        }
+        new {
+          name = "ws"
+          containerPort = wsPort
+          protocol = "TCP"
+        }
+        new {
+          name = "dashboard"
+          containerPort = dashboardPort
+          protocol = "TCP"
+        }
+      }
+      env {
+        // Rejects anonymous connects and fails closed when an auth backend errors.
+        new {
+          name = "EMQX_SECURITY_PROFILE"
+          value = "hardened"
+        }
+        // hardened refuses to boot on the image's default Erlang cookie.
+        new {
+          name = cookieKey
+          valueFrom {
+            secretKeyRef {
+              name = authSecret
+              key = cookieKey
+            }
+          }
+        }
+        // Only seeds the admin user on first boot; later edits go through the dashboard.
+        new {
+          name = dashboardPasswordKey
+          valueFrom {
+            secretKeyRef {
+              name = authSecret
+              key = dashboardPasswordKey
+            }
+          }
+        }
+        new {
+          name = "EMQX_AUTHENTICATION"
+          value = authentication
+        }
+        // The shipped acl.conf ends in an allow rule gated on the legacy profile, so under
+        // hardened every request falls through to no_match. Keep it permissive: authentication
+        // is the gate here, not per-topic authz.
+        new {
+          name = "EMQX_AUTHORIZATION__NO_MATCH"
+          value = "allow"
+        }
+        new {
+          name = "EMQX_AUTHORIZATION__DENY_ACTION"
+          value = "disconnect"
+        }
+        // hardened binds every listener to loopback by default.
+        new {
+          name = "EMQX_LISTENERS__TCP__DEFAULT__BIND"
+          value = "0.0.0.0:\(mqttPort)"
+        }
+        new {
+          name = "EMQX_LISTENERS__WS__DEFAULT__BIND"
+          value = "0.0.0.0:\(wsPort)"
+        }
+        new {
+          name = "EMQX_DASHBOARD__LISTENERS__HTTP__BIND"
+          value = "0.0.0.0:\(dashboardPort)"
+        }
+        // Traefik terminates TLS, so the self-signed ssl/wss listeners are dead weight.
+        new {
+          name = "EMQX_LISTENERS__SSL__DEFAULT__ENABLE"
+          value = "false"
+        }
+        new {
+          name = "EMQX_LISTENERS__WSS__DEFAULT__ENABLE"
+          value = "false"
+        }
+      }
+      volumeMounts {
+        new {
+          name = dataVolume
+          mountPath = "/opt/emqx/data"
+        }
+        new {
+          name = authVolume
+          mountPath = authPath
+          readOnly = true
+        }
+      }
+      readinessProbe {
+        httpGet {
+          path = "/status"
+          port = dashboardPort
+        }
+        initialDelaySeconds = 10
+        periodSeconds = 5
+      }
+      livenessProbe {
+        httpGet {
+          path = "/status"
+          port = dashboardPort
+        }
+        initialDelaySeconds = 60
+        periodSeconds = 30
+        failureThreshold = 3
+      }
+      resources {
+        requests {
+          ["memory"] = "512Mi"
+          ["cpu"] = "100m"
+        }
+      }
+    }
+  }
+}
+
+statefulSet {
+  spec {
+    volumeClaimTemplates {
+      new {
+        metadata {
+          name = dataVolume
+          namespace = moduleThis.namespace
+        }
+        spec {
+          accessModes {
+            "ReadWriteOnce"
+          }
+          resources {
+            requests {
+              ["storage"] = "2Gi"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+resources {
+  new Service {
+    metadata {
+      name = moduleThis.name
+      namespace = moduleThis.namespace
+    }
+    spec {
+      selector {
+        ["app.kubernetes.io/name"] = moduleThis.name
+      }
+      ports {
+        // Plain MQTT stays cluster-internal — outside traffic arrives as WSS via Traefik.
+        new {
+          name = "mqtt"
+          port = mqttPort
+          targetPort = mqttPort
+          protocol = "TCP"
+        }
+        new {
+          name = "ws"
+          port = wsPort
+          targetPort = wsPort
+          protocol = "TCP"
+        }
+        new {
+          name = "dashboard"
+          port = dashboardPort
+          targetPort = dashboardPort
+          protocol = "TCP"
+        }
+      }
+    }
+  }
+  new Ingress {
+    metadata {
+      name = moduleThis.name
+      namespace = moduleThis.namespace
+      annotations {
+        ["cert-manager.io/cluster-issuer"] = "lucsoft-allinkl"
+      }
+    }
+    spec {
+      ingressClassName = "traefik"
+      tls {
+        new {
+          hosts {
+            "*.lucsoft.de"
+            "lucsoft.de"
+          }
+          secretName = "lucsoft-tls"
+        }
+      }
+      rules {
+        new {
+          host = hostName
+          http {
+            paths {
+              // Traefik matches the longer rule first, so /mqtt wins over the dashboard's /.
+              new {
+                path = wsPath
+                pathType = "Prefix"
+                backend {
+                  service {
+                    name = moduleThis.name
+                    port {
+                      number = wsPort
+                    }
+                  }
+                }
+              }
+              new {
+                path = "/"
+                pathType = "Prefix"
+                backend {
+                  service {
+                    name = moduleThis.name
+                    port {
+                      number = dashboardPort
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+output {
+  value = resources
+  renderer = (K8sResource.output.renderer as YamlRenderer) {
+    isStream = true
+  }
+}

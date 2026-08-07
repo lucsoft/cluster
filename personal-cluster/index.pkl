@@ -3,6 +3,7 @@ amends "@Resource/Entrypoint.pkl"
 import "@ArgoCD/App.pkl"
 
 import "./apps/ArgoCD.pkl"
+import "./apps/Emqx.pkl"
 import "./apps/InfraCertManager.pkl"
 import "./apps/InfraIngressController.pkl"
 import "./apps/InfraSopsOperator.pkl"
@@ -37,6 +38,7 @@ local apps: Listing<App> = new {
   MinecraftServer
   MinecraftBedrockRelay
   PklPackages
+  Emqx
 }
 
 resources {
