@@ -109,6 +109,22 @@ sources {
         // exporter. It lives here rather than in components/ because the VMServiceScrape
         // CRD has no published Pkl binding yet.
         extraObjects {
+          // node-exporter needs hostNetwork, hostPID, hostPath and a hostPort — all four
+          // are denied by the baseline level Talos enforces cluster-wide by default.
+          // Declared here rather than via managedNamespaceMetadata, which needs the
+          // CreateNamespace sync option that @ArgoCD/App.pkl doesn't currently emit.
+          new {
+            apiVersion = "v1"
+            kind = "Namespace"
+            metadata {
+              name = "monitoring"
+              labels {
+                ["pod-security.kubernetes.io/enforce"] = "privileged"
+                ["pod-security.kubernetes.io/audit"] = "privileged"
+                ["pod-security.kubernetes.io/warn"] = "privileged"
+              }
+            }
+          }
           new {
             apiVersion = "operator.victoriametrics.com/v1beta1"
             kind = "VMServiceScrape"

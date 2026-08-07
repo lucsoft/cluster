@@ -1,11 +1,11 @@
 /// Bridges MQTT into Prometheus: subscribes to the broker, keeps the last payload per
 /// device in memory and exposes it on /metrics for VictoriaMetrics to scrape.
 ///
-/// Subscribed to `+/status/switch:0` rather than `+/status/+` on purpose — the exporter
-/// replaces a device's whole metric set on every message, so a `sys` or `wifi` payload
-/// would wipe the power readings until the next switch update.
+/// Assumes one switch per device: the cache is keyed on device + metric, so a `switch:1`
+/// would overwrite `switch:0`. Payloads without a configured field (sys, wifi, cloud) are
+/// simply skipped, which is why the whole `status` tree can be subscribed at once.
 ///
-/// Shelly Gen2 only publishes these topics when "generic status update" is enabled in
+/// Shelly Gen2/Gen3 only publish these topics when "generic status update" is enabled in
 /// Settings -> MQTT; without it the device just emits `<device>/events/rpc`.
 ///
 /// Broker credentials come from the `mqtt2prometheus-auth` Secret sealed in
@@ -30,11 +30,11 @@ local authSecret = "mqtt2prometheus-auth"
 local brokerHost = "emqx.emqx.svc.cluster.local"
 local brokerPort = 1883
 
-// Gen2 Shelly switch status; nested fields use the dotted gojsonq path syntax.
+// Gen2/Gen3 Shelly status; nested fields use the dotted gojsonq path syntax.
 local config = """
   mqtt:
     server: tcp://\(brokerHost):\(brokerPort)
-    topic_path: "+/status/switch:0"
+    topic_path: "+/status/+"
     device_id_regex: "(?P<deviceid>[^/]+)/status/.*"
     client_id: mqtt2prometheus
     qos: 0
@@ -70,6 +70,10 @@ local config = """
     - prom_name: shelly_output_state
       mqtt_name: output
       help: Relay state, 1 when closed
+      type: gauge
+    - prom_name: shelly_wifi_rssi_dbm
+      mqtt_name: rssi
+      help: WiFi signal strength, from the wifi status topic
       type: gauge
   """
 
