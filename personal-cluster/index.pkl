@@ -9,6 +9,8 @@ import "./apps/InfraIngressController.pkl"
 import "./apps/InfraSopsOperator.pkl"
 import "./apps/MinecraftBedrockRelay.pkl"
 import "./apps/MinecraftServer.pkl"
+import "./apps/Monitoring.pkl"
+import "./apps/Mqtt2Prometheus.pkl"
 import "./apps/PklPackages.pkl"
 import "./apps/Satisfactory.pkl"
 
@@ -39,6 +41,8 @@ local apps: Listing<App> = new {
   MinecraftBedrockRelay
   PklPackages
   Emqx
+  Monitoring
+  Mqtt2Prometheus
 }
 
 resources {

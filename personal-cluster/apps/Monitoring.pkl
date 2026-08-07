@@ -1,0 +1,146 @@
+/// victoria-metrics-k8s-stack: operator + CRDs, VMSingle, VMAgent, Grafana,
+/// kube-state-metrics and node-exporter in one release.
+amends "@ArgoCD/App.pkl"
+
+import "@ArgoCD/Application.pkl"
+
+name = "monitoring"
+namespace = "monitoring"
+
+local hostName = "grafana.lucsoft.de"
+
+// The operator injects the serving cert into its own webhook after the chart applies it.
+ignoreDifferences = new Listing<Application.ComparedToIgnoreDifference> {
+  new {
+    group = "admissionregistration.k8s.io"
+    kind = "ValidatingWebhookConfiguration"
+    jqPathExpressions {
+      ".webhooks[]?.clientConfig.caBundle"
+    }
+  }
+}
+
+sources {
+  new {
+    repoURL = "https://victoriametrics.github.io/helm-charts"
+    chart = "victoria-metrics-k8s-stack"
+    // renovate: datasource=helm registryUrl=https://victoriametrics.github.io/helm-charts packageName=victoria-metrics-k8s-stack
+    targetRevision = "0.90.0"
+    helm {
+      releaseName = "monitoring"
+      valuesObject {
+        // Without this the generated VMServiceScrapes select on the wrong release label under ArgoCD.
+        argocdReleaseOverride = "monitoring"
+        vmsingle {
+          spec {
+            retentionPeriod = "1y"
+            storage {
+              resources {
+                requests {
+                  ["storage"] = "20Gi"
+                }
+              }
+            }
+          }
+        }
+        grafana {
+          enabled = true
+          // Chart-generated admin passwords would be re-rolled on every sync.
+          admin {
+            existingSecret = "grafana-admin"
+            userKey = "admin-user"
+            passwordKey = "admin-password"
+          }
+          persistence {
+            enabled = true
+            size = "2Gi"
+          }
+          ingress {
+            enabled = true
+            ingressClassName = "traefik"
+            annotations {
+              ["cert-manager.io/cluster-issuer"] = "lucsoft-allinkl"
+            }
+            hosts {
+              hostName
+            }
+            // Same wildcard shape as the other namespaces, so cert-manager mints one cert per namespace.
+            tls {
+              new {
+                secretName = "lucsoft-tls"
+                hosts {
+                  "*.lucsoft.de"
+                  "lucsoft.de"
+                }
+              }
+            }
+          }
+          ["grafana.ini"] {
+            server {
+              root_url = "https://\(hostName)"
+            }
+          }
+        }
+        // Talos doesn't expose these control-plane components to the pod network,
+        // so their scrapes would only ever produce TargetDown noise.
+        kubeControllerManager {
+          enabled = false
+        }
+        kubeScheduler {
+          enabled = false
+        }
+        kubeEtcd {
+          enabled = false
+        }
+        kubeProxy {
+          enabled = false
+        }
+        // No notification receiver configured yet — flip all three on together.
+        alertmanager {
+          enabled = false
+        }
+        vmalert {
+          enabled = false
+        }
+        defaultRules {
+          enabled = false
+        }
+        // VMAgent runs with selectAllByDefault, so this CR is enough to pull in the MQTT
+        // exporter. It lives here rather than in components/ because the VMServiceScrape
+        // CRD has no published Pkl binding yet.
+        extraObjects {
+          new {
+            apiVersion = "operator.victoriametrics.com/v1beta1"
+            kind = "VMServiceScrape"
+            metadata {
+              name = "mqtt2prometheus"
+              namespace = "monitoring"
+            }
+            spec {
+              selector {
+                matchLabels {
+                  ["app.kubernetes.io/name"] = "mqtt2prometheus"
+                }
+              }
+              endpoints {
+                new {
+                  port = "metrics"
+                  interval = "15s"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  // Grafana admin credentials; decrypted in-cluster by sops-secrets-operator.
+  new {
+    repoURL = "https://github.com/lucsoft/cluster"
+    targetRevision = "main"
+    path = "personal-cluster/secrets"
+    directory {
+      include = "grafana-admin.sops.yaml"
+    }
+  }
+}

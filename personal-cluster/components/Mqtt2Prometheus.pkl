@@ -1,0 +1,210 @@
+/// Bridges MQTT into Prometheus: subscribes to the broker, keeps the last payload per
+/// device in memory and exposes it on /metrics for VictoriaMetrics to scrape.
+///
+/// Subscribed to `+/status/switch:0` rather than `+/status/+` on purpose — the exporter
+/// replaces a device's whole metric set on every message, so a `sys` or `wifi` payload
+/// would wipe the power readings until the next switch update.
+///
+/// Shelly Gen2 only publishes these topics when "generic status update" is enabled in
+/// Settings -> MQTT; without it the device just emits `<device>/events/rpc`.
+///
+/// Broker credentials come from the `mqtt2prometheus-auth` Secret sealed in
+/// secrets/mqtt2prometheus-auth.sops.yaml — EMQX runs with the hardened security profile
+/// and rejects anonymous connects.
+amends "@Workload/Workload.pkl"
+
+import "@k8s/api/core/v1/ConfigMap.pkl"
+import "@k8s/api/core/v1/Service.pkl"
+import "@k8s/K8sResource.pkl"
+
+local moduleThis = this
+
+local httpPort = 9641
+
+local configVolume = "config"
+local configPath = "/etc/mqtt2prometheus"
+local configFile = "config.yaml"
+
+local authSecret = "mqtt2prometheus-auth"
+
+local brokerHost = "emqx.emqx.svc.cluster.local"
+local brokerPort = 1883
+
+// Gen2 Shelly switch status; nested fields use the dotted gojsonq path syntax.
+local config = """
+  mqtt:
+    server: tcp://\(brokerHost):\(brokerPort)
+    topic_path: "+/status/switch:0"
+    device_id_regex: "(?P<deviceid>[^/]+)/status/.*"
+    client_id: mqtt2prometheus
+    qos: 0
+  cache:
+    timeout: 24h
+  json_parsing:
+    separator: .
+  metrics:
+    - prom_name: shelly_power_watts
+      mqtt_name: apower
+      help: Instantaneous active power
+      type: gauge
+    - prom_name: shelly_voltage_volts
+      mqtt_name: voltage
+      help: Line voltage
+      type: gauge
+    - prom_name: shelly_current_amperes
+      mqtt_name: current
+      help: Line current
+      type: gauge
+    - prom_name: shelly_frequency_hertz
+      mqtt_name: freq
+      help: Line frequency
+      type: gauge
+    - prom_name: shelly_energy_watthours_total
+      mqtt_name: aenergy.total
+      help: Lifetime energy counter reported by the device
+      type: counter
+    - prom_name: shelly_temperature_celsius
+      mqtt_name: temperature.tC
+      help: Internal device temperature
+      type: gauge
+    - prom_name: shelly_output_state
+      mqtt_name: output
+      help: Relay state, 1 when closed
+      type: gauge
+  """
+
+name = "mqtt2prometheus"
+namespace = "monitoring"
+
+spec {
+  securityContext {
+    runAsUser = 1000
+    runAsGroup = 1000
+    runAsNonRoot = true
+    seccompProfile {
+      type = "RuntimeDefault"
+    }
+  }
+  volumes {
+    new {
+      name = configVolume
+      configMap {
+        name = moduleThis.name
+      }
+    }
+  }
+  containers {
+    new {
+      name = moduleThis.name
+      // renovate: datasource=docker packageName=ghcr.io/hikhvar/mqtt2prometheus
+      image = "ghcr.io/hikhvar/mqtt2prometheus:v0.1.7"
+      securityContext {
+        allowPrivilegeEscalation = false
+        readOnlyRootFilesystem = true
+        capabilities {
+          drop {
+            "ALL"
+          }
+        }
+      }
+      args {
+        "-config=\(configPath)/\(configFile)"
+        "-listen-port=\(httpPort)"
+      }
+      env {
+        // Both override the (absent) mqtt.user/mqtt.password keys in the config file.
+        new {
+          name = "MQTT2PROM_MQTT_USER"
+          valueFrom {
+            secretKeyRef {
+              name = authSecret
+              key = "MQTT2PROM_MQTT_USER"
+            }
+          }
+        }
+        new {
+          name = "MQTT2PROM_MQTT_PASSWORD"
+          valueFrom {
+            secretKeyRef {
+              name = authSecret
+              key = "MQTT2PROM_MQTT_PASSWORD"
+            }
+          }
+        }
+      }
+      ports {
+        new {
+          name = "metrics"
+          containerPort = httpPort
+          protocol = "TCP"
+        }
+      }
+      volumeMounts {
+        new {
+          name = configVolume
+          mountPath = configPath
+          readOnly = true
+        }
+      }
+      readinessProbe {
+        httpGet {
+          path = "/metrics"
+          port = httpPort
+        }
+        initialDelaySeconds = 5
+        periodSeconds = 10
+      }
+      resources {
+        requests {
+          ["memory"] = "64Mi"
+          ["cpu"] = "10m"
+        }
+      }
+    }
+  }
+}
+
+deployment {
+  spec {
+    // A second replica would double-subscribe and duplicate every sample.
+    replicas = 1
+  }
+}
+
+resources {
+  new ConfigMap {
+    metadata {
+      name = moduleThis.name
+      namespace = moduleThis.namespace
+    }
+    data {
+      [configFile] = config
+    }
+  }
+  new Service {
+    metadata {
+      name = moduleThis.name
+      namespace = moduleThis.namespace
+    }
+    spec {
+      selector {
+        ["app.kubernetes.io/name"] = moduleThis.name
+      }
+      ports {
+        new {
+          name = "metrics"
+          port = httpPort
+          targetPort = httpPort
+          protocol = "TCP"
+        }
+      }
+    }
+  }
+}
+
+output {
+  value = resources
+  renderer = (K8sResource.output.renderer as YamlRenderer) {
+    isStream = true
+  }
+}

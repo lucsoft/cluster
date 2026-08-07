@@ -1,0 +1,29 @@
+amends "@ArgoCD/App.pkl"
+
+name = "mqtt2prometheus"
+namespace = "monitoring"
+
+sources {
+  new {
+    repoURL = "https://github.com/lucsoft/cluster"
+    targetRevision = "main"
+    path = "personal-cluster"
+    plugin {
+      parameters {
+        new {
+          name = "path"
+          string = "components/Mqtt2Prometheus.pkl"
+        }
+      }
+    }
+  }
+  // MQTT broker credentials; decrypted in-cluster by sops-secrets-operator.
+  new {
+    repoURL = "https://github.com/lucsoft/cluster"
+    targetRevision = "main"
+    path = "personal-cluster/secrets"
+    directory {
+      include = "mqtt2prometheus-auth.sops.yaml"
+    }
+  }
+}
