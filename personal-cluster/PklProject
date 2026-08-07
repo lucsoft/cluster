@@ -22,4 +22,7 @@ dependencies {
   ["sops"] {
     uri = "package://pkl-pkgs.lucsoft.de/packages/com.SopsSecretsOperator@0.5.13"
   }
+  ["Traefik"] {
+    uri = "package://pkl-pkgs.lucsoft.de/packages/io.Traefik@0.5.13"
+  }
 }

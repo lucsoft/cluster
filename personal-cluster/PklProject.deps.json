@@ -57,6 +57,13 @@
         "sha256": "39ca9c267170175c013c7cf3a9058447aba5f7c7fbd738c0b98a050539e62f33"
       }
     },
+    "package://pkl-pkgs.lucsoft.de/packages/io.Traefik@0": {
+      "type": "remote",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/io.Traefik@0.5.13",
+      "checksums": {
+        "sha256": "547b50469c3d22826336f06da1fb5da4c0f8a56e135d27ff57bd30978e294ee3"
+      }
+    },
     "package://pkl-pkgs.lucsoft.de/packages/io.Fission@0": {
       "type": "remote",
       "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/io.Fission@0.5.13",

@@ -8,6 +8,10 @@
 /// in EMQX's precedence chain, and it keeps config in the pod spec so a change rolls the
 /// pod instead of silently sitting on disk.
 ///
+/// Everything reaches the broker through Traefik on 443 — the dashboard and MQTT-over-WSS
+/// as plain HTTP routes, native MQTT as a TLS-terminating TCP route matched by SNI. No
+/// hostPort, so the namespace needs no relaxed pod-security level.
+///
 /// Credentials come from the `emqx-auth` Secret sealed in secrets/emqx-auth.sops.yaml,
 /// applied by the second source of apps/Emqx.pkl.
 amends "@Workload/Workload.pkl"
@@ -15,10 +19,15 @@ amends "@Workload/Workload.pkl"
 import "@k8s/api/core/v1/Service.pkl"
 import "@k8s/api/networking/v1/Ingress.pkl"
 import "@k8s/K8sResource.pkl"
+import "@Traefik/IngressRouteTCP.pkl"
 
 local moduleThis = this
 
 local hostName = "mqtt.lucsoft.de"
+
+// Native MQTT needs its own hostname: TCP routers run before HTTP routers on a shared
+// entrypoint, so a HostSNI match on `hostName` would swallow the dashboard and WSS too.
+local mqttHostName = "mqtts.lucsoft.de"
 
 local mqttPort = 1883
 local wsPort = 8083
@@ -80,8 +89,14 @@ spec {
       name = moduleThis.name
       // renovate: datasource=docker packageName=emqx/emqx
       image = "docker.io/emqx/emqx:6.2.2"
+      // Runs as uid 1000 on ports above 1024, so it needs none of them.
       securityContext {
         allowPrivilegeEscalation = false
+        capabilities {
+          drop {
+            "ALL"
+          }
+        }
       }
       ports {
         new {
@@ -236,7 +251,7 @@ resources {
         ["app.kubernetes.io/name"] = moduleThis.name
       }
       ports {
-        // Plain MQTT stays cluster-internal — outside traffic arrives as WSS via Traefik.
+        // For in-cluster clients; external ones reach 1883 via the node's hostPort.
         new {
           name = "mqtt"
           port = mqttPort
@@ -255,6 +270,35 @@ resources {
           targetPort = dashboardPort
           protocol = "TCP"
         }
+      }
+    }
+  }
+  // Native MQTT over TLS on 443, picked out of the shared entrypoint by SNI. Traefik
+  // terminates with the wildcard cert and forwards plaintext to 1883 inside the cluster,
+  // so clients get real TLS without EMQX holding a cert or claiming a hostPort.
+  new IngressRouteTCP {
+    metadata {
+      name = moduleThis.name
+      namespace = moduleThis.namespace
+    }
+    spec {
+      entryPoints {
+        "websecure"
+      }
+      routes {
+        new {
+          match = "HostSNI(`\(mqttHostName)`)"
+          services {
+            new {
+              name = moduleThis.name
+              port = mqttPort
+            }
+          }
+        }
+      }
+      tls {
+        // Minted into this namespace by the Ingress below.
+        secretName = "lucsoft-tls"
       }
     }
   }
