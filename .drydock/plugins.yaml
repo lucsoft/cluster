@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/sholdee/drydock/main/schemas/plugin-policy.schema.json
+apiVersion: drydock.sholdee.dev/v1alpha1
+kind: PluginPolicy
+bootstrap:
+  entrypoints:
+    - name: personal-cluster
+      plugin: pkl
+      sourcePath: personal-cluster
+      parameters:
+        - name: path
+          string: index.pkl
+plugins:
+  pkl:
+    engine: container
+    image: ghcr.io/lucsoft/argo-pkl-plugin:latest
+    allowMutableImageTag: true
+    network: default
+    configManagementPlugin:
+      discover:
+        fileName: PklProject
+    copy:
+      scope: repository
+      include:
+        - packages/**
+        - personal-cluster/**
+    cacheMounts:
+      - name: pkl-cache
+        target: /drydock-cache/pkl-cache
+    generate:
+      command:
+        [
+          "pkl",
+          "eval",
+          "--cache-dir",
+          "/drydock-cache/pkl-cache",
+          "{{param:path}}",
+        ]
+    parameters:
+      allow:
+        - name: path
+          type: string
+          required: true
+          path:
+            base: source
+            allow:
+              - index.pkl
+              - components/*.pkl
+        - name: pkl_modules
+          type: array
