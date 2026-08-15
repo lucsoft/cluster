@@ -1,0 +1,18 @@
+amends "@ArgoCD/App.pkl"
+
+name = "porffor"
+namespace = "fission"
+
+source {
+  repoURL = "https://github.com/lucsoft/cluster"
+  targetRevision = "main"
+  path = "personal-cluster"
+  plugin {
+    parameters {
+      new {
+        name = "path"
+        string = "components/Porffor.pkl"
+      }
+    }
+  }
+}

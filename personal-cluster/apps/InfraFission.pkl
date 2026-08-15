@@ -1,0 +1,61 @@
+amends "@ArgoCD/App.pkl"
+import "@ArgoCD/Application.pkl"
+
+name = "infra-fission"
+namespace = "fission"
+
+// cainjector fills the caBundle in-cluster, so it never matches the rendered placeholder.
+ignoreDifferences = new Listing<Application.ComparedToIgnoreDifference> {
+  new {
+    group = "admissionregistration.k8s.io"
+    kind = "MutatingWebhookConfiguration"
+    jqPathExpressions {
+      ".webhooks[]?.clientConfig.caBundle"
+    }
+  }
+  new {
+    group = "admissionregistration.k8s.io"
+    kind = "ValidatingWebhookConfiguration"
+    jqPathExpressions {
+      ".webhooks[]?.clientConfig.caBundle"
+    }
+  }
+}
+
+sources {
+  // The chart ships no CRDs; upstream expects `kubectl create -k crds/v1` at the matching tag.
+  new {
+    repoURL = "https://github.com/fission/fission"
+    // renovate: datasource=github-releases packageName=fission/fission
+    targetRevision = "v1.27.0"
+    path = "crds/v1"
+  }
+  new {
+    repoURL = "https://fission.github.io/fission-charts"
+    chart = "fission-all"
+    // renovate: datasource=helm registryUrl=https://fission.github.io/fission-charts packageName=fission-all
+    targetRevision = "1.27.0"
+    helm {
+      releaseName = "fission"
+      valuesObject {
+        // Traefik fronts everything; a LoadBalancer here would ask Hetzner for an LB we don't need.
+        routerServiceType = "ClusterIP"
+        // The chart renders RBAC into this namespace but never creates it, so keep it on the release namespace.
+        defaultNamespace = "fission"
+        // Reports the install to upstream's Google Analytics property.
+        analytics = false
+        webhook {
+          // Otherwise the chart mints a self-signed cert per render, which ArgoCD would rotate on every sync.
+          certManager {
+            enabled = true
+          }
+        }
+        internalAuth {
+          // The chart keeps this HMAC secret stable via Helm `lookup`, which returns nothing
+          // under ArgoCD — leaving it on regenerates the secret every sync and breaks running pods.
+          enabled = false
+        }
+      }
+    }
+  }
+}

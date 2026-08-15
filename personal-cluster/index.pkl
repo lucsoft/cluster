@@ -2,9 +2,11 @@ amends "@Resource/Entrypoint.pkl"
 
 import "@ArgoCD/App.pkl"
 
+import "./apps/Andromeda.pkl"
 import "./apps/ArgoCD.pkl"
 import "./apps/Emqx.pkl"
 import "./apps/InfraCertManager.pkl"
+import "./apps/InfraFission.pkl"
 import "./apps/InfraIngressController.pkl"
 import "./apps/InfraSopsOperator.pkl"
 import "./apps/MinecraftBedrockRelay.pkl"
@@ -12,6 +14,7 @@ import "./apps/MinecraftServer.pkl"
 import "./apps/Monitoring.pkl"
 import "./apps/Mqtt2Prometheus.pkl"
 import "./apps/PklPackages.pkl"
+import "./apps/Porffor.pkl"
 import "./apps/Satisfactory.pkl"
 
 local apps: Listing<App> = new {
@@ -37,6 +40,9 @@ local apps: Listing<App> = new {
   InfraIngressController
   InfraSopsOperator
   Satisfactory
+  InfraFission
+  Porffor
+  Andromeda
   MinecraftServer
   MinecraftBedrockRelay
   PklPackages

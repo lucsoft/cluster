@@ -1,4 +1,18 @@
 services:
+  fission-andromeda-env:
+    image: ghcr.io/lucsoft/fission-andromeda-env:0.1.0
+    build:
+      context: tools/fission-andromeda-env
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+  fission-porffor-env:
+    image: ghcr.io/lucsoft/fission-porffor-env:0.1.0
+    build:
+      context: tools/fission-porffor-env
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
   mc-router-scaler:
     image: ghcr.io/lucsoft/mc-router-scaler:0.1.1
     build:
