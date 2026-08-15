@@ -12,7 +12,7 @@ bootstrap:
 plugins:
   pkl:
     engine: container
-    image: ghcr.io/lucsoft/argo-pkl-plugin:latest
+    image: ghcr.io/lucsoft/argo-pkl-plugin:0.32.1
     allowMutableImageTag: true
     network: default
     configManagementPlugin:
