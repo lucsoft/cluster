@@ -9,6 +9,7 @@
 amends "@Resource/Entrypoint.pkl"
 
 import "@k8s/api/networking/v1/Ingress.pkl"
+import "@Traefik/Middleware.pkl"
 import "@Fission/Environment.pkl"
 import "@Fission/Function.pkl"
 import "@Fission/HTTPTrigger.pkl"
@@ -22,6 +23,10 @@ local hostName = "porffor.lucsoft.de"
 // The router fronts every function in the cluster; it is installed by apps/InfraFission.pkl.
 local routerService = "router"
 local routerPort = 80
+
+// Fission rejects a bare "/" for both relativeurl and prefix, so the trigger owns a real
+// path and Traefik rewrites the domain root onto it.
+local functionPath = "/hello"
 
 local hello = """
   const runtime = 'Porffor';
@@ -100,11 +105,23 @@ resources {
         type = "name"
         name = functionName
       }
-      // Host-gated so this and the Andromeda trigger can both own "/" on the shared router.
+      // Host-gated so this and the Andromeda trigger can share the router without path collisions.
       host = hostName
-      relativeurl = "/"
+      relativeurl = functionPath
       methods {
         "GET"
+      }
+    }
+  }
+  // Rewrites every path on this host onto the trigger, so the domain root serves the function.
+  new Middleware {
+    metadata {
+      name = functionName
+      namespace = fissionNamespace
+    }
+    spec {
+      replacePath {
+        path = functionPath
       }
     }
   }
@@ -114,6 +131,7 @@ resources {
       namespace = fissionNamespace
       annotations {
         ["cert-manager.io/cluster-issuer"] = "lucsoft-allinkl"
+        ["traefik.ingress.kubernetes.io/router.middlewares"] = "\(fissionNamespace)-\(functionName)@kubernetescrd"
       }
     }
     spec {
