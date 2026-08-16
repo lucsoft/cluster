@@ -1,0 +1,155 @@
+amends "package://pkg.pkl-lang.org/pkl-pantry/k8s.contrib.crd@4.2.6#/generate.pkl"
+
+import "pkl:yaml"
+
+// renovate: datasource=github-releases packageName=envoyproxy/gateway
+local version = "v1.9.0"
+local crdBasePath =
+  "https://raw.githubusercontent.com/envoyproxy/gateway/\(version)/charts/gateway-crds-helm/templates/generated"
+
+/// Since v1.9.0 the CRDs ship in their own `gateway-crds-helm` chart, and as chart *templates*
+/// rather than `crds/`, so every file is wrapped in a `{{- if .Values.crds.envoyGateway.enabled }}`
+/// guard that no YAML parser accepts. Both guard lines sit at column zero, so dropping every
+/// line that starts with `{{` leaves the CRD itself untouched.
+local function stripHelmGuard(text: String): String =
+  text.split("\n").filter((line) -> !line.startsWith("{{")).join("\n")
+
+/// The chart has no kustomization or index to enumerate, so the kinds are listed by hand. This is
+/// every CRD in the group; all eight serve `v1alpha1` only, which `baseApiGroup` flattens to the
+/// package root.
+local crds =
+  List(
+    "backends",
+    "backendtrafficpolicies",
+    "clienttrafficpolicies",
+    "envoyextensionpolicies",
+    "envoypatchpolicies",
+    "envoyproxies",
+    "httproutefilters",
+    "securitypolicies",
+  )
+
+source = crdBasePath
+
+baseApiGroup = "v1alpha1.gateway.envoyproxy.io"
+
+k8sImportPath = "@k8s"
+
+sourceContents =
+  new YamlRenderer {
+    isStream = true
+  }.renderDocument(
+    crds.map((name) ->
+      (
+        new yaml.Parser {}.parse(
+          stripHelmGuard(read("\(crdBasePath)/gateway.envoyproxy.io_\(name).yaml").text),
+        ) as Dynamic
+      )
+    ),
+  )
+
+/// Every path below is `x-kubernetes-preserve-unknown-fields` *without* a `type`, which generates as
+/// `Null` — a field whose only legal value is `null`. Two groups matter:
+///
+/// 1. The five `provider.kubernetes.*.patch.value` fields are **required**, so without this the
+///    strategic-merge patch escape hatch for the Envoy Deployment/DaemonSet/HPA/PDB/Service cannot
+///    be constructed at all.
+/// 2. The rest are Envoy Gateway's own untyped escape hatches — Wasm/Lua/dynamic-module config and
+///    the two JSON-patch `value` fields.
+///
+/// `Dynamic` is as precise as the CRD allows. Fields that are untyped but carry `anyOf` (the
+/// int-or-string quantities such as `bufferLimit` or `maxUnavailable`) need no entry — the
+/// generator already resolves those to `(Int|String)`.
+converters {
+  ["backendtrafficpolicies.gateway.envoyproxy.io"] {
+    [List("spec", "loadBalancer", "dynamicModule", "config")] = Dynamic
+  }
+  ["envoyextensionpolicies.gateway.envoyproxy.io"] {
+    [List("spec", "dynamicModule", "[]", "config")] = Dynamic
+    [List("spec", "extProc", "[]", "backendSettings", "loadBalancer", "dynamicModule", "config")] =
+      Dynamic
+    [List("spec", "lua", "[]", "filterContext")] = Dynamic
+    [List("spec", "wasm", "[]", "config")] = Dynamic
+  }
+  ["envoypatchpolicies.gateway.envoyproxy.io"] {
+    [List("spec", "jsonPatches", "[]", "operation", "value")] = Dynamic
+  }
+  ["envoyproxies.gateway.envoyproxy.io"] {
+    [List("spec", "bootstrap", "jsonPatches", "[]", "value")] = Dynamic
+    // Required in the CRD — the class is unconstructible without these.
+    [List("spec", "provider", "kubernetes", "envoyDaemonSet", "patch", "value")] = Dynamic
+    [List("spec", "provider", "kubernetes", "envoyDeployment", "patch", "value")] = Dynamic
+    [List("spec", "provider", "kubernetes", "envoyHpa", "patch", "value")] = Dynamic
+    [List("spec", "provider", "kubernetes", "envoyPDB", "patch", "value")] = Dynamic
+    [List("spec", "provider", "kubernetes", "envoyService", "patch", "value")] = Dynamic
+    [List(
+      "spec",
+      "telemetry",
+      "accessLog",
+      "settings",
+      "[]",
+      "sinks",
+      "[]",
+      "als",
+      "backendSettings",
+      "loadBalancer",
+      "dynamicModule",
+      "config",
+    )] = Dynamic
+    [List(
+      "spec",
+      "telemetry",
+      "accessLog",
+      "settings",
+      "[]",
+      "sinks",
+      "[]",
+      "openTelemetry",
+      "backendSettings",
+      "loadBalancer",
+      "dynamicModule",
+      "config",
+    )] = Dynamic
+    [List(
+      "spec",
+      "telemetry",
+      "metrics",
+      "sinks",
+      "[]",
+      "openTelemetry",
+      "backendSettings",
+      "loadBalancer",
+      "dynamicModule",
+      "config",
+    )] = Dynamic
+    [List(
+      "spec",
+      "telemetry",
+      "tracing",
+      "provider",
+      "backendSettings",
+      "loadBalancer",
+      "dynamicModule",
+      "config",
+    )] = Dynamic
+  }
+  ["securitypolicies.gateway.envoyproxy.io"] {
+    [List("spec", "extAuth", "grpc", "backendSettings", "loadBalancer", "dynamicModule", "config")] =
+      Dynamic
+    [List("spec", "extAuth", "http", "backendSettings", "loadBalancer", "dynamicModule", "config")] =
+      Dynamic
+    [List(
+      "spec",
+      "jwt",
+      "providers",
+      "[]",
+      "remoteJWKS",
+      "backendSettings",
+      "loadBalancer",
+      "dynamicModule",
+      "config",
+    )] = Dynamic
+    [List("spec", "oidc", "provider", "backendSettings", "loadBalancer", "dynamicModule", "config")] =
+      Dynamic
+  }
+}

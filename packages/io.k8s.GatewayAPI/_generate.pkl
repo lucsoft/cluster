@@ -1,0 +1,62 @@
+amends "package://pkg.pkl-lang.org/pkl-pantry/k8s.contrib.crd@4.2.6#/generate.pkl"
+
+import "pkl:yaml"
+
+// renovate: datasource=github-releases packageName=kubernetes-sigs/gateway-api
+local version = "v1.6.1"
+local crdBasePath =
+  "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/\(version)/config/crd/standard"
+
+/// The standard channel — the graduated, generally available kinds. The experimental channel adds
+/// only the `gateway.networking.x-k8s.io` group (XBackend, XBackendTrafficPolicy, XMesh), which is
+/// a different API group and would need its own `baseApiGroup` pass.
+///
+/// There is no kustomization or index to enumerate, so the kinds are listed by hand. This is every
+/// CRD in `config/crd/standard`; the directory's one remaining file, `vap_safeupgrades.yaml`, is a
+/// ValidatingAdmissionPolicy rather than a CRD and is deliberately left out.
+local crds =
+  List(
+    "backendtlspolicies",
+    "gatewayclasses",
+    "gateways",
+    "grpcroutes",
+    "httproutes",
+    "listenersets",
+    "referencegrants",
+    "tcproutes",
+    "tlsroutes",
+    "udproutes",
+  )
+
+/// Every kind serves `v1`, most of them alongside an older `v1alpha2` / `v1alpha3` / `v1beta1`.
+/// `baseApiGroup` only flattens `v1` to the package root, so leaving the older versions in place
+/// would generate a near-identical copy of each kind under nested `io/k8s/networking/gateway/…`
+/// directories. Dropping them keeps one module per kind.
+///
+/// Note this filters on *served* version, not storage version — ReferenceGrant still stores as
+/// `v1beta1`, but `v1` is served and is the version worth writing.
+local function onlyStableVersion(crd: Dynamic): Dynamic = (crd) {
+  spec {
+    versions = crd.spec.versions.toList().filter((it) -> it.name == "v1")
+  }
+}
+
+source = crdBasePath
+
+baseApiGroup = "v1.gateway.networking.k8s.io"
+
+k8sImportPath = "@k8s"
+
+sourceContents =
+  new YamlRenderer {
+    isStream = true
+  }.renderDocument(
+    crds.map((name) ->
+      onlyStableVersion(
+        new yaml.Parser {}.parse(read("\(crdBasePath)/gateway.networking.k8s.io_\(name).yaml").text)
+          as Dynamic,
+      )
+    ),
+  )
+
+converters {}

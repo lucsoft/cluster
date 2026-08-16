@@ -1,0 +1,2225 @@
+/// BackendTrafficPolicy allows the user to configure the behavior of the connection between the Envoy
+/// Proxy listener and the backend service.
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <https://raw.githubusercontent.com/envoyproxy/gateway/v1.9.0/charts/gateway-crds-helm/templates/generated>.
+module io.envoyproxy.gateway.v1alpha1.BackendTrafficPolicy
+
+extends "@k8s/K8sResource.pkl"
+
+import "pkl:base"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "gateway.envoyproxy.io/v1alpha1"
+
+fixed kind: "BackendTrafficPolicy"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// spec defines the desired state of BackendTrafficPolicy.
+spec: Spec
+
+/// status defines the current status of BackendTrafficPolicy.
+status: Status?
+
+/// spec defines the desired state of BackendTrafficPolicy.
+class Spec {
+  /// AdmissionControl defines the admission control policy to be applied. This configuration
+  /// probabilistically rejects requests based on the success rate of previous requests in a configurable
+  /// sliding time window.
+  admissionControl: AdmissionControl?
+
+  /// BandwidthLimit allows the user to limit the bandwidth of traffic sent to and received from the
+  /// backend.
+  bandwidthLimit: BandwidthLimit?
+
+  /// Circuit Breaker settings for the upstream connections and requests. If not set, circuit breakers
+  /// will be enabled with the default thresholds
+  circuitBreaker: CircuitBreaker?
+
+  /// The compression config for the http streams.
+  ///
+  /// Deprecated: Use Compressor instead.
+  compression: Listing<Compressor>?
+
+  /// The compressor config for the http streams. This provides more granular control over compression
+  /// configuration. Order matters: The first compressor in the list is preferred when q-values in
+  /// Accept-Encoding are equal.
+  compressor: Listing<Compressor>?
+
+  /// Connection includes backend connection settings.
+  connection: Connection?
+
+  /// DNS includes dns resolution settings.
+  dns: Dns?
+
+  /// FaultInjection defines the fault injection policy to be applied. This configuration can be used to
+  /// inject delays and abort requests to mimic failure scenarios such as service failures and overloads
+  faultInjection: FaultInjection?
+
+  /// HealthCheck allows gateway to perform active health checking on backends.
+  healthCheck: HealthCheck?
+
+  /// HTTP2 provides HTTP/2 configuration for backend connections.
+  http2: Http2?
+
+  /// HTTPUpgrade defines the configuration for HTTP protocol upgrades. If not specified, the default
+  /// upgrade configuration (websocket) will be used. However, if requestBuffer is configured, the
+  /// default upgrade configuration will be ignored.
+  httpUpgrade: Listing<HttpUpgrade>?
+
+  /// LoadBalancer policy to apply when routing traffic from the gateway to the backend endpoints.
+  /// Defaults to `LeastRequest`.
+  loadBalancer: LoadBalancer?
+
+  /// MergeType determines how this configuration is merged with existing BackendTrafficPolicy
+  /// configurations targeting a parent resource. When set, this configuration will be merged into the
+  /// closest parent BackendTrafficPolicy in the route's attachment hierarchy (for example, one targeting
+  /// a Gateway, Gateway listener, ListenerSet, or ListenerSet listener). Currently, this field can only
+  /// be set when targeting xRoute resources. If unset, no merging occurs, and only the most specific
+  /// configuration takes effect.
+  mergeType: String?
+
+  /// ProxyProtocol enables the Proxy Protocol when communicating with the backend.
+  proxyProtocol: ProxyProtocol?
+
+  /// RateLimit allows the user to limit the number of incoming requests to a predefined value based on
+  /// attributes within the traffic flow.
+  rateLimit: RateLimit?
+
+  /// RequestBuffer allows the gateway to buffer and fully receive each request from a client before
+  /// continuing to send the request upstream to the backends. This can be helpful to shield your backend
+  /// servers from slow clients, and also to enforce a maximum size per request as any requests larger
+  /// than the buffer size will be rejected.
+  ///
+  /// This can have a negative performance impact so should only be enabled when necessary.
+  ///
+  /// When enabling this option, you should also configure your connection buffer size to account for
+  /// these request buffers. There will also be an increase in memory usage for Envoy that should be
+  /// accounted for in your deployment settings.
+  ///
+  /// Request buffering is incompatible with streaming APIs and protocol upgrades such as gRPC streaming
+  /// and WebSocket. Do not enable this option on routes that need those protocols, because requests can
+  /// hang instead of being forwarded upstream.
+  requestBuffer: RequestBuffer?
+
+  /// ResponseOverride defines the configuration to override specific responses with a custom one. If
+  /// multiple configurations are specified, the first one to match wins.
+  responseOverride: Listing<ResponseOverride>?
+
+  /// Retry provides more advanced usage, allowing users to customize the number of retries, retry
+  /// fallback strategy, and retry triggering conditions. If not set, retry will be disabled.
+  retry: Retry?
+
+  /// RoutingType can be set to "Service" to use the Service Cluster IP for routing to the backend, or it
+  /// can be set to "Endpoint" to use Endpoint routing. When specified, this overrides the
+  /// EnvoyProxy-level setting for the relevant targetRefs. If not specified, the EnvoyProxy-level
+  /// setting is used.
+  routingType: String?
+
+  /// TargetRef is the name of the resource this policy is being attached to. This policy and the
+  /// TargetRef MUST be in the same namespace for this Policy to have effect
+  ///
+  /// Deprecated: use targetRefs/targetSelectors instead
+  targetRef: TargetRef?
+
+  /// TargetRefs are the names of the Gateway resources this policy is being attached to.
+  targetRefs: Listing<SpecTargetRef>?
+
+  /// TargetSelectors allow targeting resources for this policy based on labels
+  targetSelectors: Listing<TargetSelector>?
+
+  /// TcpKeepalive settings associated with the upstream client connection. Disabled by default.
+  tcpKeepalive: TcpKeepalive?
+
+  /// Telemetry configures the telemetry settings for the policy target (Gateway or xRoute). This will
+  /// override the telemetry settings in the EnvoyProxy resource.
+  telemetry: Telemetry?
+
+  /// Timeout settings for the backend connections.
+  timeout: Timeout?
+
+  /// UseClientProtocol configures Envoy to prefer sending requests to backends using the same HTTP
+  /// protocol that the incoming request used. Defaults to false, which means that Envoy will use the
+  /// protocol indicated by the attached BackendRef.
+  useClientProtocol: Boolean?
+}
+
+/// AdmissionControl defines the admission control policy to be applied. This configuration
+/// probabilistically rejects requests based on the success rate of previous requests in a configurable
+/// sliding time window.
+class AdmissionControl {
+  /// MaxRejectionPercent represents the upper limit of the rejection probability, expressed as a
+  /// percentage in the range [0, 100]. Defaults to 80 if not specified.
+  maxRejectionPercent: Int(isBetween(0, 100))?
+
+  /// MinRequestRate defines the minimum requests per second below which requests will pass through the
+  /// filter without rejection. Defaults to 0 if not specified.
+  minRequestRate: Int(isPositive)?
+
+  /// MinSuccessRate is the lowest request success rate, as a percentage in the range [1, 100], at which
+  /// the filter will not reject requests. Defaults to 95 if not specified. Envoy rejects values below
+  /// 1%, so values lower than 1 are not allowed.
+  minSuccessRate: Int(isBetween(1, 100))?
+
+  /// RejectionAggression controls how steeply the rejection probability rises as the observed success
+  /// rate falls below MinSuccessRate. A value of 1 produces a linear curve; higher values reject more
+  /// aggressively for a given drop in success rate. Must be greater than 0; values below 1 are clamped
+  /// to 1. Defaults to 1.
+  rejectionAggression: Int(this >= 1)?
+
+  /// SamplingWindow defines the time window over which request success rates are calculated. Must be at
+  /// least 1s; Envoy truncates the window to whole seconds and uses it as the denominator in RPS
+  /// calculations, so sub-second values would produce a zero denominator. Defaults to 30s if not
+  /// specified.
+  samplingWindow: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// SuccessCriteria defines what constitutes a successful request for both HTTP and gRPC.
+  successCriteria: SuccessCriteria?
+}
+
+/// SuccessCriteria defines what constitutes a successful request for both HTTP and gRPC.
+class SuccessCriteria {
+  /// GRPC defines success criteria for gRPC requests.
+  grpc: Grpc?
+
+  /// HTTP defines success criteria for HTTP requests.
+  http: Http?
+}
+
+/// GRPC defines success criteria for gRPC requests.
+class Grpc {
+  /// StatusCodes defines gRPC status codes that are considered successful. Status codes are defined in
+  /// https://github.com/grpc/grpc/blob/master/doc/statuscodes.md#status-codes-and-their-use-in-grpc.
+  statusCodes: Listing<
+    "Ok"
+      | "Cancelled"
+      | "Unknown"
+      | "InvalidArgument"
+      | "DeadlineExceeded"
+      | "NotFound"
+      | "AlreadyExists"
+      | "PermissionDenied"
+      | "ResourceExhausted"
+      | "FailedPrecondition"
+      | "Aborted"
+      | "OutOfRange"
+      | "Unimplemented"
+      | "Internal"
+      | "Unavailable"
+      | "DataLoss"
+      | "Unauthenticated",
+  >?
+}
+
+/// HTTP defines success criteria for HTTP requests.
+class Http {
+  /// StatusCodes defines HTTP status codes that are considered successful.
+  statusCodes: Listing<Int(isBetween(100, 599))>?
+}
+
+/// BandwidthLimit allows the user to limit the bandwidth of traffic sent to and received from the
+/// backend.
+class BandwidthLimit {
+  /// Request configures bandwidth limits for traffic sent to the backend.
+  request: Request?
+
+  /// Response configures bandwidth limits for traffic sent from the backend.
+  response: Response?
+}
+
+/// Request configures bandwidth limits for traffic sent to the backend.
+class Request {
+  /// Limit specifies the bandwidth limit as a bytes-per-unit throughput rate.
+  limit: ResponseLimit
+}
+
+/// Limit specifies the bandwidth limit as a bytes-per-unit throughput rate.
+class ResponseLimit {
+  /// Unit specifies the time unit for the bandwidth limit (e.g. Second, Minute, Hour).
+  unit: "Second" | "Minute" | "Hour"
+
+  /// Value specifies the bandwidth limit.
+  value: Int | String
+}
+
+/// Response configures bandwidth limits for traffic sent from the backend.
+class Response {
+  /// Limit specifies the bandwidth limit as a bytes-per-unit throughput rate.
+  limit: ResponseLimit
+
+  /// ResponseTrailers configures the trailer headers appended to responses when bandwidth limiting
+  /// introduces delays.
+  responseTrailers: ResponseTrailers?
+}
+
+/// ResponseTrailers configures the trailer headers appended to responses when bandwidth limiting
+/// introduces delays.
+class ResponseTrailers {
+  /// Prefix is prepended to each trailer header name. If not set, no prefix is added and the trailers
+  /// are named as-is. For example, setting "x-eg" produces trailers such as
+  /// "x-eg-bandwidth-request-delay-ms", while leaving it unset produces "bandwidth-request-delay-ms".
+  ///
+  /// The following four trailers can be added: "bandwidth-request-delay-ms" is delay time in
+  /// milliseconds it took for the request stream transfer including request body transfer time and the
+  /// time added by the filter. "bandwidth-response-delay-ms" is delay time in milliseconds it took for
+  /// the response stream transfer including response body transfer time and the time added by the
+  /// filter. "bandwidth-request-filter-delay-ms" is delay time in milliseconds in request stream
+  /// transfer added by the filter. "bandwidth-response-filter-delay-ms" is delay time in milliseconds
+  /// that added by the filter.
+  prefix: String(matches(Regex(#"^[^\r\n\x00]*$"#)))?
+}
+
+/// Circuit Breaker settings for the upstream connections and requests. If not set, circuit breakers will
+/// be enabled with the default thresholds
+class CircuitBreaker {
+  /// The maximum number of connections that Envoy will establish to the referenced backend defined
+  /// within a xRoute rule.
+  maxConnections: UInt32?
+
+  /// The maximum number of parallel requests that Envoy will make to the referenced backend defined
+  /// within a xRoute rule.
+  maxParallelRequests: UInt32?
+
+  /// The maximum number of parallel retries that Envoy will make to the referenced backend defined
+  /// within a xRoute rule.
+  maxParallelRetries: UInt32?
+
+  /// The maximum number of pending requests that Envoy will queue to the referenced backend defined
+  /// within a xRoute rule.
+  maxPendingRequests: UInt32?
+
+  /// The maximum number of requests that Envoy will make over a single connection to the referenced
+  /// backend defined within a xRoute rule. Default: unlimited.
+  maxRequestsPerConnection: UInt32?
+
+  /// PerEndpoint defines Circuit Breakers that will apply per-endpoint for an upstream cluster
+  perEndpoint: PerEndpoint?
+
+  /// RetryBudget provides settings for retry budget, which limits the number of retries in a given
+  /// percentage. RetryBudget take precedence over maxParallelRetries.
+  retryBudget: RetryBudget?
+}
+
+/// PerEndpoint defines Circuit Breakers that will apply per-endpoint for an upstream cluster
+class PerEndpoint {
+  /// MaxConnections configures the maximum number of connections that Envoy will establish per-endpoint
+  /// to the referenced backend defined within a xRoute rule.
+  maxConnections: UInt32?
+}
+
+/// RetryBudget provides settings for retry budget, which limits the number of retries in a given
+/// percentage. RetryBudget take precedence over maxParallelRetries.
+class RetryBudget {
+  /// MinRetryConcurrency specifies the minimum retry concurrency allowed for the retry budget. For
+  /// example, a budget of 20% with a minimum retry concurrency of 3 will allow 5 active retries while
+  /// there are 25 active requests. If there are 2 active requests, there are still 3 active retries
+  /// allowed because of the minimum retry concurrency. Defaults to 3.
+  minRetryConcurrency: Int?
+
+  /// Percent specifies the limit on concurrent retries as a percentage [0, 100] of the sum of active
+  /// requests and active pending requests.
+  percent: Percent
+}
+
+/// Percent specifies the limit on concurrent retries as a percentage [0, 100] of the sum of active
+/// requests and active pending requests.
+class Percent {
+  denominator: Int(this >= 1)?
+
+  numerator: Int(isPositive)
+}
+
+/// Compression defines the config of enabling compression. This can help reduce the bandwidth at the
+/// expense of higher CPU.
+class Compressor {
+  /// The configuration for Brotli compressor.
+  brotli: Dynamic?
+
+  /// The configuration for GZIP compressor.
+  gzip: Dynamic?
+
+  /// MinContentLength defines the minimum response size in bytes to apply compression. Responses smaller
+  /// than this threshold will not be compressed. Must be at least 30 bytes as enforced by Envoy Proxy.
+  /// Note that when the suffix is not provided, the value is interpreted as bytes. Default: 30 bytes
+  minContentLength: (Int | String)?
+
+  /// CompressorType defines the compressor type to use for compression.
+  type: "Gzip" | "Brotli" | "Zstd"
+
+  /// The configuration for Zstd compressor.
+  zstd: Dynamic?
+}
+
+/// Connection includes backend connection settings.
+class Connection {
+  /// BufferLimit Soft limit on size of the cluster’s connections read and write buffers. BufferLimit
+  /// applies to connection streaming (maybe non-streaming) channel between processes, it's in user
+  /// space. If unspecified, an implementation defined default is applied (32768 bytes). For example,
+  /// 20Mi, 1Gi, 256Ki etc. Note: that when the suffix is not provided, the value is interpreted as
+  /// bytes.
+  bufferLimit: (Int | String)?
+
+  /// Preconnect configures proactive upstream connections to reduce latency by establishing connections
+  /// before they’re needed and avoiding connection establishment overhead.
+  ///
+  /// If unset, Envoy will fetch connections as needed to serve in-flight requests.
+  preconnect: Preconnect?
+
+  /// SocketBufferLimit provides configuration for the maximum buffer size in bytes for each socket to
+  /// backend. SocketBufferLimit applies to socket streaming channel between TCP/IP stacks, it's in
+  /// kernel space. For example, 20Mi, 1Gi, 256Ki etc. Note that when the suffix is not provided, the
+  /// value is interpreted as bytes.
+  socketBufferLimit: (Int | String)?
+}
+
+/// Preconnect configures proactive upstream connections to reduce latency by establishing connections
+/// before they’re needed and avoiding connection establishment overhead.
+///
+/// If unset, Envoy will fetch connections as needed to serve in-flight requests.
+class Preconnect {
+  /// PerEndpointPercent configures how many additional connections to maintain per upstream endpoint,
+  /// useful for high-QPS or latency sensitive services. Expressed as a percentage of the connections
+  /// required by active streams (e.g. 100 = preconnect disabled, 105 = 1.05x connections per-endpoint,
+  /// 200 = 2.00×).
+  ///
+  /// Allowed value range is between 100-300. When both PerEndpointPercent and PredictivePercent are set,
+  /// Envoy ensures both are satisfied (max of the two).
+  perEndpointPercent: Int(isBetween(100, 300))?
+
+  /// PredictivePercent configures how many additional connections to maintain across the cluster by
+  /// anticipating which upstream endpoint the load balancer will select next, useful for low-QPS
+  /// services. Relies on deterministic loadbalancing and is only supported with Random or RoundRobin.
+  /// Expressed as a percentage of the connections required by active streams (e.g. 100 = 1.0 (no
+  /// preconnect), 105 = 1.05× connections across the cluster, 200 = 2.00×).
+  ///
+  /// Minimum allowed value is 100. When both PerEndpointPercent and PredictivePercent are set Envoy
+  /// ensures both are satisfied per host (max of the two).
+  predictivePercent: Int(this >= 100)?
+}
+
+/// DNS includes dns resolution settings.
+class Dns {
+  /// DNSRefreshRate specifies the rate at which DNS records should be refreshed. Defaults to 30 seconds.
+  dnsRefreshRate: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// LookupFamily determines how Envoy would resolve DNS for Routes where the backend is specified as a
+  /// fully qualified domain name (FQDN). If set, this configuration overrides other defaults.
+  lookupFamily: ("IPv4" | "IPv6" | "IPv4Preferred" | "IPv6Preferred" | "IPv4AndIPv6")?
+
+  /// RespectDNSTTL indicates whether the DNS Time-To-Live (TTL) should be respected. If the value is set
+  /// to true, the DNS refresh rate will be set to the resource record’s TTL. Defaults to true.
+  respectDnsTtl: Boolean?
+}
+
+/// FaultInjection defines the fault injection policy to be applied. This configuration can be used to
+/// inject delays and abort requests to mimic failure scenarios such as service failures and overloads
+class FaultInjection {
+  /// If specified, the request will be aborted if it meets the configuration criteria.
+  abort: Abort?
+
+  /// If specified, a delay will be injected into the request.
+  delay: Delay?
+}
+
+/// If specified, the request will be aborted if it meets the configuration criteria.
+class Abort {
+  /// GrpcStatus specifies the GRPC status code to be returned
+  grpcStatus: Int(isBetween(0, 16))?
+
+  /// StatusCode specifies the HTTP status code to be returned
+  httpStatus: Int(isBetween(200, 600))?
+
+  /// Percentage specifies the percentage of requests to be aborted. Default 100%, if set 0, no requests
+  /// will be aborted. Accuracy to 0.0001%.
+  percentage: Number?
+}
+
+/// If specified, a delay will be injected into the request.
+class Delay {
+  /// FixedDelay specifies the fixed delay duration
+  fixedDelay: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))
+
+  /// Percentage specifies the percentage of requests to be delayed. Default 100%, if set 0, no requests
+  /// will be delayed. Accuracy to 0.0001%.
+  percentage: Number?
+}
+
+/// HealthCheck allows gateway to perform active health checking on backends.
+class HealthCheck {
+  /// Active health check configuration
+  active: Active?
+
+  /// When number of unhealthy endpoints for a backend reaches this threshold Envoy will disregard health
+  /// status and balance across all endpoints. It's designed to prevent a situation in which host
+  /// failures cascade throughout the cluster as load increases. If not set, the default value is 50%. To
+  /// disable panic mode, set value to `0`.
+  panicThreshold: Int(isBetween(0, 100))?
+
+  /// Passive passive check configuration
+  passive: Passive?
+}
+
+/// Active health check configuration
+class Active {
+  /// GRPC defines the configuration of the GRPC health checker. It's optional, and can only be used if
+  /// the specified type is GRPC.
+  grpc: ActiveGrpc?
+
+  /// HealthCheckLog defines health check event logging configuration for this cluster. When set, HC
+  /// probe outcomes are logged to the configured sinks. Takes precedence over the gateway-level
+  /// EnvoyProxy.spec.telemetry.healthCheckLog.
+  healthCheckLog: HealthCheckLog?
+
+  /// HealthyThreshold defines the number of healthy health checks required before a backend host is
+  /// marked healthy.
+  healthyThreshold: Int(this >= 1)?
+
+  /// HTTP defines the configuration of http health checker. It's required while the health checker type
+  /// is HTTP.
+  http: ActiveHttp?
+
+  /// InitialJitter defines the maximum time Envoy will wait before the first health check. Envoy will
+  /// randomly select a value between 0 and the initial jitter value.
+  initialJitter: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// Interval defines the time between active health checks.
+  interval: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// Overrides defines the configuration of the overriding health check settings for all endpoints in
+  /// the backend cluster. This allows customization of port and other settings that may differ from the
+  /// main service configuration.
+  overrides: Overrides?
+
+  /// TCP defines the configuration of tcp health checker. It's required while the health checker type is
+  /// TCP.
+  tcp: Tcp?
+
+  /// Timeout defines the time to wait for a health check response.
+  timeout: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// Type defines the type of health checker.
+  type: String(this == "HTTP" || this == "TCP" || this == "GRPC")
+
+  /// UnhealthyThreshold defines the number of unhealthy health checks required before a backend host is
+  /// marked unhealthy. Without RetriableStatuses configured, any health check failure results in the
+  /// host being immediately considered unhealthy. When RetriableStatuses is set, health checks returning
+  /// those statuses are retried up to this threshold before the host is marked unhealthy.
+  unhealthyThreshold: Int(this >= 1)?
+}
+
+/// GRPC defines the configuration of the GRPC health checker. It's optional, and can only be used if the
+/// specified type is GRPC.
+class ActiveGrpc {
+  /// Service to send in the health check request. If this is not specified, then the health check
+  /// request applies to the entire server and not to a specific service.
+  service: String?
+}
+
+/// HealthCheckLog defines health check event logging configuration for this cluster. When set, HC probe
+/// outcomes are logged to the configured sinks. Takes precedence over the gateway-level
+/// EnvoyProxy.spec.telemetry.healthCheckLog.
+class HealthCheckLog {
+  /// Matches defines which health check probe outcomes produce a log entry. When omitted or empty, all
+  /// events are logged.
+  ///
+  /// Each value must be unique. Multiple values are ORed. If any failure type is specified then a
+  /// success type must also be specified, and vice versa.
+  matches: Listing<"Failure" | "FailureSeriesStart" | "Success" | "HealthyTransition">(length <= 4)?
+
+  /// Sinks defines where health check events are written. When omitted, events are written to
+  /// /dev/stdout.
+  sinks: Listing<Sink>(length <= 1)?
+}
+
+/// ProxyHealthCheckLogSink defines a destination for health check event logs.
+class Sink {
+  /// File defines the file sink configuration. Required when type is File.
+  file: File?
+
+  /// Type defines the type of sink.
+  type: "File"
+}
+
+/// File defines the file sink configuration. Required when type is File.
+class File {
+  /// Path specifies the file path for health check event output. Use /dev/stdout to write to standard
+  /// output.
+  path: String(!isEmpty)
+}
+
+/// HTTP defines the configuration of http health checker. It's required while the health checker type is
+/// HTTP.
+class ActiveHttp {
+  /// ExpectedResponse defines a list of HTTP expected responses to match.
+  expectedResponse: ExpectedResponse?
+
+  /// ExpectedStatuses defines a list of HTTP response statuses considered healthy. Defaults to 200 only
+  expectedStatuses: Listing<Int(isBetween(100, 599))>?
+
+  /// Hostname defines the HTTP Host header used for active HTTP health checks. Host selection uses this
+  /// order: this field, the associated Backend endpoint hostname if available, then the effective Route
+  /// hostname.
+  hostname: String(
+    length.isBetween(1, 253),
+    matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )?
+
+  /// Method defines the HTTP method used for health checking. Defaults to GET
+  method: String(length <= 16)?
+
+  /// Path defines the HTTP path that will be requested during health checking.
+  path: String(length.isBetween(1, 1024))
+
+  /// RequestBody defines the HTTP request body payload sent during health checking.
+  requestBody: RequestBody?
+
+  /// RetriableStatuses defines a list of HTTP response statuses considered retriable. Responses matching
+  /// these statuses count towards the unhealthy threshold but do not result in the host being considered
+  /// immediately unhealthy. The expected statuses take precedence for any range overlaps with this
+  /// field.
+  retriableStatuses: Listing<Int(isBetween(100, 599))>?
+}
+
+/// ExpectedResponse defines a list of HTTP expected responses to match.
+class ExpectedResponse {
+  /// Binary payload base64 encoded.
+  binary: String?
+
+  /// Text payload in plain text.
+  text: String?
+
+  /// Type defines the type of the payload.
+  type: String(this == "Text" || this == "Binary")
+}
+
+/// RequestBody defines the HTTP request body payload sent during health checking.
+class RequestBody {
+  /// Binary payload base64 encoded.
+  binary: String?
+
+  /// Text payload in plain text.
+  text: String?
+
+  /// Type defines the type of the payload.
+  type: String(this == "Text" || this == "Binary")
+}
+
+/// Overrides defines the configuration of the overriding health check settings for all endpoints in the
+/// backend cluster. This allows customization of port and other settings that may differ from the main
+/// service configuration.
+class Overrides {
+  /// Port overrides the health check port. If not set, the endpoint's serving port is used for health
+  /// checks. This is useful when health checks are served on a different port than the main service port
+  /// (e.g., port 443 for service, port 9090 for health checks).
+  port: Int(isBetween(1, 65535))?
+}
+
+/// TCP defines the configuration of tcp health checker. It's required while the health checker type is
+/// TCP.
+class Tcp {
+  /// Receive defines the expected response payload.
+  receive: Receive?
+
+  /// Send defines the request payload.
+  send: Send?
+}
+
+/// Receive defines the expected response payload.
+class Receive {
+  /// Binary payload base64 encoded.
+  binary: String?
+
+  /// Text payload in plain text.
+  text: String?
+
+  /// Type defines the type of the payload.
+  type: String(this == "Text" || this == "Binary")
+}
+
+/// Send defines the request payload.
+class Send {
+  /// Binary payload base64 encoded.
+  binary: String?
+
+  /// Text payload in plain text.
+  text: String?
+
+  /// Type defines the type of the payload.
+  type: String(this == "Text" || this == "Binary")
+}
+
+/// Passive passive check configuration
+class Passive {
+  /// AlwaysEjectOneEndpoint defines whether at least one host should be ejected, regardless of
+  /// MaxEjectionPercent.
+  alwaysEjectOneEndpoint: Boolean?
+
+  /// BaseEjectionTime defines the base duration for which a host will be ejected on consecutive
+  /// failures.
+  baseEjectionTime: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// Consecutive5xxErrors sets the number of consecutive 5xx errors triggering ejection.
+  consecutive5XxErrors: Int?
+
+  /// ConsecutiveGatewayErrors sets the number of consecutive gateway errors triggering ejection.
+  consecutiveGatewayErrors: Int?
+
+  /// ConsecutiveLocalOriginFailures sets the number of consecutive local origin failures triggering
+  /// ejection. Parameter takes effect only when split_external_local_origin_errors is set to true.
+  consecutiveLocalOriginFailures: Int?
+
+  /// FailurePercentageThreshold sets the failure percentage threshold for outlier detection. If the
+  /// failure percentage of a given host is greater than or equal to this value, it will be ejected.
+  /// Defaults to 85.
+  failurePercentageThreshold: Int(isBetween(0, 100))?
+
+  /// Interval defines the time between passive health checks.
+  interval: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// MaxEjectionPercent sets the maximum percentage of hosts in a cluster that can be ejected.
+  maxEjectionPercent: Int(isBetween(0, 100))?
+
+  /// SplitExternalLocalOriginErrors enables splitting of errors between external and local origin.
+  splitExternalLocalOriginErrors: Boolean?
+}
+
+/// HTTP2 provides HTTP/2 configuration for backend connections.
+class Http2 {
+  /// ConnectionKeepalive configures HTTP/2 connection keepalive using PING frames.
+  connectionKeepalive: ConnectionKeepalive?
+
+  /// InitialConnectionWindowSize sets the initial window size for HTTP/2 connections. If not set, the
+  /// default value is 1 MiB.
+  initialConnectionWindowSize: (Int | String)?
+
+  /// InitialStreamWindowSize sets the initial window size for HTTP/2 streams. If not set, the default
+  /// value is 64 KiB(64*1024).
+  initialStreamWindowSize: (Int | String)?
+
+  /// MaxConcurrentStreams sets the maximum number of concurrent streams allowed per connection. If not
+  /// set, the default value is 100.
+  maxConcurrentStreams: Int(isBetween(1, 2147483647))?
+
+  /// OnInvalidMessage determines if Envoy will terminate the connection or just the offending stream in
+  /// the event of HTTP messaging error It's recommended for L2 Envoy deployments to set this value to
+  /// TerminateStream. https://www.envoyproxy.io/docs/envoy/latest/configuration/best_practices/level_two
+  /// Default: TerminateConnection
+  onInvalidMessage: String?
+}
+
+/// ConnectionKeepalive configures HTTP/2 connection keepalive using PING frames.
+class ConnectionKeepalive {
+  /// IdleInterval specifies how long a connection must be idle before a PING is sent.
+  idleInterval: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// Interval specifies how often to send HTTP/2 PING frames to keep the connection alive.
+  interval: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// IntervalJitter specifies a random jitter percentage added to each interval. Defaults to 15% if not
+  /// specified.
+  intervalJitter: Int(isBetween(0, 100))?
+
+  /// Timeout specifies how long to wait for a PING response before considering the connection dead.
+  timeout: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+}
+
+/// ProtocolUpgradeConfig specifies the configuration for protocol upgrades.
+class HttpUpgrade {
+  /// Connect specifies the configuration for the CONNECT config. This is allowed only when type is
+  /// CONNECT.
+  connect: Connect?
+
+  /// Type is the case-insensitive type of protocol upgrade. e.g. `websocket`, `CONNECT`, `spdy/3.1` etc.
+  type: String
+}
+
+/// Connect specifies the configuration for the CONNECT config. This is allowed only when type is
+/// CONNECT.
+class Connect {
+  /// Terminate the CONNECT request, and forwards the payload as raw TCP data.
+  terminate: Boolean?
+}
+
+/// LoadBalancer policy to apply when routing traffic from the gateway to the backend endpoints. Defaults
+/// to `LeastRequest`.
+class LoadBalancer {
+  /// BackendUtilization defines the configuration when the load balancer type is set to
+  /// BackendUtilization.
+  backendUtilization: BackendUtilization?
+
+  /// ConsistentHash defines the configuration when the load balancer type is set to ConsistentHash
+  consistentHash: ConsistentHash?
+
+  /// DynamicModule defines the configuration when the load balancer type is set to DynamicModule. The
+  /// referenced module must be registered in the EnvoyProxy resource's dynamicModules allowlist.
+  dynamicModule: DynamicModule?
+
+  /// EndpointOverride defines the configuration for endpoint override. When specified, the load balancer
+  /// will attempt to route requests to endpoints based on the override information extracted from
+  /// request headers or metadata. If the override endpoints are not available, the configured load
+  /// balancer policy will be used as fallback.
+  endpointOverride: EndpointOverride?
+
+  /// SlowStart defines the configuration related to the slow start load balancer policy. If set, during
+  /// slow start window, traffic sent to the newly added hosts will gradually increase. Supported for
+  /// RoundRobin, LeastRequest, and BackendUtilization load balancers.
+  slowStart: SlowStart?
+
+  /// Type decides the type of Load Balancer policy. Valid LoadBalancerType values are "ConsistentHash",
+  /// "LeastRequest", "Random", "RoundRobin", "BackendUtilization", "DynamicModule".
+  type: "ConsistentHash"
+    | "LeastRequest"
+    | "Random"
+    | "RoundRobin"
+    | "BackendUtilization"
+    | "DynamicModule"
+
+  /// ZoneAware defines the configuration related to the distribution of requests between locality zones.
+  zoneAware: ZoneAware?
+}
+
+/// BackendUtilization defines the configuration when the load balancer type is set to
+/// BackendUtilization.
+class BackendUtilization {
+  /// A given endpoint must report load metrics continuously for at least this long before the endpoint
+  /// weight will be used. Default is 10s.
+  blackoutPeriod: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// ErrorUtilizationPenaltyPercent adjusts endpoint weights based on the error rate (eps/qps). This is
+  /// expressed as a percentage-based integer where 100 represents 1.0, 150 represents 1.5, etc.
+  ///
+  /// For example: - 100 => 1.0x - 120 => 1.2x - 200 => 2.0x
+  ///
+  /// Must be non-negative.
+  errorUtilizationPenaltyPercent: Int(isPositive)?
+
+  /// KeepResponseHeaders keeps the ORCA load report headers/trailers before sending the response to the
+  /// client. Defaults to false.
+  keepResponseHeaders: Boolean?
+
+  /// Metric names used to compute utilization if application_utilization is not set. For map fields in
+  /// ORCA proto, use the form "<map_field>.<key>", e.g., "named_metrics.foo".
+  metricNamesForComputingUtilization: Listing<String>?
+
+  /// OutOfBand enables out-of-band ORCA load reporting. When set, Envoy opens a server-streaming gRPC
+  /// connection to each endpoint's xds.service.orca.v3.OpenRcaService/StreamCoreMetrics and pulls load
+  /// reports periodically, instead of relying on in-band ORCA metrics carried in response
+  /// headers/trailers.
+  ///
+  /// The backend must implement OpenRcaService for this to take effect.
+  outOfBand: OutOfBand?
+
+  /// If a given endpoint has not reported load metrics in this long, stop using the reported weight.
+  /// Defaults to 3m.
+  weightExpirationPeriod: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// How often endpoint weights are recalculated. Values less than 100ms are capped at 100ms. Default
+  /// 1s.
+  weightUpdatePeriod: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+}
+
+/// OutOfBand enables out-of-band ORCA load reporting. When set, Envoy opens a server-streaming gRPC
+/// connection to each endpoint's xds.service.orca.v3.OpenRcaService/StreamCoreMetrics and pulls load
+/// reports periodically, instead of relying on in-band ORCA metrics carried in response
+/// headers/trailers.
+///
+/// The backend must implement OpenRcaService for this to take effect.
+class OutOfBand {
+  /// Authority overrides the :authority header on the OutOfBand gRPC stream. If unset, Envoy uses the
+  /// endpoint hostname, then the dialed address, then the cluster name.
+  authority: String(length.isBetween(1, 259), matches(Regex(#"^[^\x00\n\r]*$"#)))?
+
+  /// Port overrides the port used for the OutOfBand reporting connection, e.g. to reach a separate
+  /// reporting sidecar. Defaults to the endpoint's port.
+  port: Int(isBetween(1, 65535))?
+
+  /// ReportingPeriod is how often Envoy requests load reports from the server. Must be greater than 0.
+  /// Defaults to 10s.
+  reportingPeriod: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+}
+
+/// ConsistentHash defines the configuration when the load balancer type is set to ConsistentHash
+class ConsistentHash {
+  /// Cookie configures the cookie hash policy when the consistent hash type is set to Cookie.
+  cookie: Cookie?
+
+  /// Header configures the header hash policy when the consistent hash type is set to Header.
+  ///
+  /// Deprecated: use Headers instead
+  header: Header?
+
+  /// Headers configures the header hash policy for each header, when the consistent hash type is set to
+  /// Headers.
+  headers: Listing<ConsistentHashHeader>?
+
+  /// QueryParams configures the query parameter hash policy when the consistent hash type is set to
+  /// QueryParams.
+  queryParams: Listing<QueryParam>?
+
+  /// The table size for consistent hashing, must be prime number limited to 5000011.
+  tableSize: Int(isBetween(2, 5000011))?
+
+  /// ConsistentHashType defines the type of input to hash on. Valid Type values are "SourceIP",
+  /// "Header", "Headers", "Cookie". "QueryParams".
+  type: "SourceIP" | "Header" | "Headers" | "Cookie" | "QueryParams"
+}
+
+/// Cookie configures the cookie hash policy when the consistent hash type is set to Cookie.
+class Cookie {
+  /// Additional Attributes to set for the generated cookie.
+  attributes: Mapping<String, String>?
+
+  /// Name of the cookie to hash. If this cookie does not exist in the request, Envoy will generate a
+  /// cookie and set the TTL on the response back to the client based on Layer 4 attributes of the
+  /// backend endpoint, to ensure that these future requests go to the same backend endpoint. Make sure
+  /// to set the TTL field for this case.
+  name: String
+
+  /// TTL of the generated cookie if the cookie is not present. This value sets the Max-Age attribute
+  /// value.
+  ttl: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+}
+
+/// Header configures the header hash policy when the consistent hash type is set to Header.
+///
+/// Deprecated: use Headers instead
+class Header {
+  /// Name of the header to hash.
+  name: String
+}
+
+/// Header defines the header hashing configuration for consistent hash based load balancing.
+class ConsistentHashHeader {
+  /// Name of the header to hash.
+  name: String
+}
+
+/// QueryParam defines the query parameter name hashing configuration for consistent hash based load
+/// balancing.
+class QueryParam {
+  /// Name of the query param to hash.
+  name: String
+}
+
+/// DynamicModule defines the configuration when the load balancer type is set to DynamicModule. The
+/// referenced module must be registered in the EnvoyProxy resource's dynamicModules allowlist.
+class DynamicModule {
+  /// Config is optional configuration for the module's load balancer implementation. This is serialized
+  /// and passed to the module's initialization function.
+  config: base.Dynamic?
+
+  /// LBPolicyName identifies a specific load balancer implementation within the dynamic module. A single
+  /// shared library can contain multiple LB policy implementations. This value is passed to the module's
+  /// initialization function to select the appropriate implementation.
+  lbPolicyName: String(length.isBetween(1, 253))
+
+  /// Name references a dynamic module registered in the EnvoyProxy resource's dynamicModules list. The
+  /// referenced module must exist in the registry; otherwise, the policy will be rejected.
+  name: String(length.isBetween(1, 253), matches(Regex("^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$")))
+}
+
+/// EndpointOverride defines the configuration for endpoint override. When specified, the load balancer
+/// will attempt to route requests to endpoints based on the override information extracted from request
+/// headers or metadata. If the override endpoints are not available, the configured load balancer policy
+/// will be used as fallback.
+class EndpointOverride {
+  /// ExtractFrom defines the sources to extract endpoint override information from.
+  extractFrom: Listing<ExtractFrom>(length.isBetween(1, 10))
+}
+
+/// EndpointOverrideExtractFrom defines a source to extract endpoint override information from.
+class ExtractFrom {
+  /// Header defines the header to get the override endpoint addresses. The header value must specify at
+  /// least one endpoint in `IP:Port` format or multiple endpoints in `IP:Port,IP:Port,...` format. For
+  /// example `10.0.0.5:8080` or `[2600:4040:5204::1574:24ae]:80`. The IPv6 address is enclosed in square
+  /// brackets.
+  header: String?
+}
+
+/// SlowStart defines the configuration related to the slow start load balancer policy. If set, during
+/// slow start window, traffic sent to the newly added hosts will gradually increase. Supported for
+/// RoundRobin, LeastRequest, and BackendUtilization load balancers.
+class SlowStart {
+  /// Window defines the duration of the warm up period for newly added host. During slow start window,
+  /// traffic sent to the newly added hosts will gradually increase. Currently only supports linear
+  /// growth of traffic. For additional details, see
+  /// https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/cluster/v3/cluster.proto#config-cluster-v3-cluster-slowstartconfig
+  window: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))
+}
+
+/// ZoneAware defines the configuration related to the distribution of requests between locality zones.
+class ZoneAware {
+  /// PreferLocalZone configures zone-aware routing to prefer sending traffic to the local locality zone.
+  preferLocal: PreferLocal?
+
+  /// WeightedZones configures weight-based traffic distribution across locality zones. Traffic is
+  /// distributed proportionally based on the sum of all zone weights.
+  weightedZones: Listing<WeightedZone>?
+}
+
+/// PreferLocalZone configures zone-aware routing to prefer sending traffic to the local locality zone.
+class PreferLocal {
+  /// ForceLocalZone defines override configuration for forcing all traffic to stay within the local zone
+  /// instead of the default behavior which maintains equal distribution among upstream endpoints while
+  /// sending as much traffic as possible locally.
+  force: Force?
+
+  /// MinEndpointsThreshold is the minimum number of total upstream endpoints across all zones required
+  /// to enable zone-aware routing.
+  minEndpointsThreshold: Int?
+
+  /// Configures percentage of requests that will be considered for zone aware routing if zone aware
+  /// routing is configured. If not specified, Envoy defaults to 100%.
+  percentageEnabled: Int(isBetween(0, 100))?
+}
+
+/// ForceLocalZone defines override configuration for forcing all traffic to stay within the local zone
+/// instead of the default behavior which maintains equal distribution among upstream endpoints while
+/// sending as much traffic as possible locally.
+class Force {
+  /// MinEndpointsInZoneThreshold is the minimum number of upstream endpoints in the local zone required
+  /// to honor the forceLocalZone override. This is useful for protecting zones with fewer endpoints.
+  minEndpointsInZoneThreshold: Int?
+}
+
+/// WeightedZoneConfig defines the weight for a specific locality zone.
+class WeightedZone {
+  /// Weight defines the weight for this locality. Higher values receive more traffic. The actual traffic
+  /// distribution is proportional to this value relative to other localities.
+  weight: Int
+
+  /// Zone specifies the topology zone this weight applies to. The value should match the
+  /// topology.kubernetes.io/zone label of the nodes where endpoints are running. Zones not listed in the
+  /// configuration receive a default weight of 1.
+  zone: String
+}
+
+/// ProxyProtocol enables the Proxy Protocol when communicating with the backend.
+class ProxyProtocol {
+  /// Version of ProxyProtocol Valid ProxyProtocolVersion values are "V1" "V2"
+  version: "V1" | "V2"
+}
+
+/// RateLimit allows the user to limit the number of incoming requests to a predefined value based on
+/// attributes within the traffic flow.
+class RateLimit {
+  /// Global defines global rate limit configuration.
+  global: Global?
+
+  /// Local defines local rate limit configuration.
+  `local`: Local?
+
+  /// Type decides the scope for the RateLimits. Valid RateLimitType values are "Global" or "Local".
+  ///
+  /// Deprecated: Use Global and/or Local fields directly instead. Both can be specified simultaneously
+  /// for combined rate limiting.
+  type: ("Global" | "Local")?
+}
+
+/// Global defines global rate limit configuration.
+class Global {
+  /// Rules are a list of RateLimit selectors and limits. Each rule and its associated limit is applied
+  /// in a mutually exclusive way. If a request matches multiple rules, each of their associated limits
+  /// get applied, so a single request might increase the rate limit counters for multiple rules if
+  /// selected. The rate limit service will return a logical OR of the individual rate limit decisions of
+  /// all matching rules. For example, if a request matches two rules, one rate limited and one not, the
+  /// final decision will be to rate limit the request.
+  rules: Listing<LocalRule>(length <= 256)
+}
+
+/// RateLimitRule defines the semantics for matching attributes from the incoming requests, and setting
+/// limits for them.
+class LocalRule {
+  /// ClientSelectors holds the list of select conditions to select specific clients using attributes
+  /// from the traffic flow. All individual select conditions must hold True for this rule and its limit
+  /// to be applied.
+  ///
+  /// If no client selectors are specified, the rule applies to all traffic of the targeted Route.
+  ///
+  /// If the policy targets a Gateway, the rule applies to each Route of the Gateway. Please note that
+  /// each Route has its own rate limit counters. For example, if a Gateway has two Routes, and the
+  /// policy has a rule with limit 10rps, each Route will have its own 10rps limit.
+  clientSelectors: Listing<RuleClientSelector>(length <= 8)?
+
+  /// Cost specifies the cost of requests and responses for the rule.
+  ///
+  /// This is optional and if not specified, the default behavior is to reduce the rate limit counters by
+  /// 1 on the request path and do not reduce the rate limit counters on the response path.
+  cost: RuleCost?
+
+  /// Limit holds the rate limit values. This limit is applied for traffic flows when the selectors
+  /// compute to True, causing the request to be counted towards the limit. The limit is enforced and the
+  /// request is ratelimited, i.e. a response with 429 HTTP status code is sent back to the client when
+  /// the selected requests have reached the limit.
+  limit: RuleLimit
+
+  /// ShadowMode indicates whether this rate-limit rule runs in shadow mode. When enabled, all
+  /// rate-limiting operations are performed (cache lookups, counter updates, telemetry generation), but
+  /// the outcome is never enforced. The request always succeeds, even if the configured limit is
+  /// exceeded.
+  ///
+  /// Only supported for Global Rate Limits.
+  shadowMode: Boolean?
+
+  /// Shared determines whether this rate limit rule applies across all the policy targets. If set to
+  /// true, the rule is treated as a common bucket and is shared across all policy targets (xRoutes).
+  /// Default: false.
+  shared: Boolean?
+
+  /// XRateLimitHeaders controls whether X-RateLimit response headers are emitted for this rate limit
+  /// rule. When set, this overrides the global DisableRateLimitHeaders setting in ClientTrafficPolicy
+  /// for this rule. If not set, the rule inherits the listener-level setting (default behavior).
+  xRateLimitHeaders: ("Off" | "DraftVersion03")?
+}
+
+/// RateLimitSelectCondition specifies the attributes within the traffic flow that can be used to select
+/// a subset of clients to be ratelimited. All the individual conditions must hold True for the overall
+/// condition to hold True. And, at least one of headers or methods or path or sourceCIDR or queryParams
+/// condition must be specified.
+class RuleClientSelector {
+  /// Headers is a list of request headers to match. Multiple header values are ANDed together, meaning,
+  /// a request MUST match all the specified headers.
+  headers: Listing<RuleClientSelectorHeader>(length <= 128)?
+
+  /// Methods is a list of request methods to match. Multiple method values are ORed together, meaning, a
+  /// request can match any one of the specified methods. If not specified, it matches all methods.
+  methods: Listing<ClientSelectorMethod>?
+
+  /// Path is the request path to match. Support Exact, PathPrefix and RegularExpression match types.
+  path: ClientSelectorPath?
+
+  /// QueryParams is a list of query parameters to match. Multiple query parameter values are ANDed
+  /// together, meaning, a request MUST match all the specified query parameters.
+  queryParams: Listing<RuleClientSelectorQueryParam>(length <= 16)?
+
+  /// SourceCIDR is the client IP Address range to match on.
+  sourceCIDR: ClientSelectorSourceCIDR?
+}
+
+/// HeaderMatch defines the match attributes within the HTTP Headers of the request.
+class RuleClientSelectorHeader {
+  /// Invert specifies whether the value match result will be inverted. Do not set this field when
+  /// Type="Distinct", implying matching on any/all unique values within the header.
+  invert: Boolean?
+
+  /// Name of the HTTP header. The header name is case-insensitive unless PreserveHeaderCase is set to
+  /// true. For example, "Foo" and "foo" are considered the same header.
+  name: String(length.isBetween(1, 256))
+
+  /// Type specifies how to match against the value of the header.
+  type: ("Exact" | "RegularExpression" | "Distinct")?
+
+  /// Value within the HTTP header. Do not set this field when Type="Distinct", implying matching on
+  /// any/all unique values within the header.
+  value: String(length <= 1024)?
+}
+
+/// MethodMatch defines the matching criteria for the HTTP method of a request.
+class ClientSelectorMethod {
+  /// Invert specifies whether the value match result will be inverted.
+  invert: Boolean?
+
+  /// Value specifies the HTTP method.
+  value: "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE" | "PATCH"
+}
+
+/// Path is the request path to match. Support Exact, PathPrefix and RegularExpression match types.
+class ClientSelectorPath {
+  /// Invert specifies whether the value match result will be inverted.
+  invert: Boolean?
+
+  /// Type specifies how to match against the value of the path.
+  type: ("Exact" | "PathPrefix" | "RegularExpression")?
+
+  /// Value specifies the HTTP path.
+  value: String(length <= 1024)
+}
+
+/// QueryParamMatch defines the match attributes within the query parameters of the request.
+class RuleClientSelectorQueryParam {
+  /// Invert specifies whether the value match result will be inverted. Do not set this field when
+  /// Type="Distinct", implying matching on any/all unique values within the query parameter.
+  invert: Boolean?
+
+  /// Name of the query parameter.
+  name: String(length.isBetween(1, 256))
+
+  /// Type specifies how to match against the value of the query parameter.
+  type: ("Exact" | "RegularExpression" | "Distinct")?
+
+  /// Value of the query parameter. Do not set this field when Type="Distinct", implying matching on
+  /// any/all unique values within the query parameter.
+  value: String(length <= 1024)?
+}
+
+/// SourceCIDR is the client IP Address range to match on.
+class ClientSelectorSourceCIDR {
+  /// Invert specifies whether the source range match result will be inverted. When true, the rule
+  /// matches when the client IP is not in the specified range(s).
+  invert: Boolean?
+
+  type: ("Exact" | "Distinct")?
+
+  /// Value is the IP CIDR that represents the range of Source IP Addresses of the client. These could
+  /// also be the intermediate addresses through which the request has flown through and is part of the
+  /// `X-Forwarded-For` header. For example, `192.168.0.1/32`, `192.168.0.0/24`, `001:db8::/64`.
+  value: String(length.isBetween(1, 256))
+}
+
+/// Cost specifies the cost of requests and responses for the rule.
+///
+/// This is optional and if not specified, the default behavior is to reduce the rate limit counters by 1
+/// on the request path and do not reduce the rate limit counters on the response path.
+class RuleCost {
+  /// Request specifies the number to reduce the rate limit counters on the request path. If this is not
+  /// specified, the default behavior is to reduce the rate limit counters by 1.
+  ///
+  /// When Envoy receives a request that matches the rule, it tries to reduce the rate limit counters by
+  /// the specified number. If the counter doesn't have enough capacity, the request is rate limited.
+  request: RuleCostRequest?
+
+  /// Response specifies the number to reduce the rate limit counters after the response is sent back to
+  /// the client or the request stream is closed.
+  ///
+  /// The cost is used to reduce the rate limit counters for the matching requests. Since the reduction
+  /// happens after the request stream is complete, the rate limit won't be enforced for the current
+  /// request, but for the subsequent matching requests.
+  ///
+  /// This is optional and if not specified, the rate limit counters are not reduced on the response
+  /// path.
+  ///
+  /// Currently, this is only supported for HTTP Global Rate Limits.
+  response: RuleCostResponse?
+}
+
+/// Request specifies the number to reduce the rate limit counters on the request path. If this is not
+/// specified, the default behavior is to reduce the rate limit counters by 1.
+///
+/// When Envoy receives a request that matches the rule, it tries to reduce the rate limit counters by
+/// the specified number. If the counter doesn't have enough capacity, the request is rate limited.
+class RuleCostRequest {
+  /// From specifies where to get the rate limit cost. Currently, only "Number" and "Metadata" are
+  /// supported.
+  from: "Number" | "Metadata"
+
+  /// Metadata specifies the per-request metadata to retrieve the usage number from.
+  metadata: ResponseMetadata?
+
+  /// Number specifies the fixed usage number to reduce the rate limit counters. Using zero can be used
+  /// to only check the rate limit counters without reducing them.
+  number: Int?
+}
+
+/// Metadata specifies the per-request metadata to retrieve the usage number from.
+class ResponseMetadata {
+  /// Key is the key to retrieve the usage number from the filter metadata.
+  key: String
+
+  /// Namespace is the namespace of the dynamic metadata.
+  namespace: String
+}
+
+/// Response specifies the number to reduce the rate limit counters after the response is sent back to
+/// the client or the request stream is closed.
+///
+/// The cost is used to reduce the rate limit counters for the matching requests. Since the reduction
+/// happens after the request stream is complete, the rate limit won't be enforced for the current
+/// request, but for the subsequent matching requests.
+///
+/// This is optional and if not specified, the rate limit counters are not reduced on the response path.
+///
+/// Currently, this is only supported for HTTP Global Rate Limits.
+class RuleCostResponse {
+  /// From specifies where to get the rate limit cost. Currently, only "Number" and "Metadata" are
+  /// supported.
+  from: "Number" | "Metadata"
+
+  /// Metadata specifies the per-request metadata to retrieve the usage number from.
+  metadata: ResponseMetadata?
+
+  /// Number specifies the fixed usage number to reduce the rate limit counters. Using zero can be used
+  /// to only check the rate limit counters without reducing them.
+  number: Int?
+}
+
+/// Limit holds the rate limit values. This limit is applied for traffic flows when the selectors compute
+/// to True, causing the request to be counted towards the limit. The limit is enforced and the request
+/// is ratelimited, i.e. a response with 429 HTTP status code is sent back to the client when the
+/// selected requests have reached the limit.
+class RuleLimit {
+  /// FromMetadata sources the limit value from per-request dynamic metadata. When the referenced
+  /// metadata value is present, it overrides Requests/Unit for that request; otherwise Requests/Unit are
+  /// used as the default.
+  ///
+  /// The referenced metadata value must be a struct containing an integer "requests_per_unit" property
+  /// and a "unit" property with a value parseable to a RateLimitUnit. An upstream filter (e.g. ext_proc)
+  /// is responsible for writing this struct into dynamic metadata.
+  ///
+  /// Only supported for Global Rate Limits.
+  fromMetadata: LimitFromMetadata?
+
+  /// Requests is the number of requests (or cost units, when used with cost-based rate limiting) allowed
+  /// per Unit.
+  requests: UInt32
+
+  /// RateLimitUnit specifies the intervals for setting rate limits. Valid RateLimitUnit values are
+  /// "Second", "Minute", "Hour", "Day", "Week", "Month" and "Year".
+  unit: "Second" | "Minute" | "Hour" | "Day" | "Week" | "Month" | "Year"
+}
+
+/// FromMetadata sources the limit value from per-request dynamic metadata. When the referenced metadata
+/// value is present, it overrides Requests/Unit for that request; otherwise Requests/Unit are used as
+/// the default.
+///
+/// The referenced metadata value must be a struct containing an integer "requests_per_unit" property and
+/// a "unit" property with a value parseable to a RateLimitUnit. An upstream filter (e.g. ext_proc) is
+/// responsible for writing this struct into dynamic metadata.
+///
+/// Only supported for Global Rate Limits.
+class LimitFromMetadata {
+  /// Key is the key to retrieve the limit value from within the namespaced filter metadata.
+  key: String(!isEmpty)
+
+  /// Namespace is the namespace of the dynamic metadata.
+  namespace: String(!isEmpty)
+}
+
+/// Local defines local rate limit configuration.
+class Local {
+  /// Rules are a list of RateLimit selectors and limits. If a request matches multiple rules, the
+  /// strictest limit is applied. For example, if a request matches two rules, one with 10rps and one
+  /// with 20rps, the final limit will be based on the rule with 10rps.
+  rules: Listing<LocalRule>(length <= 16)?
+}
+
+/// RequestBuffer allows the gateway to buffer and fully receive each request from a client before
+/// continuing to send the request upstream to the backends. This can be helpful to shield your backend
+/// servers from slow clients, and also to enforce a maximum size per request as any requests larger than
+/// the buffer size will be rejected.
+///
+/// This can have a negative performance impact so should only be enabled when necessary.
+///
+/// When enabling this option, you should also configure your connection buffer size to account for these
+/// request buffers. There will also be an increase in memory usage for Envoy that should be accounted
+/// for in your deployment settings.
+///
+/// Request buffering is incompatible with streaming APIs and protocol upgrades such as gRPC streaming
+/// and WebSocket. Do not enable this option on routes that need those protocols, because requests can
+/// hang instead of being forwarded upstream.
+class RequestBuffer {
+  /// Limit specifies the maximum allowed size in bytes for each incoming request buffer. If exceeded,
+  /// the request will be rejected with HTTP 413 Content Too Large.
+  ///
+  /// Accepts values in resource.Quantity format (e.g., "10Mi", "500Ki").
+  limit: (Int | String)?
+}
+
+/// ResponseOverride defines the configuration to override specific responses with a custom one.
+class ResponseOverride {
+  /// Match configuration.
+  match: Match
+
+  /// Redirect configuration
+  redirect: Redirect?
+
+  /// Response configuration.
+  response: ResponseOverrideResponse?
+
+  /// Source specifies which responses this rule applies to. Local overrides only Envoy-generated
+  /// responses (e.g. auth failures). Backend overrides only upstream responses. All (default) overrides
+  /// both.
+  source: ("All" | "Local" | "Backend")?
+}
+
+/// Match configuration.
+class Match {
+  /// Response headers to match on. The match evaluates to true if all matches are successful.
+  responseHeaders: Listing<ResponseHeader>(length.isBetween(1, 16))?
+
+  /// Status code to match on. The match evaluates to true if any of the matches are successful.
+  statusCodes: Listing<StatusCode>(length.isBetween(1, 50))?
+}
+
+/// ResponseOverrideHeaderMatch defines the configuration for matching a response header.
+class ResponseHeader {
+  /// Name of the HTTP header. The header name is case-insensitive. For example, "Foo" and "foo" are
+  /// considered the same header.
+  name: String(length.isBetween(1, 256), matches(Regex(#"^[A-Za-z0-9!#$%&'*+\-.^_\x60|~]+$"#)))
+
+  /// Value within the HTTP header to match against.
+  value: Value
+}
+
+/// Value within the HTTP header to match against.
+class Value {
+  /// Type specifies how to match against a string.
+  type: ("Exact" | "Prefix" | "Suffix" | "RegularExpression")?
+
+  /// Value specifies the string value that the match must have.
+  value: String(length.isBetween(1, 1024))
+}
+
+/// StatusCodeMatch defines the configuration for matching a status code.
+class StatusCode {
+  /// Range contains the range of status codes.
+  range: Range?
+
+  /// Type is the type of value. Valid values are Value and Range, default is Value.
+  type: String(this == "Value" || this == "Range")
+
+  /// Value contains the value of the status code.
+  value: Int?
+}
+
+/// Range contains the range of status codes.
+class Range {
+  /// End of the range, including the end value.
+  end: Int
+
+  /// Start of the range, including the start value.
+  start: Int
+}
+
+/// Redirect configuration
+class Redirect {
+  /// Hostname is the hostname to be used in the value of the `Location` header in the response. When
+  /// empty, the hostname in the `Host` header of the request is used.
+  hostname: String(
+    length.isBetween(1, 253),
+    matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )?
+
+  /// Path defines parameters used to modify the path of the incoming request. The modified path is then
+  /// used to construct the `Location` header. When empty, the request path is used as-is. Only
+  /// ReplaceFullPath path modifier is supported currently.
+  path: Path?
+
+  /// Port is the port to be used in the value of the `Location` header in the response.
+  ///
+  /// If redirect scheme is not-empty, the well-known port associated with the redirect scheme will be
+  /// used. Specifically "http" to port 80 and "https" to port 443. If the redirect scheme does not have
+  /// a well-known port or redirect scheme is empty, the listener port of the Gateway will be used.
+  ///
+  /// Port will not be added in the 'Location' header if scheme is HTTP and port is 80 or scheme is HTTPS
+  /// and port is 443.
+  port: Int?
+
+  /// Scheme is the scheme to be used in the value of the `Location` header in the response. When empty,
+  /// the scheme of the request is used.
+  scheme: ("http" | "https")?
+
+  /// StatusCode is the HTTP status code to be used in response.
+  statusCode: Int(this == 301 || this == 302)?
+}
+
+/// Path defines parameters used to modify the path of the incoming request. The modified path is then
+/// used to construct the `Location` header. When empty, the request path is used as-is. Only
+/// ReplaceFullPath path modifier is supported currently.
+class Path {
+  /// ReplaceFullPath specifies the value with which to replace the full path of a request during a
+  /// rewrite or redirect.
+  replaceFullPath: String(length <= 1024)?
+
+  /// ReplacePrefixMatch specifies the value with which to replace the prefix match of a request during a
+  /// rewrite or redirect. For example, a request to "/foo/bar" with a prefix match of "/foo" and a
+  /// ReplacePrefixMatch of "/xyz" would be modified to "/xyz/bar".
+  ///
+  /// Note that this matches the behavior of the PathPrefix match type. This matches full path elements.
+  /// A path element refers to the list of labels in the path split by the `/` separator. When specified,
+  /// a trailing `/` is ignored. For example, the paths `/abc`, `/abc/`, and `/abc/def` would all match
+  /// the prefix `/abc`, but the path `/abcd` would not.
+  ///
+  /// ReplacePrefixMatch is only compatible with a `PathPrefix` HTTPRouteMatch. Using any other
+  /// HTTPRouteMatch type on the same HTTPRouteRule will result in the implementation setting the
+  /// Accepted Condition for the Route to `status: False`.
+  ///
+  /// Request Path | Prefix Match | Replace Prefix | Modified Path
+  replacePrefixMatch: String(length <= 1024)?
+
+  /// Type defines the type of path modifier. Additional types may be added in a future release of the
+  /// API.
+  ///
+  /// Note that values may be added to this enum, implementations must ensure that unknown values will
+  /// not cause a crash.
+  ///
+  /// Unknown values here must result in the implementation setting the Accepted Condition for the Route
+  /// to `status: False`, with a Reason of `UnsupportedValue`.
+  type: "ReplaceFullPath" | "ReplacePrefixMatch"
+}
+
+/// Response configuration.
+class ResponseOverrideResponse {
+  /// Body of the Custom Response Supports Envoy command operators for dynamic content (see
+  /// https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage#command-operators).
+  body: Body?
+
+  /// Content Type of the response. This will be set in the Content-Type header.
+  contentType: String?
+
+  /// Header defines headers to add, set or remove from the response. This allows the response policy to
+  /// append, add or override headers of the final response before it is sent to a downstream client.
+  /// Note: Header removal is not supported for responseOverride.
+  header: ResponseOverrideResponseHeader?
+
+  /// Status Code of the Custom Response If unset, does not override the status of response.
+  statusCode: Int?
+}
+
+/// Body of the Custom Response Supports Envoy command operators for dynamic content (see
+/// https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage#command-operators).
+class Body {
+  /// Inline contains the value as an inline string.
+  inline: String?
+
+  /// Type is the type of method to use to read the body value. Valid values are Inline and ValueRef,
+  /// default is Inline.
+  type: String(this == "Inline" || this == "ValueRef")
+
+  /// ValueRef contains the contents of the body specified as a local object reference. Only a reference
+  /// to ConfigMap is supported.
+  ///
+  /// The value of key `response.body` in the ConfigMap will be used as the response body. If the key is
+  /// not found, the first value in the ConfigMap will be used.
+  valueRef: ValueRef?
+}
+
+/// ValueRef contains the contents of the body specified as a local object reference. Only a reference to
+/// ConfigMap is supported.
+///
+/// The value of key `response.body` in the ConfigMap will be used as the response body. If the key is
+/// not found, the first value in the ConfigMap will be used.
+class ValueRef {
+  /// Group is the group of the referent. For example, "gateway.networking.k8s.io". When unspecified or
+  /// empty string, core API group is inferred.
+  group: String(
+    length <= 253,
+    matches(Regex(#"^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )
+
+  /// Kind is kind of the referent. For example "HTTPRoute" or "Service".
+  kind: String(length.isBetween(1, 63), matches(Regex("^[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?$")))
+
+  /// Name is the name of the referent.
+  name: String(length.isBetween(1, 253))
+}
+
+/// Header defines headers to add, set or remove from the response. This allows the response policy to
+/// append, add or override headers of the final response before it is sent to a downstream client. Note:
+/// Header removal is not supported for responseOverride.
+class ResponseOverrideResponseHeader {
+  /// Add adds the given header(s) (name, value) to the request before the action. It appends to any
+  /// existing values associated with the header name.
+  ///
+  /// Input: GET /foo HTTP/1.1 my-header: foo
+  ///
+  /// Config: add: - name: "my-header" value: "bar,baz"
+  ///
+  /// Output: GET /foo HTTP/1.1 my-header: foo,bar,baz
+  add: Listing<Set>(length <= 16)?
+
+  /// Remove the given header(s) from the HTTP request before the action. The value of Remove is a list
+  /// of HTTP header names. Note that the header names are case-insensitive (see
+  /// https://datatracker.ietf.org/doc/html/rfc2616#section-4.2).
+  ///
+  /// Input: GET /foo HTTP/1.1 my-header1: foo my-header2: bar my-header3: baz
+  ///
+  /// Config: remove: ["my-header1", "my-header3"]
+  ///
+  /// Output: GET /foo HTTP/1.1 my-header2: bar
+  remove: Listing<String>(length <= 16)?
+
+  /// Set overwrites the request with the given header (name, value) before the action.
+  ///
+  /// Input: GET /foo HTTP/1.1 my-header: foo
+  ///
+  /// Config: set: - name: "my-header" value: "bar"
+  ///
+  /// Output: GET /foo HTTP/1.1 my-header: bar
+  set: Listing<Set>(length <= 16)?
+}
+
+/// HTTPHeader represents an HTTP Header name and value as defined by RFC 7230.
+class Set {
+  /// Name is the name of the HTTP Header to be matched. Name matching MUST be case-insensitive. (See
+  /// https://tools.ietf.org/html/rfc7230#section-3.2).
+  ///
+  /// If multiple entries specify equivalent header names, the first entry with an equivalent name MUST
+  /// be considered for a match. Subsequent entries with an equivalent header name MUST be ignored. Due
+  /// to the case-insensitivity of header names, "foo" and "Foo" are considered equivalent.
+  name: String(length.isBetween(1, 256), matches(Regex(#"^[A-Za-z0-9!#$%&'*+\-.^_\x60|~]+$"#)))
+
+  /// Value is the value of HTTP Header to be matched. <gateway:experimental:description> Must consist of
+  /// printable US-ASCII characters, optionally separated by single tabs or spaces. See:
+  /// https://tools.ietf.org/html/rfc7230#section-3.2 </gateway:experimental:description>
+  ///
+  /// <gateway:experimental:validation:Pattern=`^[!-~]+([\t ]?[!-~]+)*$`>
+  value: String(length.isBetween(1, 4096))
+}
+
+/// Retry provides more advanced usage, allowing users to customize the number of retries, retry fallback
+/// strategy, and retry triggering conditions. If not set, retry will be disabled.
+class Retry {
+  /// NumAttemptsPerPriority defines the number of requests (initial attempt + retries) that should be
+  /// sent to the same priority before switching to a different one. If not specified or set to 0, all
+  /// requests are sent to the highest priority that is healthy.
+  numAttemptsPerPriority: Int?
+
+  /// NumRetries is the number of retries to be attempted. Defaults to 2.
+  numRetries: Int(isPositive)?
+
+  /// PerRetry is the retry policy to be applied per retry attempt.
+  perRetry: PerRetry?
+
+  /// RetryOn specifies the retry trigger condition.
+  ///
+  /// If not specified, the default is to retry on
+  /// connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes(503).
+  retryOn: RetryOn?
+}
+
+/// PerRetry is the retry policy to be applied per retry attempt.
+class PerRetry {
+  /// Backoff is the backoff policy to be applied per retry attempt. gateway uses a fully jittered
+  /// exponential back-off algorithm for retries. For additional details, see
+  /// https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/router_filter#config-http-filters-router-x-envoy-max-retries
+  backOff: BackOff?
+
+  /// Timeout is the timeout per retry attempt.
+  timeout: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+}
+
+/// Backoff is the backoff policy to be applied per retry attempt. gateway uses a fully jittered
+/// exponential back-off algorithm for retries. For additional details, see
+/// https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/router_filter#config-http-filters-router-x-envoy-max-retries
+class BackOff {
+  /// BaseInterval is the base interval between retries.
+  baseInterval: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// MaxInterval is the maximum interval between retries. This parameter is optional, but must be
+  /// greater than or equal to the base_interval if set. The default is 10 times the base_interval
+  maxInterval: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+}
+
+/// RetryOn specifies the retry trigger condition.
+///
+/// If not specified, the default is to retry on
+/// connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes(503).
+class RetryOn {
+  /// HttpStatusCodes specifies the http status codes to be retried. The retriable-status-codes trigger
+  /// must also be configured for these status codes to trigger a retry.
+  httpStatusCodes: Listing<Int(isBetween(100, 599))>?
+
+  /// Triggers specifies the retry trigger condition(Http/Grpc).
+  triggers: Listing<
+    "5xx"
+      | "gateway-error"
+      | "reset"
+      | "reset-before-request"
+      | "connect-failure"
+      | "retriable-4xx"
+      | "refused-stream"
+      | "retriable-status-codes"
+      | "cancelled"
+      | "deadline-exceeded"
+      | "internal"
+      | "resource-exhausted"
+      | "unavailable",
+  >?
+}
+
+/// TargetRef is the name of the resource this policy is being attached to. This policy and the TargetRef
+/// MUST be in the same namespace for this Policy to have effect
+///
+/// Deprecated: use targetRefs/targetSelectors instead
+class TargetRef {
+  /// Group is the group of the target resource.
+  group: String(
+    length <= 253,
+    matches(Regex(#"^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )
+
+  /// Kind is kind of the target resource.
+  kind: String(length.isBetween(1, 63), matches(Regex("^[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?$")))
+
+  /// Name is the name of the target resource.
+  name: String(length.isBetween(1, 253))
+
+  /// SectionName is the name of a section within the target resource. When unspecified, this targetRef
+  /// targets the entire resource. In the following resources, SectionName is interpreted as the
+  /// following:
+  ///
+  /// * Gateway: Listener name * HTTPRoute: HTTPRouteRule name * Service: Port name
+  ///
+  /// If a SectionName is specified, but does not exist on the targeted object, the Policy must fail to
+  /// attach, and the policy implementation should record a `ResolvedRefs` or similar Condition in the
+  /// Policy's status.
+  sectionName: String(
+    length.isBetween(1, 253),
+    matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )?
+}
+
+/// LocalPolicyTargetReferenceWithSectionName identifies an API object to apply a direct policy to. This
+/// should be used as part of Policy resources that can target single resources. For more information on
+/// how this policy attachment mode works, and a sample Policy resource, refer to the policy attachment
+/// documentation for Gateway API.
+///
+/// Note: This should only be used for direct policy attachment when references to SectionName are
+/// actually needed. In all other cases, LocalPolicyTargetReference should be used.
+class SpecTargetRef {
+  /// Group is the group of the target resource.
+  group: String(
+    length <= 253,
+    matches(Regex(#"^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )
+
+  /// Kind is kind of the target resource.
+  kind: String(length.isBetween(1, 63), matches(Regex("^[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?$")))
+
+  /// Name is the name of the target resource.
+  name: String(length.isBetween(1, 253))
+
+  /// SectionName is the name of a section within the target resource. When unspecified, this targetRef
+  /// targets the entire resource. In the following resources, SectionName is interpreted as the
+  /// following:
+  ///
+  /// * Gateway: Listener name * HTTPRoute: HTTPRouteRule name * Service: Port name
+  ///
+  /// If a SectionName is specified, but does not exist on the targeted object, the Policy must fail to
+  /// attach, and the policy implementation should record a `ResolvedRefs` or similar Condition in the
+  /// Policy's status.
+  sectionName: String(
+    length.isBetween(1, 253),
+    matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )?
+}
+
+class TargetSelector {
+  /// Group is the group that this selector targets. Defaults to gateway.networking.k8s.io
+  group: String(
+    length <= 253,
+    matches(Regex(#"^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )?
+
+  /// Kind is the resource kind that this selector targets.
+  kind: String(length.isBetween(1, 63), matches(Regex("^[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?$")))
+
+  /// MatchExpressions is a list of label selector requirements. The requirements are ANDed.
+  matchExpressions: Listing<SelectorMatchExpression>?
+
+  /// MatchLabels are the set of label selectors for identifying the targeted resource.
+  matchLabels: Mapping<String, String>?
+
+  /// Namespaces determines which namespaces are considered for target selection.
+  ///
+  /// If unspecified, only targets in the same namespace as this policy are considered.
+  ///
+  /// When specified, the effective set of namespaces is always constrained to the namespaces watched by
+  /// Envoy Gateway.
+  ///
+  /// Selecting targets across namespaces requires a ReferenceGrant in the target namespace that allows
+  /// this policy kind to reference the selected target kind. Cross-namespace targets without a matching
+  /// ReferenceGrant are ignored.
+  namespaces: Namespaces?
+}
+
+/// A label selector requirement is a selector that contains values, a key, and an operator that relates
+/// the key and values.
+class SelectorMatchExpression {
+  /// key is the label key that the selector applies to.
+  key: String
+
+  /// operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists
+  /// and DoesNotExist.
+  operator: String
+
+  /// values is an array of string values. If the operator is In or NotIn, the values array must be
+  /// non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is
+  /// replaced during a strategic merge patch.
+  values: Listing<String>?
+}
+
+/// Namespaces determines which namespaces are considered for target selection.
+///
+/// If unspecified, only targets in the same namespace as this policy are considered.
+///
+/// When specified, the effective set of namespaces is always constrained to the namespaces watched by
+/// Envoy Gateway.
+///
+/// Selecting targets across namespaces requires a ReferenceGrant in the target namespace that allows
+/// this policy kind to reference the selected target kind. Cross-namespace targets without a matching
+/// ReferenceGrant are ignored.
+class Namespaces {
+  /// From indicates how namespaces are selected for this target selector.
+  ///
+  /// All means all namespaces watched by Envoy Gateway. Selector means namespaces watched by Envoy
+  /// Gateway that match Selector.
+  from: "Same" | "All" | "Selector"
+
+  /// Selector selects namespaces when From is set to Selector.
+  selector: Selector?
+}
+
+/// Selector selects namespaces when From is set to Selector.
+class Selector {
+  /// matchExpressions is a list of label selector requirements. The requirements are ANDed.
+  matchExpressions: Listing<SelectorMatchExpression>?
+
+  /// matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is
+  /// equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and
+  /// the values array contains only "value". The requirements are ANDed.
+  matchLabels: Mapping<String, String>?
+}
+
+/// TcpKeepalive settings associated with the upstream client connection. Disabled by default.
+class TcpKeepalive {
+  /// The duration a connection needs to be idle before keep-alive probes start being sent. The duration
+  /// format is Defaults to `7200s`.
+  idleTime: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// The duration between keep-alive probes. Defaults to `75s`.
+  interval: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// The total number of unacknowledged probes to send before deciding the connection is dead. Defaults
+  /// to 9.
+  probes: Int?
+}
+
+/// Telemetry configures the telemetry settings for the policy target (Gateway or xRoute). This will
+/// override the telemetry settings in the EnvoyProxy resource.
+class Telemetry {
+  /// Metrics defines metrics configuration for the backend or Route.
+  metrics: Metrics?
+
+  /// Tracing configures the tracing settings for the backend or HTTPRoute.
+  ///
+  /// This takes precedence over EnvoyProxy tracing when set.
+  tracing: Tracing?
+}
+
+/// Metrics defines metrics configuration for the backend or Route.
+class Metrics {
+  /// RouteStatName defines the value of the Route stat_prefix, determining how the route stats are
+  /// named. For more details, see envoy docs:
+  /// https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/route/v3/route_components.proto#config-route-v3-route
+  /// The supported operators for this pattern are: %ROUTE_NAME%: name of Gateway API xRoute resource
+  /// %ROUTE_NAMESPACE%: namespace of Gateway API xRoute resource %ROUTE_KIND%: kind of Gateway API
+  /// xRoute resource Example: %ROUTE_KIND%/%ROUTE_NAMESPACE%/%ROUTE_NAME% => httproute/my-ns/my-route
+  /// Disabled by default.
+  routeStatName: String?
+}
+
+/// Tracing configures the tracing settings for the backend or HTTPRoute.
+///
+/// This takes precedence over EnvoyProxy tracing when set.
+class Tracing {
+  /// ClientSamplingFraction represents the fraction of requests that should be selected for tracing when
+  /// requested by the client. If unspecified, client-forced tracing is disabled by default and users
+  /// must set this field to opt in.
+  clientSamplingFraction: ClientSamplingFraction?
+
+  /// CustomTags defines the custom tags to add to each span. If provider is kubernetes, pod name and
+  /// namespace are added by default.
+  ///
+  /// Deprecated: Use Tags instead.
+  customTags: Mapping<String, CustomTags>?
+
+  /// OverallSamplingFraction represents the fraction of requests that should be selected for tracing
+  /// after all other sampling checks have been applied.
+  overallSamplingFraction: OverallSamplingFraction?
+
+  /// SamplingFraction represents the fraction of requests that should be selected for tracing if no
+  /// prior sampling decision has been made.
+  samplingFraction: SamplingFraction?
+
+  /// SpanName defines the name of the span which will be used for tracing. Envoy [command
+  /// operators](https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage#command-operators)
+  /// may be used in the value. The [format string
+  /// documentation](https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage#config-access-log-format-strings)
+  /// provides more information.
+  ///
+  /// If not set, the span name is provider specific. e.g. Datadog use `ingress` as the default client
+  /// span name, and `router <UPSTREAM_CLUSTER> egress` as the server span name.
+  spanName: SpanName?
+
+  /// Tags defines the custom tags to add to each span. Envoy [command
+  /// operators](https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage#command-operators)
+  /// may be used in the value. The [format string
+  /// documentation](https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage#config-access-log-format-strings)
+  /// provides more information. If provider is kubernetes, pod name and namespace are added by default.
+  ///
+  /// Same keys take precedence over CustomTags.
+  tags: Mapping<String, String>?
+}
+
+/// ClientSamplingFraction represents the fraction of requests that should be selected for tracing when
+/// requested by the client. If unspecified, client-forced tracing is disabled by default and users must
+/// set this field to opt in.
+class ClientSamplingFraction {
+  denominator: Int(this >= 1)?
+
+  numerator: Int(isPositive)
+}
+
+class CustomTags {
+  /// Environment adds value from environment variable to each span. It's required when the type is
+  /// "Environment".
+  environment: Environment?
+
+  /// Literal adds hard-coded value to each span. It's required when the type is "Literal".
+  literal: Literal?
+
+  /// RequestHeader adds value from request header to each span. It's required when the type is
+  /// "RequestHeader".
+  requestHeader: RequestHeader?
+
+  /// Type defines the type of custom tag.
+  type: "Literal" | "Environment" | "RequestHeader"
+}
+
+/// Environment adds value from environment variable to each span. It's required when the type is
+/// "Environment".
+class Environment {
+  /// DefaultValue defines the default value to use if the environment variable is not set.
+  defaultValue: String?
+
+  /// Name defines the name of the environment variable which to extract the value from.
+  name: String
+}
+
+/// Literal adds hard-coded value to each span. It's required when the type is "Literal".
+class Literal {
+  /// Value defines the hard-coded value to add to each span.
+  value: String
+}
+
+/// RequestHeader adds value from request header to each span. It's required when the type is
+/// "RequestHeader".
+class RequestHeader {
+  /// DefaultValue defines the default value to use if the request header is not set.
+  defaultValue: String?
+
+  /// Name defines the name of the request header which to extract the value from.
+  name: String
+}
+
+/// OverallSamplingFraction represents the fraction of requests that should be selected for tracing after
+/// all other sampling checks have been applied.
+class OverallSamplingFraction {
+  denominator: Int(this >= 1)?
+
+  numerator: Int(isPositive)
+}
+
+/// SamplingFraction represents the fraction of requests that should be selected for tracing if no prior
+/// sampling decision has been made.
+class SamplingFraction {
+  denominator: Int(this >= 1)?
+
+  numerator: Int(isPositive)
+}
+
+/// SpanName defines the name of the span which will be used for tracing. Envoy [command
+/// operators](https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage#command-operators)
+/// may be used in the value. The [format string
+/// documentation](https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage#config-access-log-format-strings)
+/// provides more information.
+///
+/// If not set, the span name is provider specific. e.g. Datadog use `ingress` as the default client span
+/// name, and `router <UPSTREAM_CLUSTER> egress` as the server span name.
+class SpanName {
+  /// Client defines operation name of the span which will be used for tracing.
+  client: String
+
+  /// Server defines the operation name of the upstream span which will be used for tracing.
+  server: String
+}
+
+/// Timeout settings for the backend connections.
+class Timeout {
+  /// Timeout settings for HTTP.
+  http: TimeoutHttp?
+
+  /// Timeout settings for TCP.
+  tcp: TimeoutTcp?
+}
+
+/// Timeout settings for HTTP.
+class TimeoutHttp {
+  /// The idle timeout for an HTTP connection. Idle time is defined as a period in which there are no
+  /// active requests in the connection. Default: 1 hour.
+  connectionIdleTimeout: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// The maximum duration of an HTTP connection. Default: unlimited.
+  maxConnectionDuration: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// MaxStreamDuration is the maximum duration for a stream to complete. This timeout measures the time
+  /// from when the request is sent until the response stream is fully consumed and does not apply to
+  /// non-streaming requests. When set to "0s", no max duration is applied and streams can run
+  /// indefinitely.
+  maxStreamDuration: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// RequestTimeout is the time until which entire response is received from the upstream.
+  requestTimeout: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// The stream idle timeout defines the amount of time a stream can exist without any upstream or
+  /// downstream activity. If not specified, StreamIdleTimeout is inherited from the listener-level
+  /// setting, which can be configured via ClientTrafficPolicy.
+  streamIdleTimeout: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+}
+
+/// Timeout settings for TCP.
+class TimeoutTcp {
+  /// The timeout for network connection establishment, including TCP and TLS handshakes. Default: 10
+  /// seconds.
+  connectTimeout: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+}
+
+/// status defines the current status of BackendTrafficPolicy.
+class Status {
+  /// Ancestors is a list of ancestor resources (usually Gateways) that are associated with the policy,
+  /// and the status of the policy with respect to each ancestor. When this policy attaches to a parent,
+  /// the controller that manages the parent and the ancestors MUST add an entry to this list when the
+  /// controller first sees the policy and SHOULD update the entry as appropriate when the relevant
+  /// ancestor is modified.
+  ///
+  /// Note that choosing the relevant ancestor is left to the Policy designers; an important part of
+  /// Policy design is designing the right object level at which to namespace this status.
+  ///
+  /// Note also that implementations MUST ONLY populate ancestor status for the Ancestor resources they
+  /// are responsible for. Implementations MUST use the ControllerName field to uniquely identify the
+  /// entries in this list that they are responsible for.
+  ///
+  /// Note that to achieve this, the list of PolicyAncestorStatus structs MUST be treated as a map with a
+  /// composite key, made up of the AncestorRef and ControllerName fields combined.
+  ///
+  /// A maximum of 16 ancestors will be represented in this list. An empty list means the Policy is not
+  /// relevant for any ancestors.
+  ///
+  /// If this slice is full, implementations MUST NOT add further entries. Instead they MUST consider the
+  /// policy unimplementable and signal that on any related resources such as the ancestor that would be
+  /// referenced here. For example, if this list was full on BackendTLSPolicy, no additional Gateways
+  /// would be able to reference the Service targeted by the BackendTLSPolicy.
+  ancestors: Listing<Ancestor>(length <= 16)
+}
+
+/// PolicyAncestorStatus describes the status of a route with respect to an associated Ancestor.
+///
+/// Ancestors refer to objects that are either the Target of a policy or above it in terms of object
+/// hierarchy. For example, if a policy targets a Service, the Policy's Ancestors are, in order, the
+/// Service, the HTTPRoute, the Gateway, and the GatewayClass. Almost always, in this hierarchy, the
+/// Gateway will be the most useful object to place Policy status on, so we recommend that
+/// implementations SHOULD use Gateway as the PolicyAncestorStatus object unless the designers have a
+/// _very_ good reason otherwise.
+///
+/// In the context of policy attachment, the Ancestor is used to distinguish which resource results in a
+/// distinct application of this policy. For example, if a policy targets a Service, it may have a
+/// distinct result per attached Gateway.
+///
+/// Policies targeting the same resource may have different effects depending on the ancestors of those
+/// resources. For example, different Gateways targeting the same Service may have different
+/// capabilities, especially if they have different underlying implementations.
+///
+/// For example, in BackendTLSPolicy, the Policy attaches to a Service that is used as a backend in a
+/// HTTPRoute that is itself attached to a Gateway. In this case, the relevant object for status is the
+/// Gateway, and that is the ancestor object referred to in this status.
+///
+/// Note that a parent is also an ancestor, so for objects where the parent is the relevant object for
+/// status, this struct SHOULD still be used.
+///
+/// This struct is intended to be used in a slice that's effectively a map, with a composite key made up
+/// of the AncestorRef and the ControllerName.
+class Ancestor {
+  /// AncestorRef corresponds with a ParentRef in the spec that this PolicyAncestorStatus struct
+  /// describes the status of.
+  ancestorRef: AncestorRef
+
+  /// Conditions describes the status of the Policy with respect to the given Ancestor.
+  ///
+  /// <gateway:util:excludeFromCRD>
+  ///
+  /// Notes for implementors:
+  ///
+  /// Conditions are a listType `map`, which means that they function like a map with a key of the `type`
+  /// field _in the k8s apiserver_.
+  ///
+  /// This means that implementations must obey some rules when updating this section.
+  ///
+  /// * Implementations MUST perform a read-modify-write cycle on this field before modifying it. That
+  /// is, when modifying this field, implementations must be confident they have fetched the most recent
+  /// version of this field, and ensure that changes they make are on that recent version. *
+  /// Implementations MUST NOT remove or reorder Conditions that they are not directly responsible for.
+  /// For example, if an implementation sees a Condition with type `special.io/SomeField`, it MUST NOT
+  /// remove, change or update that Condition. * Implementations MUST always _merge_ changes into
+  /// Conditions of the same Type, rather than creating more than one Condition of the same Type. *
+  /// Implementations MUST always update the `observedGeneration` field of the Condition to the
+  /// `metadata.generation` of the Gateway at the time of update creation. * If the `observedGeneration`
+  /// of a Condition is _greater than_ the value the implementation knows about, then it MUST NOT perform
+  /// the update on that Condition, but must wait for a future reconciliation and status update. (The
+  /// assumption is that the implementation's copy of the object is stale and an update will be
+  /// re-triggered if relevant.)
+  ///
+  /// </gateway:util:excludeFromCRD>
+  conditions: Listing<Condition>(length.isBetween(1, 8))
+
+  /// ControllerName is a domain/path string that indicates the name of the controller that wrote this
+  /// status. This corresponds with the controllerName field on GatewayClass.
+  ///
+  /// Example: "example.net/gateway-controller".
+  ///
+  /// The format of this field is DOMAIN "/" PATH, where DOMAIN and PATH are valid Kubernetes names
+  /// (https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names).
+  ///
+  /// Controllers MUST populate this field when writing status. Controllers should ensure that entries to
+  /// status populated with their ControllerName are cleaned up when they are no longer necessary.
+  controllerName: String(
+    length.isBetween(1, 253),
+    matches(
+      Regex(
+        #"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*\/[A-Za-z0-9\/\-._~%!$&'()*+,;=:]+$"#,
+      ),
+    ),
+  )
+}
+
+/// AncestorRef corresponds with a ParentRef in the spec that this PolicyAncestorStatus struct describes
+/// the status of.
+class AncestorRef {
+  /// Group is the group of the referent. When unspecified, "gateway.networking.k8s.io" is inferred. To
+  /// set the core API group (such as for a "Service" kind referent), Group must be explicitly set to ""
+  /// (empty string).
+  ///
+  /// Support: Core
+  group: String(
+    length <= 253,
+    matches(Regex(#"^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )?
+
+  /// Kind is kind of the referent.
+  ///
+  /// There are two kinds of parent resources with "Core" support:
+  ///
+  /// * Gateway (Gateway conformance profile) * Service (Mesh conformance profile, ClusterIP Services
+  /// only)
+  ///
+  /// Support for other resources is Implementation-Specific.
+  kind: String(length.isBetween(1, 63), matches(Regex("^[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?$")))?
+
+  /// Name is the name of the referent.
+  ///
+  /// Support: Core
+  name: String(length.isBetween(1, 253))
+
+  /// Namespace is the namespace of the referent. When unspecified, this refers to the local namespace of
+  /// the Route.
+  ///
+  /// Note that there are specific rules for ParentRefs which cross namespace boundaries. Cross-namespace
+  /// references are only valid if they are explicitly allowed by something in the namespace they are
+  /// referring to. For example: Gateway has the AllowedRoutes field, and ReferenceGrant provides a
+  /// generic way to enable any other kind of cross-namespace reference.
+  ///
+  /// <gateway:experimental:description> ParentRefs from a Route to a Service in the same namespace are
+  /// "producer" routes, which apply default routing rules to inbound connections from any namespace to
+  /// the Service.
+  ///
+  /// ParentRefs from a Route to a Service in a different namespace are "consumer" routes, and these
+  /// routing rules are only applied to outbound connections originating from the same namespace as the
+  /// Route, for which the intended destination of the connections are a Service targeted as a ParentRef
+  /// of the Route. </gateway:experimental:description>
+  ///
+  /// Support: Core
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+
+  /// Port is the network port this Route targets. It can be interpreted differently based on the type of
+  /// parent resource.
+  ///
+  /// When the parent resource is a Gateway, this targets all listeners listening on the specified port
+  /// that also support this kind of Route(and select this Route). It's not recommended to set `Port`
+  /// unless the networking behaviors specified in a Route must apply to a specific port as opposed to a
+  /// listener(s) whose port(s) may be changed. When both Port and SectionName are specified, the name
+  /// and port of the selected listener must match both specified values.
+  ///
+  /// <gateway:experimental:description> When the parent resource is a Service, this targets a specific
+  /// port in the Service spec. When both Port (experimental) and SectionName are specified, the name and
+  /// port of the selected port must match both specified values. </gateway:experimental:description>
+  ///
+  /// Implementations MAY choose to support other parent resources. Implementations supporting other
+  /// types of parent resources MUST clearly document how/if Port is interpreted.
+  ///
+  /// For the purpose of status, an attachment is considered successful as long as the parent resource
+  /// accepts it partially. For example, Gateway listeners can restrict which Routes can attach to them
+  /// by Route kind, namespace, or hostname. If 1 of 2 Gateway listeners accept attachment from the
+  /// referencing Route, the Route MUST be considered successfully attached. If no Gateway listeners
+  /// accept attachment from this Route, the Route MUST be considered detached from the Gateway.
+  ///
+  /// Support: Extended
+  port: Int(isBetween(1, 65535))?
+
+  /// SectionName is the name of a section within the target resource. In the following resources,
+  /// SectionName is interpreted as the following:
+  ///
+  /// * Gateway: Listener name. When both Port (experimental) and SectionName are specified, the name and
+  /// port of the selected listener must match both specified values. * Service: Port name. When both
+  /// Port (experimental) and SectionName are specified, the name and port of the selected listener must
+  /// match both specified values.
+  ///
+  /// Implementations MAY choose to support attaching Routes to other resources. If that is the case,
+  /// they MUST clearly document how SectionName is interpreted.
+  ///
+  /// When unspecified (empty string), this will reference the entire resource. For the purpose of
+  /// status, an attachment is considered successful if at least one section in the parent resource
+  /// accepts it. For example, Gateway listeners can restrict which Routes can attach to them by Route
+  /// kind, namespace, or hostname. If 1 of 2 Gateway listeners accept attachment from the referencing
+  /// Route, the Route MUST be considered successfully attached. If no Gateway listeners accept
+  /// attachment from this Route, the Route MUST be considered detached from the Gateway.
+  ///
+  /// Support: Core
+  sectionName: String(
+    length.isBetween(1, 253),
+    matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )?
+}
+
+/// Condition contains details for one aspect of the current state of this API Resource.
+class Condition {
+  /// lastTransitionTime is the last time the condition transitioned from one status to another. This
+  /// should be when the underlying condition changed. If that is not known, then using the time when the
+  /// API field changed is acceptable.
+  lastTransitionTime: String
+
+  /// message is a human readable message indicating details about the transition. This may be an empty
+  /// string.
+  message: String(length <= 32768)
+
+  /// observedGeneration represents the .metadata.generation that the condition was set based upon. For
+  /// instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration
+  /// is 9, the condition is out of date with respect to the current state of the instance.
+  observedGeneration: Int(isPositive)?
+
+  /// reason contains a programmatic identifier indicating the reason for the condition's last
+  /// transition. Producers of specific condition types may define expected values and meanings for this
+  /// field, and whether the values are considered a guaranteed API. The value should be a CamelCase
+  /// string. This field may not be empty.
+  reason: String(
+    length.isBetween(1, 1024),
+    matches(Regex("^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$")),
+  )
+
+  /// status of the condition, one of True, False, Unknown.
+  status: "True" | "False" | "Unknown"
+
+  /// type of condition in CamelCase or in foo.example.com/CamelCase.
+  type: String(
+    length <= 316,
+    matches(
+      Regex(
+        #"^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$"#,
+      ),
+    ),
+  )
+}

@@ -1,0 +1,327 @@
+/// Backend allows the user to configure the endpoints of a backend and the behavior of the connection
+/// from Envoy Proxy to the backend.
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <https://raw.githubusercontent.com/envoyproxy/gateway/v1.9.0/charts/gateway-crds-helm/templates/generated>.
+module io.envoyproxy.gateway.v1alpha1.Backend
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "gateway.envoyproxy.io/v1alpha1"
+
+fixed kind: "Backend"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// Spec defines the desired state of Backend.
+spec: Spec
+
+/// Status defines the current status of Backend.
+status: Status?
+
+/// Spec defines the desired state of Backend.
+class Spec {
+  /// AppProtocols defines the application protocols to be supported when connecting to the backend.
+  appProtocols: Listing<
+    "gateway.envoyproxy.io/h2c" | "gateway.envoyproxy.io/ws" | "gateway.envoyproxy.io/wss",
+  >?
+
+  /// Endpoints defines the endpoints to be used when connecting to the backend.
+  endpoints: Listing<Endpoint>(length.isBetween(1, 256))?
+
+  /// Fallback indicates whether the backend is designated as a fallback. It is highly recommended to
+  /// configure active or passive health checks to ensure that failover can be detected when the active
+  /// backends become unhealthy and to automatically readjust once the primary backends are healthy
+  /// again. The overprovisioning factor is set to 1.4, meaning the fallback backends will only start
+  /// receiving traffic when the health of the active backends falls below 72%.
+  fallback: Boolean?
+
+  /// TLS defines the TLS settings for the backend. If TLS is specified here and a BackendTLSPolicy is
+  /// also configured for the backend, the final TLS settings will be a merge of both configurations. In
+  /// case of overlapping fields, the values defined in the BackendTLSPolicy will take precedence.
+  tls: Tls?
+
+  /// Type defines the type of the backend. Defaults to "Endpoints"
+  type: ("Endpoints" | "DynamicResolver")?
+}
+
+/// BackendEndpoint describes a backend endpoint, which can be either a fully-qualified domain name, IP
+/// address or unix domain socket corresponding to Envoy's Address:
+/// https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/core/v3/address.proto#config-core-v3-address
+class Endpoint {
+  /// FQDN defines a FQDN endpoint
+  fqdn: Fqdn?
+
+  /// Hostname defines an optional hostname for the backend endpoint.
+  hostname: String(
+    length.isBetween(1, 253),
+    matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )?
+
+  /// IP defines an IP endpoint. Supports both IPv4 and IPv6 addresses.
+  ip: Ip?
+
+  /// Unix defines the unix domain socket endpoint
+  unix: Unix?
+
+  /// Zone defines the service zone of the backend endpoint.
+  zone: String?
+}
+
+/// FQDN defines a FQDN endpoint
+class Fqdn {
+  /// Hostname defines the FQDN hostname of the backend endpoint.
+  hostname: String(
+    length.isBetween(1, 253),
+    matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*\.?$"#)),
+  )
+
+  /// Port defines the port of the backend endpoint.
+  port: UInt16
+}
+
+/// IP defines an IP endpoint. Supports both IPv4 and IPv6 addresses.
+class Ip {
+  /// Address defines the IP address of the backend endpoint. Supports both IPv4 and IPv6 addresses.
+  address: String(
+    length.isBetween(3, 45),
+    matches(
+      Regex(
+        #"^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{1,4}|::|(([0-9a-fA-F]{1,4}:){0,5})?(:[0-9a-fA-F]{1,4}){1,2})$"#,
+      ),
+    ),
+  )
+
+  /// Port defines the port of the backend endpoint.
+  port: UInt16
+}
+
+/// Unix defines the unix domain socket endpoint
+class Unix {
+  /// Path defines the unix domain socket path of the backend endpoint. The path length must not exceed
+  /// 108 characters.
+  path: String
+}
+
+/// TLS defines the TLS settings for the backend. If TLS is specified here and a BackendTLSPolicy is also
+/// configured for the backend, the final TLS settings will be a merge of both configurations. In case of
+/// overlapping fields, the values defined in the BackendTLSPolicy will take precedence.
+class Tls {
+  /// ALPNProtocols supplies the list of ALPN protocols that should be exposed by the listener or used by
+  /// the proxy to connect to the backend. Defaults: 1. HTTPS Routes: h2 and http/1.1 are enabled in
+  /// listener context. 2. Other Routes: ALPN is disabled. 3. Backends: proxy uses the appropriate ALPN
+  /// options for the backend protocol. When an empty list is provided, the ALPN TLS extension is
+  /// disabled.
+  ///
+  /// Defaults to [h2, http/1.1] if not specified.
+  ///
+  /// Typical Supported values are: - http/1.0 - http/1.1 - h2
+  alpnProtocols: Listing<String>?
+
+  /// AutoSNIFromEndpointHostname indicates whether the upstream endpoint's hostname should be used as
+  /// the SNI value when establishing a TLS connection to the backend. This uses the resolved hostname of
+  /// the upstream endpoint (e.g., from the Backend Endpoints list), rather than a static value.
+  ///
+  /// Mutually exclusive with SNI. When a BackendTLSPolicy is attached, its Hostname value takes
+  /// precedence and AutoSNIFromEndpointHostname is ignored.
+  autoSNIFromEndpointHostname: Boolean?
+
+  /// CACertificateRefs contains one or more references to Kubernetes objects that contain TLS
+  /// certificates of the Certificate Authorities that can be used as a trust anchor to validate the
+  /// certificates presented by the backend.
+  ///
+  /// A single reference to a Kubernetes ConfigMap or a Kubernetes Secret, with the CA certificate in a
+  /// key named `ca.crt` is currently supported.
+  ///
+  /// If CACertificateRefs is empty or unspecified, then WellKnownCACertificates must be specified. Only
+  /// one of CACertificateRefs or WellKnownCACertificates may be specified, not both.
+  caCertificateRefs: Listing<CaCertificateRef>(length <= 8)?
+
+  /// Ciphers specifies the set of cipher suites supported when negotiating TLS 1.0 - 1.2. This setting
+  /// has no effect for TLS 1.3. For Envoy TLS cipher suite configuration semantics and default cipher
+  /// lists, see the Envoy documentation:
+  /// https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/transport_sockets/tls/v3/common.proto#extensions-transport-sockets-tls-v3-tlsparameters
+  /// Supported cipher suite names: - ECDHE-ECDSA-AES128-GCM-SHA256 - ECDHE-RSA-AES128-GCM-SHA256 -
+  /// ECDHE-ECDSA-AES256-GCM-SHA384 - ECDHE-RSA-AES256-GCM-SHA384 - ECDHE-ECDSA-CHACHA20-POLY1305 -
+  /// ECDHE-RSA-CHACHA20-POLY1305 - ECDHE-ECDSA-AES128-SHA - ECDHE-RSA-AES128-SHA - AES128-GCM-SHA256 -
+  /// AES128-SHA - ECDHE-ECDSA-AES256-SHA - ECDHE-RSA-AES256-SHA - AES256-GCM-SHA384 - AES256-SHA
+  /// Supported IANA/RFC aliases: - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 -
+  /// TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 -
+  /// TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 -
+  /// TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 - TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA -
+  /// TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA - TLS_RSA_WITH_AES_128_GCM_SHA256 - TLS_RSA_WITH_AES_128_CBC_SHA
+  /// - TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA - TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA -
+  /// TLS_RSA_WITH_AES_256_GCM_SHA384 - TLS_RSA_WITH_AES_256_CBC_SHA In non-FIPS Envoy Proxy builds the
+  /// default cipher list is: - [ECDHE-ECDSA-AES128-GCM-SHA256|ECDHE-ECDSA-CHACHA20-POLY1305] -
+  /// [ECDHE-RSA-AES128-GCM-SHA256|ECDHE-RSA-CHACHA20-POLY1305] - ECDHE-ECDSA-AES256-GCM-SHA384 -
+  /// ECDHE-RSA-AES256-GCM-SHA384 In builds using BoringSSL FIPS the default cipher list is: -
+  /// ECDHE-ECDSA-AES128-GCM-SHA256 - ECDHE-RSA-AES128-GCM-SHA256 - ECDHE-ECDSA-AES256-GCM-SHA384 -
+  /// ECDHE-RSA-AES256-GCM-SHA384
+  ciphers: Listing<String>?
+
+  /// ClientCertificateRef defines the reference to a Kubernetes Secret that contains the client
+  /// certificate and private key for Envoy to use when connecting to backend services and external
+  /// services, such as ExtAuth, ALS, OpenTelemetry, etc. This secret should be located within the same
+  /// namespace as the Envoy proxy resource that references it.
+  clientCertificateRef: ClientCertificateRef?
+
+  /// ECDHCurves specifies the set of supported ECDH curves. In non-FIPS Envoy Proxy builds the default
+  /// curves are: - X25519 - P-256 In builds using BoringSSL FIPS the default curve is: - P-256
+  ecdhCurves: Listing<String>?
+
+  /// Fingerprints specifies TLS client fingerprinting. When specified, a JAX fingerprint derived from
+  /// the client’s TLS handshake is generated. The fingerprint can be logged in access logs or forwarded
+  /// to upstream services using request headers.
+  ///
+  /// Fingerprinting is disabled if not specified.
+  ///
+  /// Supported values are: - JA3 - JA4
+  fingerprints: Listing<"JA3" | "JA4">?
+
+  /// InsecureSkipVerify indicates whether the upstream's certificate verification should be skipped.
+  /// Defaults to "false".
+  insecureSkipVerify: Boolean?
+
+  /// Max specifies the maximal TLS protocol version to allow The default is TLS 1.3 if this is not
+  /// specified.
+  maxVersion: ("Auto" | "1.0" | "1.1" | "1.2" | "1.3")?
+
+  /// Min specifies the minimal TLS protocol version to allow. The default is TLS 1.2 if this is not
+  /// specified.
+  minVersion: ("Auto" | "1.0" | "1.1" | "1.2" | "1.3")?
+
+  /// SignatureAlgorithms specifies which signature algorithms the listener should support.
+  signatureAlgorithms: Listing<String>?
+
+  /// SNI specifies the fixed SNI value used when establishing an upstream TLS connection to the backend.
+  ///
+  /// Envoy Gateway will use the HTTP host header value for SNI, when all resources referenced in
+  /// BackendRefs are: 1. Backend resources that do not set SNI, or 2. Service/ServiceImport resources
+  /// that do not have a BackendTLSPolicy attached to them
+  ///
+  /// If a BackendTLSPolicy is attached to the Backend resource, the BackendTLSPolicy's
+  /// validation.hostname value takes precedence over this field.
+  ///
+  /// If no BackendTLSPolicy validation.hostname applies and both this field and
+  /// AutoSNIFromEndpointHostname are unset, Envoy Gateway configures Envoy to set the upstream SNI from
+  /// the downstream HTTP host/authority header.
+  sni: String(
+    length.isBetween(1, 253),
+    matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )?
+
+  /// WellKnownCACertificates specifies whether system CA certificates may be used in the TLS handshake
+  /// between the gateway and backend pod.
+  ///
+  /// If WellKnownCACertificates is unspecified or empty (""), then CACertificateRefs must be specified
+  /// with at least one entry for a valid configuration. Only one of CACertificateRefs or
+  /// WellKnownCACertificates may be specified, not both.
+  wellKnownCACertificates: String(
+    length.isBetween(1, 253),
+    matches(
+      Regex(
+        #"^(System|([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/([A-Za-z0-9][-A-Za-z0-9_.]{0,61})?[A-Za-z0-9]))$"#,
+      ),
+    ),
+  )?
+}
+
+/// LocalObjectReference identifies an API object within the namespace of the referrer. The API object
+/// must be valid in the cluster; the Group and Kind must be registered in the cluster for this reference
+/// to be valid.
+///
+/// References to objects with invalid Group and Kind are not valid, and must be rejected by the
+/// implementation, with appropriate Conditions set on the containing object.
+class CaCertificateRef {
+  /// Group is the group of the referent. For example, "gateway.networking.k8s.io". When unspecified or
+  /// empty string, core API group is inferred.
+  group: String(
+    length <= 253,
+    matches(Regex(#"^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )
+
+  /// Kind is kind of the referent. For example "HTTPRoute" or "Service".
+  kind: String(length.isBetween(1, 63), matches(Regex("^[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?$")))
+
+  /// Name is the name of the referent.
+  name: String(length.isBetween(1, 253))
+}
+
+/// ClientCertificateRef defines the reference to a Kubernetes Secret that contains the client
+/// certificate and private key for Envoy to use when connecting to backend services and external
+/// services, such as ExtAuth, ALS, OpenTelemetry, etc. This secret should be located within the same
+/// namespace as the Envoy proxy resource that references it.
+class ClientCertificateRef {
+  /// Group is the group of the referent. For example, "gateway.networking.k8s.io". When unspecified or
+  /// empty string, core API group is inferred.
+  group: String(
+    length <= 253,
+    matches(Regex(#"^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )?
+
+  /// Kind is kind of the referent. For example "Secret".
+  kind: String(length.isBetween(1, 63), matches(Regex("^[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?$")))?
+
+  /// Name is the name of the referent.
+  name: String(length.isBetween(1, 253))
+
+  /// Namespace is the namespace of the referenced object. When unspecified, the local namespace is
+  /// inferred.
+  ///
+  /// Note that when a namespace different than the local namespace is specified, a ReferenceGrant object
+  /// is required in the referent namespace to allow that namespace's owner to accept the reference. See
+  /// the ReferenceGrant documentation for details.
+  ///
+  /// Support: Core
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// Status defines the current status of Backend.
+class Status {
+  /// Conditions describe the current conditions of the Backend.
+  conditions: Listing<Condition>(length <= 8)?
+}
+
+/// Condition contains details for one aspect of the current state of this API Resource.
+class Condition {
+  /// lastTransitionTime is the last time the condition transitioned from one status to another. This
+  /// should be when the underlying condition changed. If that is not known, then using the time when the
+  /// API field changed is acceptable.
+  lastTransitionTime: String
+
+  /// message is a human readable message indicating details about the transition. This may be an empty
+  /// string.
+  message: String(length <= 32768)
+
+  /// observedGeneration represents the .metadata.generation that the condition was set based upon. For
+  /// instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration
+  /// is 9, the condition is out of date with respect to the current state of the instance.
+  observedGeneration: Int(isPositive)?
+
+  /// reason contains a programmatic identifier indicating the reason for the condition's last
+  /// transition. Producers of specific condition types may define expected values and meanings for this
+  /// field, and whether the values are considered a guaranteed API. The value should be a CamelCase
+  /// string. This field may not be empty.
+  reason: String(
+    length.isBetween(1, 1024),
+    matches(Regex("^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$")),
+  )
+
+  /// status of the condition, one of True, False, Unknown.
+  status: "True" | "False" | "Unknown"
+
+  /// type of condition in CamelCase or in foo.example.com/CamelCase.
+  type: String(
+    length <= 316,
+    matches(
+      Regex(
+        #"^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$"#,
+      ),
+    ),
+  )
+}

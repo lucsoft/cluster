@@ -1,0 +1,1789 @@
+/// EnvoyExtensionPolicy allows the user to configure various envoy extensibility options for the
+/// Gateway.
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <https://raw.githubusercontent.com/envoyproxy/gateway/v1.9.0/charts/gateway-crds-helm/templates/generated>.
+module io.envoyproxy.gateway.v1alpha1.EnvoyExtensionPolicy
+
+extends "@k8s/K8sResource.pkl"
+
+import "pkl:base"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "gateway.envoyproxy.io/v1alpha1"
+
+fixed kind: "EnvoyExtensionPolicy"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// Spec defines the desired state of EnvoyExtensionPolicy.
+spec: Spec
+
+/// Status defines the current status of EnvoyExtensionPolicy.
+status: Status?
+
+/// Spec defines the desired state of EnvoyExtensionPolicy.
+class Spec {
+  /// DynamicModule is an ordered list of dynamic module HTTP filters that should be added to the envoy
+  /// filter chain. Each module must be registered in the EnvoyProxy resource's dynamicModules allowlist.
+  /// Order matters, as the filters will be loaded in the order they are defined in this list.
+  dynamicModule: Listing<DynamicModule>(length <= 16)?
+
+  /// ExtProc is an ordered list of external processing filters that should be added to the envoy filter
+  /// chain
+  extProc: Listing<ExtProc>(length <= 16)?
+
+  /// Lua is an ordered list of Lua filters that should be added to the envoy filter chain
+  lua: Listing<Lua>(length <= 16)?
+
+  /// MergeType determines how this configuration is merged with existing EnvoyExtensionPolicy
+  /// configurations targeting a parent resource. When set, this configuration will be merged into the
+  /// closest parent EnvoyExtensionPolicy in the route's attachment hierarchy (for example, one targeting
+  /// a Gateway, Gateway listener, ListenerSet, or ListenerSet listener). Currently, this field can only
+  /// be set when targeting xRoute resources. If unset, no merging occurs, and only the most specific
+  /// configuration takes effect.
+  mergeType: String?
+
+  /// TargetRef is the name of the resource this policy is being attached to. This policy and the
+  /// TargetRef MUST be in the same namespace for this Policy to have effect
+  ///
+  /// Deprecated: use targetRefs/targetSelectors instead
+  targetRef: TargetRef?
+
+  /// TargetRefs are the names of the Gateway resources this policy is being attached to.
+  targetRefs: Listing<SpecTargetRef>?
+
+  /// TargetSelectors allow targeting resources for this policy based on labels
+  targetSelectors: Listing<TargetSelector>?
+
+  /// Wasm is a list of Wasm extensions to be loaded by the Gateway. Order matters, as the extensions
+  /// will be loaded in the order they are defined in this list.
+  wasm: Listing<Wasm>(length <= 16)?
+}
+
+/// DynamicModule defines a dynamic module HTTP filter to be loaded by Envoy. The module must be
+/// registered in the EnvoyProxy resource's dynamicModules allowlist by the infrastructure operator.
+class DynamicModule {
+  /// Config is the configuration for the dynamic module filter. This is serialized as JSON and passed to
+  /// the module's initialization function.
+  config: base.Dynamic?
+
+  /// FilterName identifies a specific filter implementation within the dynamic module. A single shared
+  /// library can contain multiple filter implementations. This value is passed to the module's HTTP
+  /// filter config init function to select the appropriate implementation. If not specified, defaults to
+  /// an empty string.
+  filterName: String(length <= 253)?
+
+  /// Name references a dynamic module registered in the EnvoyProxy resource's dynamicModules list. The
+  /// referenced module must exist in the registry; otherwise, the policy will be rejected.
+  name: String(length.isBetween(1, 253), matches(Regex("^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$")))
+
+  /// TerminalFilter indicates that this dynamic module handles requests without requiring an upstream
+  /// backend. The module is responsible for generating and sending the response to downstream directly.
+  /// Defaults to false.
+  terminalFilter: Boolean?
+}
+
+/// ExtProc defines the configuration for External Processing filter.
+class ExtProc {
+  /// BackendRef references a Kubernetes object that represents the backend server to which the
+  /// authorization request will be sent.
+  ///
+  /// Deprecated: Use BackendRefs instead.
+  backendRef: BackendRef?
+
+  /// BackendRefs references a Kubernetes object that represents the backend server to which the
+  /// authorization request will be sent.
+  backendRefs: Listing<ExtProcBackendRef>(length <= 16)?
+
+  /// BackendSettings holds configuration for managing the connection to the backend.
+  backendSettings: BackendSettings?
+
+  /// FailOpen is a switch used to control the behavior when failing to call the external processor.
+  ///
+  /// If FailOpen is set to true, the system bypasses the ExtProc extension and allows the traffic to
+  /// pass through. If it is set to false or not set (defaulting to false), the system blocks the traffic
+  /// and returns an HTTP 5xx error.
+  ///
+  /// If set to true, the ExtProc extension will also be bypassed if the configuration is invalid.
+  failOpen: Boolean?
+
+  /// MessageTimeout is the timeout for a response to be returned from the external processor Default:
+  /// 200ms
+  messageTimeout: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// Metadata defines options related to the sending and receiving of dynamic metadata. These options
+  /// define which metadata namespaces would be sent to the processor and which dynamic metadata
+  /// namespaces the processor would be permitted to emit metadata to. Users can specify custom
+  /// namespaces or well-known envoy metadata namespace (such as envoy.filters.http.ext_authz) documented
+  /// here:
+  /// https://www.envoyproxy.io/docs/envoy/latest/configuration/advanced/well_known_dynamic_metadata#well-known-dynamic-metadata
+  /// Default: no metadata context is sent or received from the external processor
+  metadata: Metadata?
+
+  /// ProcessingMode defines how request and response body is processed Default: header and body are not
+  /// sent to the external processor
+  processingMode: ProcessingMode?
+
+  /// ShadowMode sets if envoy gateway should treat this external processor as "send and go". When
+  /// enabled, Envoy forwards request/response data to the external processor but does not wait for or
+  /// apply any response from it. This maps to Envoy's `observability_mode` on the ext_proc filter.
+  /// Defaults to false.
+  shadowMode: Boolean?
+
+  /// Sets the HTTP status that is returned to the client when the external processor returns an error or
+  /// cannot be reached. Defaults to 500 Internal Server Error. Only 4xx and 5xx status codes are
+  /// supported.
+  statusOnError: Int(
+    this == 400
+      || this == 401
+      || this == 402
+      || this == 403
+      || this == 404
+      || this == 405
+      || this == 406
+      || this == 407
+      || this == 408
+      || this == 409
+      || this == 410
+      || this == 411
+      || this == 412
+      || this == 413
+      || this == 414
+      || this == 415
+      || this == 416
+      || this == 417
+      || this == 421
+      || this == 422
+      || this == 423
+      || this == 424
+      || this == 426
+      || this == 428
+      || this == 429
+      || this == 431
+      || this == 500
+      || this == 501
+      || this == 502
+      || this == 503
+      || this == 504
+      || this == 505
+      || this == 506
+      || this == 507
+      || this == 508
+      || this == 510
+      || this == 511,
+  )?
+}
+
+/// BackendRef references a Kubernetes object that represents the backend server to which the
+/// authorization request will be sent.
+///
+/// Deprecated: Use BackendRefs instead.
+class BackendRef {
+  /// Group is the group of the referent. For example, "gateway.networking.k8s.io". When unspecified or
+  /// empty string, core API group is inferred.
+  group: String(
+    length <= 253,
+    matches(Regex(#"^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )?
+
+  /// Kind is the Kubernetes resource kind of the referent. For example "Service".
+  ///
+  /// Defaults to "Service" when not specified.
+  ///
+  /// ExternalName services can refer to CNAME DNS records that may live outside of the cluster and as
+  /// such are difficult to reason about in terms of conformance. They also may not be safe to forward to
+  /// (see CVE-2021-25740 for more information). Implementations SHOULD NOT support ExternalName
+  /// Services.
+  ///
+  /// Support: Core (Services with a type other than ExternalName)
+  ///
+  /// Support: Implementation-specific (Services with type ExternalName)
+  kind: String(length.isBetween(1, 63), matches(Regex("^[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?$")))?
+
+  /// Name is the name of the referent.
+  name: String(length.isBetween(1, 253))
+
+  /// Namespace is the namespace of the backend. When unspecified, the local namespace is inferred.
+  ///
+  /// Note that when a namespace different than the local namespace is specified, a ReferenceGrant object
+  /// is required in the referent namespace to allow that namespace's owner to accept the reference. See
+  /// the ReferenceGrant documentation for details.
+  ///
+  /// Support: Core
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+
+  /// Port specifies the destination port number to use for this resource. Port is required when the
+  /// referent is a Kubernetes Service. In this case, the port number is the service port number, not the
+  /// target port. For other resources, destination port might be derived from the referent resource or
+  /// this field.
+  port: Int(isBetween(1, 65535))?
+}
+
+/// BackendRef defines how an ObjectReference that is specific to BackendRef.
+class ExtProcBackendRef {
+  /// Fallback indicates whether the backend is designated as a fallback. Multiple fallback backends can
+  /// be configured. It is highly recommended to configure active or passive health checks to ensure that
+  /// failover can be detected when the active backends become unhealthy and to automatically readjust
+  /// once the primary backends are healthy again. The overprovisioning factor is set to 1.4, meaning the
+  /// fallback backends will only start receiving traffic when the health of the active backends falls
+  /// below 72%.
+  fallback: Boolean?
+
+  /// Group is the group of the referent. For example, "gateway.networking.k8s.io". When unspecified or
+  /// empty string, core API group is inferred.
+  group: String(
+    length <= 253,
+    matches(Regex(#"^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )?
+
+  /// Kind is the Kubernetes resource kind of the referent. For example "Service".
+  ///
+  /// Defaults to "Service" when not specified.
+  ///
+  /// ExternalName services can refer to CNAME DNS records that may live outside of the cluster and as
+  /// such are difficult to reason about in terms of conformance. They also may not be safe to forward to
+  /// (see CVE-2021-25740 for more information). Implementations SHOULD NOT support ExternalName
+  /// Services.
+  ///
+  /// Support: Core (Services with a type other than ExternalName)
+  ///
+  /// Support: Implementation-specific (Services with type ExternalName)
+  kind: String(length.isBetween(1, 63), matches(Regex("^[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?$")))?
+
+  /// Name is the name of the referent.
+  name: String(length.isBetween(1, 253))
+
+  /// Namespace is the namespace of the backend. When unspecified, the local namespace is inferred.
+  ///
+  /// Note that when a namespace different than the local namespace is specified, a ReferenceGrant object
+  /// is required in the referent namespace to allow that namespace's owner to accept the reference. See
+  /// the ReferenceGrant documentation for details.
+  ///
+  /// Support: Core
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+
+  /// Port specifies the destination port number to use for this resource. Port is required when the
+  /// referent is a Kubernetes Service. In this case, the port number is the service port number, not the
+  /// target port. For other resources, destination port might be derived from the referent resource or
+  /// this field.
+  port: Int(isBetween(1, 65535))?
+
+  /// Weight specifies the proportion of requests forwarded to the referenced backend. This is computed
+  /// as weight/(sum of all weights in this BackendRefs list). For non-zero values, there may be some
+  /// epsilon from the exact proportion defined here depending on the precision an implementation
+  /// supports. Weight is not a percentage and the sum of weights does not need to equal 100.
+  ///
+  /// If only one backend is specified and it has a weight greater than 0, 100% of the traffic is
+  /// forwarded to that backend. If weight is set to 0, no traffic should be forwarded for this entry. If
+  /// unspecified, weight defaults to 1.
+  ///
+  /// Support for this field varies based on the context where used.
+  weight: Int(isBetween(0, 1000000))?
+}
+
+/// BackendSettings holds configuration for managing the connection to the backend.
+class BackendSettings {
+  /// Circuit Breaker settings for the upstream connections and requests. If not set, circuit breakers
+  /// will be enabled with the default thresholds
+  circuitBreaker: CircuitBreaker?
+
+  /// Connection includes backend connection settings.
+  connection: Connection?
+
+  /// DNS includes dns resolution settings.
+  dns: Dns?
+
+  /// HealthCheck allows gateway to perform active health checking on backends.
+  healthCheck: HealthCheck?
+
+  /// HTTP2 provides HTTP/2 configuration for backend connections.
+  http2: Http2?
+
+  /// LoadBalancer policy to apply when routing traffic from the gateway to the backend endpoints.
+  /// Defaults to `LeastRequest`.
+  loadBalancer: LoadBalancer?
+
+  /// ProxyProtocol enables the Proxy Protocol when communicating with the backend.
+  proxyProtocol: ProxyProtocol?
+
+  /// Retry provides more advanced usage, allowing users to customize the number of retries, retry
+  /// fallback strategy, and retry triggering conditions. If not set, retry will be disabled.
+  retry: Retry?
+
+  /// TcpKeepalive settings associated with the upstream client connection. Disabled by default.
+  tcpKeepalive: TcpKeepalive?
+
+  /// Timeout settings for the backend connections.
+  timeout: Timeout?
+}
+
+/// Circuit Breaker settings for the upstream connections and requests. If not set, circuit breakers will
+/// be enabled with the default thresholds
+class CircuitBreaker {
+  /// The maximum number of connections that Envoy will establish to the referenced backend defined
+  /// within a xRoute rule.
+  maxConnections: UInt32?
+
+  /// The maximum number of parallel requests that Envoy will make to the referenced backend defined
+  /// within a xRoute rule.
+  maxParallelRequests: UInt32?
+
+  /// The maximum number of parallel retries that Envoy will make to the referenced backend defined
+  /// within a xRoute rule.
+  maxParallelRetries: UInt32?
+
+  /// The maximum number of pending requests that Envoy will queue to the referenced backend defined
+  /// within a xRoute rule.
+  maxPendingRequests: UInt32?
+
+  /// The maximum number of requests that Envoy will make over a single connection to the referenced
+  /// backend defined within a xRoute rule. Default: unlimited.
+  maxRequestsPerConnection: UInt32?
+
+  /// PerEndpoint defines Circuit Breakers that will apply per-endpoint for an upstream cluster
+  perEndpoint: PerEndpoint?
+
+  /// RetryBudget provides settings for retry budget, which limits the number of retries in a given
+  /// percentage. RetryBudget take precedence over maxParallelRetries.
+  retryBudget: RetryBudget?
+}
+
+/// PerEndpoint defines Circuit Breakers that will apply per-endpoint for an upstream cluster
+class PerEndpoint {
+  /// MaxConnections configures the maximum number of connections that Envoy will establish per-endpoint
+  /// to the referenced backend defined within a xRoute rule.
+  maxConnections: UInt32?
+}
+
+/// RetryBudget provides settings for retry budget, which limits the number of retries in a given
+/// percentage. RetryBudget take precedence over maxParallelRetries.
+class RetryBudget {
+  /// MinRetryConcurrency specifies the minimum retry concurrency allowed for the retry budget. For
+  /// example, a budget of 20% with a minimum retry concurrency of 3 will allow 5 active retries while
+  /// there are 25 active requests. If there are 2 active requests, there are still 3 active retries
+  /// allowed because of the minimum retry concurrency. Defaults to 3.
+  minRetryConcurrency: Int?
+
+  /// Percent specifies the limit on concurrent retries as a percentage [0, 100] of the sum of active
+  /// requests and active pending requests.
+  percent: Percent
+}
+
+/// Percent specifies the limit on concurrent retries as a percentage [0, 100] of the sum of active
+/// requests and active pending requests.
+class Percent {
+  denominator: Int(this >= 1)?
+
+  numerator: Int(isPositive)
+}
+
+/// Connection includes backend connection settings.
+class Connection {
+  /// BufferLimit Soft limit on size of the cluster’s connections read and write buffers. BufferLimit
+  /// applies to connection streaming (maybe non-streaming) channel between processes, it's in user
+  /// space. If unspecified, an implementation defined default is applied (32768 bytes). For example,
+  /// 20Mi, 1Gi, 256Ki etc. Note: that when the suffix is not provided, the value is interpreted as
+  /// bytes.
+  bufferLimit: (Int | String)?
+
+  /// Preconnect configures proactive upstream connections to reduce latency by establishing connections
+  /// before they’re needed and avoiding connection establishment overhead.
+  ///
+  /// If unset, Envoy will fetch connections as needed to serve in-flight requests.
+  preconnect: Preconnect?
+
+  /// SocketBufferLimit provides configuration for the maximum buffer size in bytes for each socket to
+  /// backend. SocketBufferLimit applies to socket streaming channel between TCP/IP stacks, it's in
+  /// kernel space. For example, 20Mi, 1Gi, 256Ki etc. Note that when the suffix is not provided, the
+  /// value is interpreted as bytes.
+  socketBufferLimit: (Int | String)?
+}
+
+/// Preconnect configures proactive upstream connections to reduce latency by establishing connections
+/// before they’re needed and avoiding connection establishment overhead.
+///
+/// If unset, Envoy will fetch connections as needed to serve in-flight requests.
+class Preconnect {
+  /// PerEndpointPercent configures how many additional connections to maintain per upstream endpoint,
+  /// useful for high-QPS or latency sensitive services. Expressed as a percentage of the connections
+  /// required by active streams (e.g. 100 = preconnect disabled, 105 = 1.05x connections per-endpoint,
+  /// 200 = 2.00×).
+  ///
+  /// Allowed value range is between 100-300. When both PerEndpointPercent and PredictivePercent are set,
+  /// Envoy ensures both are satisfied (max of the two).
+  perEndpointPercent: Int(isBetween(100, 300))?
+
+  /// PredictivePercent configures how many additional connections to maintain across the cluster by
+  /// anticipating which upstream endpoint the load balancer will select next, useful for low-QPS
+  /// services. Relies on deterministic loadbalancing and is only supported with Random or RoundRobin.
+  /// Expressed as a percentage of the connections required by active streams (e.g. 100 = 1.0 (no
+  /// preconnect), 105 = 1.05× connections across the cluster, 200 = 2.00×).
+  ///
+  /// Minimum allowed value is 100. When both PerEndpointPercent and PredictivePercent are set Envoy
+  /// ensures both are satisfied per host (max of the two).
+  predictivePercent: Int(this >= 100)?
+}
+
+/// DNS includes dns resolution settings.
+class Dns {
+  /// DNSRefreshRate specifies the rate at which DNS records should be refreshed. Defaults to 30 seconds.
+  dnsRefreshRate: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// LookupFamily determines how Envoy would resolve DNS for Routes where the backend is specified as a
+  /// fully qualified domain name (FQDN). If set, this configuration overrides other defaults.
+  lookupFamily: ("IPv4" | "IPv6" | "IPv4Preferred" | "IPv6Preferred" | "IPv4AndIPv6")?
+
+  /// RespectDNSTTL indicates whether the DNS Time-To-Live (TTL) should be respected. If the value is set
+  /// to true, the DNS refresh rate will be set to the resource record’s TTL. Defaults to true.
+  respectDnsTtl: Boolean?
+}
+
+/// HealthCheck allows gateway to perform active health checking on backends.
+class HealthCheck {
+  /// Active health check configuration
+  active: Active?
+
+  /// When number of unhealthy endpoints for a backend reaches this threshold Envoy will disregard health
+  /// status and balance across all endpoints. It's designed to prevent a situation in which host
+  /// failures cascade throughout the cluster as load increases. If not set, the default value is 50%. To
+  /// disable panic mode, set value to `0`.
+  panicThreshold: Int(isBetween(0, 100))?
+
+  /// Passive passive check configuration
+  passive: Passive?
+}
+
+/// Active health check configuration
+class Active {
+  /// GRPC defines the configuration of the GRPC health checker. It's optional, and can only be used if
+  /// the specified type is GRPC.
+  grpc: Grpc?
+
+  /// HealthCheckLog defines health check event logging configuration for this cluster. When set, HC
+  /// probe outcomes are logged to the configured sinks. Takes precedence over the gateway-level
+  /// EnvoyProxy.spec.telemetry.healthCheckLog.
+  healthCheckLog: HealthCheckLog?
+
+  /// HealthyThreshold defines the number of healthy health checks required before a backend host is
+  /// marked healthy.
+  healthyThreshold: Int(this >= 1)?
+
+  /// HTTP defines the configuration of http health checker. It's required while the health checker type
+  /// is HTTP.
+  http: Http?
+
+  /// InitialJitter defines the maximum time Envoy will wait before the first health check. Envoy will
+  /// randomly select a value between 0 and the initial jitter value.
+  initialJitter: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// Interval defines the time between active health checks.
+  interval: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// Overrides defines the configuration of the overriding health check settings for all endpoints in
+  /// the backend cluster. This allows customization of port and other settings that may differ from the
+  /// main service configuration.
+  overrides: Overrides?
+
+  /// TCP defines the configuration of tcp health checker. It's required while the health checker type is
+  /// TCP.
+  tcp: Tcp?
+
+  /// Timeout defines the time to wait for a health check response.
+  timeout: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// Type defines the type of health checker.
+  type: String(this == "HTTP" || this == "TCP" || this == "GRPC")
+
+  /// UnhealthyThreshold defines the number of unhealthy health checks required before a backend host is
+  /// marked unhealthy. Without RetriableStatuses configured, any health check failure results in the
+  /// host being immediately considered unhealthy. When RetriableStatuses is set, health checks returning
+  /// those statuses are retried up to this threshold before the host is marked unhealthy.
+  unhealthyThreshold: Int(this >= 1)?
+}
+
+/// GRPC defines the configuration of the GRPC health checker. It's optional, and can only be used if the
+/// specified type is GRPC.
+class Grpc {
+  /// Service to send in the health check request. If this is not specified, then the health check
+  /// request applies to the entire server and not to a specific service.
+  service: String?
+}
+
+/// HealthCheckLog defines health check event logging configuration for this cluster. When set, HC probe
+/// outcomes are logged to the configured sinks. Takes precedence over the gateway-level
+/// EnvoyProxy.spec.telemetry.healthCheckLog.
+class HealthCheckLog {
+  /// Matches defines which health check probe outcomes produce a log entry. When omitted or empty, all
+  /// events are logged.
+  ///
+  /// Each value must be unique. Multiple values are ORed. If any failure type is specified then a
+  /// success type must also be specified, and vice versa.
+  matches: Listing<"Failure" | "FailureSeriesStart" | "Success" | "HealthyTransition">(length <= 4)?
+
+  /// Sinks defines where health check events are written. When omitted, events are written to
+  /// /dev/stdout.
+  sinks: Listing<Sink>(length <= 1)?
+}
+
+/// ProxyHealthCheckLogSink defines a destination for health check event logs.
+class Sink {
+  /// File defines the file sink configuration. Required when type is File.
+  file: File?
+
+  /// Type defines the type of sink.
+  type: "File"
+}
+
+/// File defines the file sink configuration. Required when type is File.
+class File {
+  /// Path specifies the file path for health check event output. Use /dev/stdout to write to standard
+  /// output.
+  path: String(!isEmpty)
+}
+
+/// HTTP defines the configuration of http health checker. It's required while the health checker type is
+/// HTTP.
+class Http {
+  /// ExpectedResponse defines a list of HTTP expected responses to match.
+  expectedResponse: ExpectedResponse?
+
+  /// ExpectedStatuses defines a list of HTTP response statuses considered healthy. Defaults to 200 only
+  expectedStatuses: Listing<Int(isBetween(100, 599))>?
+
+  /// Hostname defines the HTTP Host header used for active HTTP health checks. Host selection uses this
+  /// order: this field, the associated Backend endpoint hostname if available, then the effective Route
+  /// hostname.
+  hostname: String(
+    length.isBetween(1, 253),
+    matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )?
+
+  /// Method defines the HTTP method used for health checking. Defaults to GET
+  method: String(length <= 16)?
+
+  /// Path defines the HTTP path that will be requested during health checking.
+  path: String(length.isBetween(1, 1024))
+
+  /// RequestBody defines the HTTP request body payload sent during health checking.
+  requestBody: RequestBody?
+
+  /// RetriableStatuses defines a list of HTTP response statuses considered retriable. Responses matching
+  /// these statuses count towards the unhealthy threshold but do not result in the host being considered
+  /// immediately unhealthy. The expected statuses take precedence for any range overlaps with this
+  /// field.
+  retriableStatuses: Listing<Int(isBetween(100, 599))>?
+}
+
+/// ExpectedResponse defines a list of HTTP expected responses to match.
+class ExpectedResponse {
+  /// Binary payload base64 encoded.
+  binary: String?
+
+  /// Text payload in plain text.
+  text: String?
+
+  /// Type defines the type of the payload.
+  type: String(this == "Text" || this == "Binary")
+}
+
+/// RequestBody defines the HTTP request body payload sent during health checking.
+class RequestBody {
+  /// Binary payload base64 encoded.
+  binary: String?
+
+  /// Text payload in plain text.
+  text: String?
+
+  /// Type defines the type of the payload.
+  type: String(this == "Text" || this == "Binary")
+}
+
+/// Overrides defines the configuration of the overriding health check settings for all endpoints in the
+/// backend cluster. This allows customization of port and other settings that may differ from the main
+/// service configuration.
+class Overrides {
+  /// Port overrides the health check port. If not set, the endpoint's serving port is used for health
+  /// checks. This is useful when health checks are served on a different port than the main service port
+  /// (e.g., port 443 for service, port 9090 for health checks).
+  port: Int(isBetween(1, 65535))?
+}
+
+/// TCP defines the configuration of tcp health checker. It's required while the health checker type is
+/// TCP.
+class Tcp {
+  /// Receive defines the expected response payload.
+  receive: Receive?
+
+  /// Send defines the request payload.
+  send: Send?
+}
+
+/// Receive defines the expected response payload.
+class Receive {
+  /// Binary payload base64 encoded.
+  binary: String?
+
+  /// Text payload in plain text.
+  text: String?
+
+  /// Type defines the type of the payload.
+  type: String(this == "Text" || this == "Binary")
+}
+
+/// Send defines the request payload.
+class Send {
+  /// Binary payload base64 encoded.
+  binary: String?
+
+  /// Text payload in plain text.
+  text: String?
+
+  /// Type defines the type of the payload.
+  type: String(this == "Text" || this == "Binary")
+}
+
+/// Passive passive check configuration
+class Passive {
+  /// AlwaysEjectOneEndpoint defines whether at least one host should be ejected, regardless of
+  /// MaxEjectionPercent.
+  alwaysEjectOneEndpoint: Boolean?
+
+  /// BaseEjectionTime defines the base duration for which a host will be ejected on consecutive
+  /// failures.
+  baseEjectionTime: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// Consecutive5xxErrors sets the number of consecutive 5xx errors triggering ejection.
+  consecutive5XxErrors: Int?
+
+  /// ConsecutiveGatewayErrors sets the number of consecutive gateway errors triggering ejection.
+  consecutiveGatewayErrors: Int?
+
+  /// ConsecutiveLocalOriginFailures sets the number of consecutive local origin failures triggering
+  /// ejection. Parameter takes effect only when split_external_local_origin_errors is set to true.
+  consecutiveLocalOriginFailures: Int?
+
+  /// FailurePercentageThreshold sets the failure percentage threshold for outlier detection. If the
+  /// failure percentage of a given host is greater than or equal to this value, it will be ejected.
+  /// Defaults to 85.
+  failurePercentageThreshold: Int(isBetween(0, 100))?
+
+  /// Interval defines the time between passive health checks.
+  interval: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// MaxEjectionPercent sets the maximum percentage of hosts in a cluster that can be ejected.
+  maxEjectionPercent: Int(isBetween(0, 100))?
+
+  /// SplitExternalLocalOriginErrors enables splitting of errors between external and local origin.
+  splitExternalLocalOriginErrors: Boolean?
+}
+
+/// HTTP2 provides HTTP/2 configuration for backend connections.
+class Http2 {
+  /// ConnectionKeepalive configures HTTP/2 connection keepalive using PING frames.
+  connectionKeepalive: ConnectionKeepalive?
+
+  /// InitialConnectionWindowSize sets the initial window size for HTTP/2 connections. If not set, the
+  /// default value is 1 MiB.
+  initialConnectionWindowSize: (Int | String)?
+
+  /// InitialStreamWindowSize sets the initial window size for HTTP/2 streams. If not set, the default
+  /// value is 64 KiB(64*1024).
+  initialStreamWindowSize: (Int | String)?
+
+  /// MaxConcurrentStreams sets the maximum number of concurrent streams allowed per connection. If not
+  /// set, the default value is 100.
+  maxConcurrentStreams: Int(isBetween(1, 2147483647))?
+
+  /// OnInvalidMessage determines if Envoy will terminate the connection or just the offending stream in
+  /// the event of HTTP messaging error It's recommended for L2 Envoy deployments to set this value to
+  /// TerminateStream. https://www.envoyproxy.io/docs/envoy/latest/configuration/best_practices/level_two
+  /// Default: TerminateConnection
+  onInvalidMessage: String?
+}
+
+/// ConnectionKeepalive configures HTTP/2 connection keepalive using PING frames.
+class ConnectionKeepalive {
+  /// IdleInterval specifies how long a connection must be idle before a PING is sent.
+  idleInterval: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// Interval specifies how often to send HTTP/2 PING frames to keep the connection alive.
+  interval: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// IntervalJitter specifies a random jitter percentage added to each interval. Defaults to 15% if not
+  /// specified.
+  intervalJitter: Int(isBetween(0, 100))?
+
+  /// Timeout specifies how long to wait for a PING response before considering the connection dead.
+  timeout: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+}
+
+/// LoadBalancer policy to apply when routing traffic from the gateway to the backend endpoints. Defaults
+/// to `LeastRequest`.
+class LoadBalancer {
+  /// BackendUtilization defines the configuration when the load balancer type is set to
+  /// BackendUtilization.
+  backendUtilization: BackendUtilization?
+
+  /// ConsistentHash defines the configuration when the load balancer type is set to ConsistentHash
+  consistentHash: ConsistentHash?
+
+  /// DynamicModule defines the configuration when the load balancer type is set to DynamicModule. The
+  /// referenced module must be registered in the EnvoyProxy resource's dynamicModules allowlist.
+  dynamicModule: LoadBalancerDynamicModule?
+
+  /// EndpointOverride defines the configuration for endpoint override. When specified, the load balancer
+  /// will attempt to route requests to endpoints based on the override information extracted from
+  /// request headers or metadata. If the override endpoints are not available, the configured load
+  /// balancer policy will be used as fallback.
+  endpointOverride: EndpointOverride?
+
+  /// SlowStart defines the configuration related to the slow start load balancer policy. If set, during
+  /// slow start window, traffic sent to the newly added hosts will gradually increase. Supported for
+  /// RoundRobin, LeastRequest, and BackendUtilization load balancers.
+  slowStart: SlowStart?
+
+  /// Type decides the type of Load Balancer policy. Valid LoadBalancerType values are "ConsistentHash",
+  /// "LeastRequest", "Random", "RoundRobin", "BackendUtilization", "DynamicModule".
+  type: "ConsistentHash"
+    | "LeastRequest"
+    | "Random"
+    | "RoundRobin"
+    | "BackendUtilization"
+    | "DynamicModule"
+
+  /// ZoneAware defines the configuration related to the distribution of requests between locality zones.
+  zoneAware: ZoneAware?
+}
+
+/// BackendUtilization defines the configuration when the load balancer type is set to
+/// BackendUtilization.
+class BackendUtilization {
+  /// A given endpoint must report load metrics continuously for at least this long before the endpoint
+  /// weight will be used. Default is 10s.
+  blackoutPeriod: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// ErrorUtilizationPenaltyPercent adjusts endpoint weights based on the error rate (eps/qps). This is
+  /// expressed as a percentage-based integer where 100 represents 1.0, 150 represents 1.5, etc.
+  ///
+  /// For example: - 100 => 1.0x - 120 => 1.2x - 200 => 2.0x
+  ///
+  /// Must be non-negative.
+  errorUtilizationPenaltyPercent: Int(isPositive)?
+
+  /// KeepResponseHeaders keeps the ORCA load report headers/trailers before sending the response to the
+  /// client. Defaults to false.
+  keepResponseHeaders: Boolean?
+
+  /// Metric names used to compute utilization if application_utilization is not set. For map fields in
+  /// ORCA proto, use the form "<map_field>.<key>", e.g., "named_metrics.foo".
+  metricNamesForComputingUtilization: Listing<String>?
+
+  /// OutOfBand enables out-of-band ORCA load reporting. When set, Envoy opens a server-streaming gRPC
+  /// connection to each endpoint's xds.service.orca.v3.OpenRcaService/StreamCoreMetrics and pulls load
+  /// reports periodically, instead of relying on in-band ORCA metrics carried in response
+  /// headers/trailers.
+  ///
+  /// The backend must implement OpenRcaService for this to take effect.
+  outOfBand: OutOfBand?
+
+  /// If a given endpoint has not reported load metrics in this long, stop using the reported weight.
+  /// Defaults to 3m.
+  weightExpirationPeriod: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// How often endpoint weights are recalculated. Values less than 100ms are capped at 100ms. Default
+  /// 1s.
+  weightUpdatePeriod: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+}
+
+/// OutOfBand enables out-of-band ORCA load reporting. When set, Envoy opens a server-streaming gRPC
+/// connection to each endpoint's xds.service.orca.v3.OpenRcaService/StreamCoreMetrics and pulls load
+/// reports periodically, instead of relying on in-band ORCA metrics carried in response
+/// headers/trailers.
+///
+/// The backend must implement OpenRcaService for this to take effect.
+class OutOfBand {
+  /// Authority overrides the :authority header on the OutOfBand gRPC stream. If unset, Envoy uses the
+  /// endpoint hostname, then the dialed address, then the cluster name.
+  authority: String(length.isBetween(1, 259), matches(Regex(#"^[^\x00\n\r]*$"#)))?
+
+  /// Port overrides the port used for the OutOfBand reporting connection, e.g. to reach a separate
+  /// reporting sidecar. Defaults to the endpoint's port.
+  port: Int(isBetween(1, 65535))?
+
+  /// ReportingPeriod is how often Envoy requests load reports from the server. Must be greater than 0.
+  /// Defaults to 10s.
+  reportingPeriod: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+}
+
+/// ConsistentHash defines the configuration when the load balancer type is set to ConsistentHash
+class ConsistentHash {
+  /// Cookie configures the cookie hash policy when the consistent hash type is set to Cookie.
+  cookie: Cookie?
+
+  /// Header configures the header hash policy when the consistent hash type is set to Header.
+  ///
+  /// Deprecated: use Headers instead
+  header: Header?
+
+  /// Headers configures the header hash policy for each header, when the consistent hash type is set to
+  /// Headers.
+  headers: Listing<ConsistentHashHeader>?
+
+  /// QueryParams configures the query parameter hash policy when the consistent hash type is set to
+  /// QueryParams.
+  queryParams: Listing<QueryParam>?
+
+  /// The table size for consistent hashing, must be prime number limited to 5000011.
+  tableSize: Int(isBetween(2, 5000011))?
+
+  /// ConsistentHashType defines the type of input to hash on. Valid Type values are "SourceIP",
+  /// "Header", "Headers", "Cookie". "QueryParams".
+  type: "SourceIP" | "Header" | "Headers" | "Cookie" | "QueryParams"
+}
+
+/// Cookie configures the cookie hash policy when the consistent hash type is set to Cookie.
+class Cookie {
+  /// Additional Attributes to set for the generated cookie.
+  attributes: Mapping<String, String>?
+
+  /// Name of the cookie to hash. If this cookie does not exist in the request, Envoy will generate a
+  /// cookie and set the TTL on the response back to the client based on Layer 4 attributes of the
+  /// backend endpoint, to ensure that these future requests go to the same backend endpoint. Make sure
+  /// to set the TTL field for this case.
+  name: String
+
+  /// TTL of the generated cookie if the cookie is not present. This value sets the Max-Age attribute
+  /// value.
+  ttl: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+}
+
+/// Header configures the header hash policy when the consistent hash type is set to Header.
+///
+/// Deprecated: use Headers instead
+class Header {
+  /// Name of the header to hash.
+  name: String
+}
+
+/// Header defines the header hashing configuration for consistent hash based load balancing.
+class ConsistentHashHeader {
+  /// Name of the header to hash.
+  name: String
+}
+
+/// QueryParam defines the query parameter name hashing configuration for consistent hash based load
+/// balancing.
+class QueryParam {
+  /// Name of the query param to hash.
+  name: String
+}
+
+/// DynamicModule defines the configuration when the load balancer type is set to DynamicModule. The
+/// referenced module must be registered in the EnvoyProxy resource's dynamicModules allowlist.
+class LoadBalancerDynamicModule {
+  /// Config is optional configuration for the module's load balancer implementation. This is serialized
+  /// and passed to the module's initialization function.
+  config: base.Dynamic?
+
+  /// LBPolicyName identifies a specific load balancer implementation within the dynamic module. A single
+  /// shared library can contain multiple LB policy implementations. This value is passed to the module's
+  /// initialization function to select the appropriate implementation.
+  lbPolicyName: String(length.isBetween(1, 253))
+
+  /// Name references a dynamic module registered in the EnvoyProxy resource's dynamicModules list. The
+  /// referenced module must exist in the registry; otherwise, the policy will be rejected.
+  name: String(length.isBetween(1, 253), matches(Regex("^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$")))
+}
+
+/// EndpointOverride defines the configuration for endpoint override. When specified, the load balancer
+/// will attempt to route requests to endpoints based on the override information extracted from request
+/// headers or metadata. If the override endpoints are not available, the configured load balancer policy
+/// will be used as fallback.
+class EndpointOverride {
+  /// ExtractFrom defines the sources to extract endpoint override information from.
+  extractFrom: Listing<ExtractFrom>(length.isBetween(1, 10))
+}
+
+/// EndpointOverrideExtractFrom defines a source to extract endpoint override information from.
+class ExtractFrom {
+  /// Header defines the header to get the override endpoint addresses. The header value must specify at
+  /// least one endpoint in `IP:Port` format or multiple endpoints in `IP:Port,IP:Port,...` format. For
+  /// example `10.0.0.5:8080` or `[2600:4040:5204::1574:24ae]:80`. The IPv6 address is enclosed in square
+  /// brackets.
+  header: String?
+}
+
+/// SlowStart defines the configuration related to the slow start load balancer policy. If set, during
+/// slow start window, traffic sent to the newly added hosts will gradually increase. Supported for
+/// RoundRobin, LeastRequest, and BackendUtilization load balancers.
+class SlowStart {
+  /// Window defines the duration of the warm up period for newly added host. During slow start window,
+  /// traffic sent to the newly added hosts will gradually increase. Currently only supports linear
+  /// growth of traffic. For additional details, see
+  /// https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/cluster/v3/cluster.proto#config-cluster-v3-cluster-slowstartconfig
+  window: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))
+}
+
+/// ZoneAware defines the configuration related to the distribution of requests between locality zones.
+class ZoneAware {
+  /// PreferLocalZone configures zone-aware routing to prefer sending traffic to the local locality zone.
+  preferLocal: PreferLocal?
+
+  /// WeightedZones configures weight-based traffic distribution across locality zones. Traffic is
+  /// distributed proportionally based on the sum of all zone weights.
+  weightedZones: Listing<WeightedZone>?
+}
+
+/// PreferLocalZone configures zone-aware routing to prefer sending traffic to the local locality zone.
+class PreferLocal {
+  /// ForceLocalZone defines override configuration for forcing all traffic to stay within the local zone
+  /// instead of the default behavior which maintains equal distribution among upstream endpoints while
+  /// sending as much traffic as possible locally.
+  force: Force?
+
+  /// MinEndpointsThreshold is the minimum number of total upstream endpoints across all zones required
+  /// to enable zone-aware routing.
+  minEndpointsThreshold: Int?
+
+  /// Configures percentage of requests that will be considered for zone aware routing if zone aware
+  /// routing is configured. If not specified, Envoy defaults to 100%.
+  percentageEnabled: Int(isBetween(0, 100))?
+}
+
+/// ForceLocalZone defines override configuration for forcing all traffic to stay within the local zone
+/// instead of the default behavior which maintains equal distribution among upstream endpoints while
+/// sending as much traffic as possible locally.
+class Force {
+  /// MinEndpointsInZoneThreshold is the minimum number of upstream endpoints in the local zone required
+  /// to honor the forceLocalZone override. This is useful for protecting zones with fewer endpoints.
+  minEndpointsInZoneThreshold: Int?
+}
+
+/// WeightedZoneConfig defines the weight for a specific locality zone.
+class WeightedZone {
+  /// Weight defines the weight for this locality. Higher values receive more traffic. The actual traffic
+  /// distribution is proportional to this value relative to other localities.
+  weight: Int
+
+  /// Zone specifies the topology zone this weight applies to. The value should match the
+  /// topology.kubernetes.io/zone label of the nodes where endpoints are running. Zones not listed in the
+  /// configuration receive a default weight of 1.
+  zone: String
+}
+
+/// ProxyProtocol enables the Proxy Protocol when communicating with the backend.
+class ProxyProtocol {
+  /// Version of ProxyProtocol Valid ProxyProtocolVersion values are "V1" "V2"
+  version: "V1" | "V2"
+}
+
+/// Retry provides more advanced usage, allowing users to customize the number of retries, retry fallback
+/// strategy, and retry triggering conditions. If not set, retry will be disabled.
+class Retry {
+  /// NumAttemptsPerPriority defines the number of requests (initial attempt + retries) that should be
+  /// sent to the same priority before switching to a different one. If not specified or set to 0, all
+  /// requests are sent to the highest priority that is healthy.
+  numAttemptsPerPriority: Int?
+
+  /// NumRetries is the number of retries to be attempted. Defaults to 2.
+  numRetries: Int(isPositive)?
+
+  /// PerRetry is the retry policy to be applied per retry attempt.
+  perRetry: PerRetry?
+
+  /// RetryOn specifies the retry trigger condition.
+  ///
+  /// If not specified, the default is to retry on
+  /// connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes(503).
+  retryOn: RetryOn?
+}
+
+/// PerRetry is the retry policy to be applied per retry attempt.
+class PerRetry {
+  /// Backoff is the backoff policy to be applied per retry attempt. gateway uses a fully jittered
+  /// exponential back-off algorithm for retries. For additional details, see
+  /// https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/router_filter#config-http-filters-router-x-envoy-max-retries
+  backOff: BackOff?
+
+  /// Timeout is the timeout per retry attempt.
+  timeout: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+}
+
+/// Backoff is the backoff policy to be applied per retry attempt. gateway uses a fully jittered
+/// exponential back-off algorithm for retries. For additional details, see
+/// https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/router_filter#config-http-filters-router-x-envoy-max-retries
+class BackOff {
+  /// BaseInterval is the base interval between retries.
+  baseInterval: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// MaxInterval is the maximum interval between retries. This parameter is optional, but must be
+  /// greater than or equal to the base_interval if set. The default is 10 times the base_interval
+  maxInterval: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+}
+
+/// RetryOn specifies the retry trigger condition.
+///
+/// If not specified, the default is to retry on
+/// connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes(503).
+class RetryOn {
+  /// HttpStatusCodes specifies the http status codes to be retried. The retriable-status-codes trigger
+  /// must also be configured for these status codes to trigger a retry.
+  httpStatusCodes: Listing<Int(isBetween(100, 599))>?
+
+  /// Triggers specifies the retry trigger condition(Http/Grpc).
+  triggers: Listing<
+    "5xx"
+      | "gateway-error"
+      | "reset"
+      | "reset-before-request"
+      | "connect-failure"
+      | "retriable-4xx"
+      | "refused-stream"
+      | "retriable-status-codes"
+      | "cancelled"
+      | "deadline-exceeded"
+      | "internal"
+      | "resource-exhausted"
+      | "unavailable",
+  >?
+}
+
+/// TcpKeepalive settings associated with the upstream client connection. Disabled by default.
+class TcpKeepalive {
+  /// The duration a connection needs to be idle before keep-alive probes start being sent. The duration
+  /// format is Defaults to `7200s`.
+  idleTime: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// The duration between keep-alive probes. Defaults to `75s`.
+  interval: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// The total number of unacknowledged probes to send before deciding the connection is dead. Defaults
+  /// to 9.
+  probes: Int?
+}
+
+/// Timeout settings for the backend connections.
+class Timeout {
+  /// Timeout settings for HTTP.
+  http: TimeoutHttp?
+
+  /// Timeout settings for TCP.
+  tcp: TimeoutTcp?
+}
+
+/// Timeout settings for HTTP.
+class TimeoutHttp {
+  /// The idle timeout for an HTTP connection. Idle time is defined as a period in which there are no
+  /// active requests in the connection. Default: 1 hour.
+  connectionIdleTimeout: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// The maximum duration of an HTTP connection. Default: unlimited.
+  maxConnectionDuration: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// MaxStreamDuration is the maximum duration for a stream to complete. This timeout measures the time
+  /// from when the request is sent until the response stream is fully consumed and does not apply to
+  /// non-streaming requests. When set to "0s", no max duration is applied and streams can run
+  /// indefinitely.
+  maxStreamDuration: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// RequestTimeout is the time until which entire response is received from the upstream.
+  requestTimeout: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+
+  /// The stream idle timeout defines the amount of time a stream can exist without any upstream or
+  /// downstream activity. If not specified, StreamIdleTimeout is inherited from the listener-level
+  /// setting, which can be configured via ClientTrafficPolicy.
+  streamIdleTimeout: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+}
+
+/// Timeout settings for TCP.
+class TimeoutTcp {
+  /// The timeout for network connection establishment, including TCP and TLS handshakes. Default: 10
+  /// seconds.
+  connectTimeout: String(matches(Regex("^([0-9]{1,5}(h|m|s|ms)){1,4}$")))?
+}
+
+/// Metadata defines options related to the sending and receiving of dynamic metadata. These options
+/// define which metadata namespaces would be sent to the processor and which dynamic metadata namespaces
+/// the processor would be permitted to emit metadata to. Users can specify custom namespaces or
+/// well-known envoy metadata namespace (such as envoy.filters.http.ext_authz) documented here:
+/// https://www.envoyproxy.io/docs/envoy/latest/configuration/advanced/well_known_dynamic_metadata#well-known-dynamic-metadata
+/// Default: no metadata context is sent or received from the external processor
+class Metadata {
+  /// AccessibleNamespaces are metadata namespaces that are sent to the external processor as context
+  accessibleNamespaces: Listing<String>?
+
+  /// WritableNamespaces are metadata namespaces that the external processor can write to
+  writableNamespaces: Listing<String>(length <= 8)?
+}
+
+/// ProcessingMode defines how request and response body is processed Default: header and body are not
+/// sent to the external processor
+class ProcessingMode {
+  /// AllowModeOverride allows the external processor to override the processing mode set via the
+  /// `mode_override` field in the gRPC response message. This defaults to false.
+  allowModeOverride: Boolean?
+
+  /// Defines processing mode for requests. If present, request headers are sent. Request body is
+  /// processed according to the specified mode.
+  request: Request?
+
+  /// Defines processing mode for responses. If present, response headers are sent. Response body is
+  /// processed according to the specified mode.
+  response: Response?
+}
+
+/// Defines processing mode for requests. If present, request headers are sent. Request body is processed
+/// according to the specified mode.
+class Request {
+  /// Defines which attributes are sent to the external processor. Envoy Gateway currently supports only
+  /// the following attribute prefixes: connection, source, destination, request, response, upstream and
+  /// xds.route. https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/advanced/attributes
+  attributes: Listing<
+    String(
+      matches(
+        Regex(
+          #"^(connection\.|source\.|destination\.|request\.|response\.|upstream\.|xds\.route_)[a-z_1-9]*$"#,
+        ),
+      ),
+    ),
+  >?
+
+  /// Defines body processing mode
+  body: ("Streamed" | "Buffered" | "BufferedPartial" | "FullDuplexStreamed")?
+}
+
+/// Defines processing mode for responses. If present, response headers are sent. Response body is
+/// processed according to the specified mode.
+class Response {
+  /// Defines which attributes are sent to the external processor. Envoy Gateway currently supports only
+  /// the following attribute prefixes: connection, source, destination, request, response, upstream and
+  /// xds.route. https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/advanced/attributes
+  attributes: Listing<
+    String(
+      matches(
+        Regex(
+          #"^(connection\.|source\.|destination\.|request\.|response\.|upstream\.|xds\.route_)[a-z_1-9]*$"#,
+        ),
+      ),
+    ),
+  >?
+
+  /// Defines body processing mode
+  body: ("Streamed" | "Buffered" | "BufferedPartial" | "FullDuplexStreamed")?
+}
+
+/// Lua defines a Lua extension Only one of Inline or ValueRef must be set
+class Lua {
+  /// FilterContext is the filter context configuration for the Lua script. This must be a JSON object
+  /// (key/value pairs). The values are made available to the Lua script via
+  /// request_handle:filterContext(). This allows a shared script to be parameterized differently per
+  /// EnvoyExtensionPolicy/route.
+  filterContext: base.Dynamic?
+
+  /// Inline contains the source code as an inline string.
+  inline: String?
+
+  /// Type is the type of method to use to read the Lua value. Valid values are Inline and ValueRef,
+  /// default is Inline.
+  type: "Inline" | "ValueRef"
+
+  /// ValueRef has the source code specified as a local object reference. Only a reference to ConfigMap
+  /// is supported. The value of key `lua` in the ConfigMap will be used. If the key is not found, the
+  /// first value in the ConfigMap will be used.
+  valueRef: ValueRef?
+}
+
+/// ValueRef has the source code specified as a local object reference. Only a reference to ConfigMap is
+/// supported. The value of key `lua` in the ConfigMap will be used. If the key is not found, the first
+/// value in the ConfigMap will be used.
+class ValueRef {
+  /// Group is the group of the referent. For example, "gateway.networking.k8s.io". When unspecified or
+  /// empty string, core API group is inferred.
+  group: String(
+    length <= 253,
+    matches(Regex(#"^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )
+
+  /// Kind is kind of the referent. For example "HTTPRoute" or "Service".
+  kind: String(length.isBetween(1, 63), matches(Regex("^[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?$")))
+
+  /// Name is the name of the referent.
+  name: String(length.isBetween(1, 253))
+}
+
+/// TargetRef is the name of the resource this policy is being attached to. This policy and the TargetRef
+/// MUST be in the same namespace for this Policy to have effect
+///
+/// Deprecated: use targetRefs/targetSelectors instead
+class TargetRef {
+  /// Group is the group of the target resource.
+  group: String(
+    length <= 253,
+    matches(Regex(#"^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )
+
+  /// Kind is kind of the target resource.
+  kind: String(length.isBetween(1, 63), matches(Regex("^[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?$")))
+
+  /// Name is the name of the target resource.
+  name: String(length.isBetween(1, 253))
+
+  /// SectionName is the name of a section within the target resource. When unspecified, this targetRef
+  /// targets the entire resource. In the following resources, SectionName is interpreted as the
+  /// following:
+  ///
+  /// * Gateway: Listener name * HTTPRoute: HTTPRouteRule name * Service: Port name
+  ///
+  /// If a SectionName is specified, but does not exist on the targeted object, the Policy must fail to
+  /// attach, and the policy implementation should record a `ResolvedRefs` or similar Condition in the
+  /// Policy's status.
+  sectionName: String(
+    length.isBetween(1, 253),
+    matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )?
+}
+
+/// LocalPolicyTargetReferenceWithSectionName identifies an API object to apply a direct policy to. This
+/// should be used as part of Policy resources that can target single resources. For more information on
+/// how this policy attachment mode works, and a sample Policy resource, refer to the policy attachment
+/// documentation for Gateway API.
+///
+/// Note: This should only be used for direct policy attachment when references to SectionName are
+/// actually needed. In all other cases, LocalPolicyTargetReference should be used.
+class SpecTargetRef {
+  /// Group is the group of the target resource.
+  group: String(
+    length <= 253,
+    matches(Regex(#"^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )
+
+  /// Kind is kind of the target resource.
+  kind: String(length.isBetween(1, 63), matches(Regex("^[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?$")))
+
+  /// Name is the name of the target resource.
+  name: String(length.isBetween(1, 253))
+
+  /// SectionName is the name of a section within the target resource. When unspecified, this targetRef
+  /// targets the entire resource. In the following resources, SectionName is interpreted as the
+  /// following:
+  ///
+  /// * Gateway: Listener name * HTTPRoute: HTTPRouteRule name * Service: Port name
+  ///
+  /// If a SectionName is specified, but does not exist on the targeted object, the Policy must fail to
+  /// attach, and the policy implementation should record a `ResolvedRefs` or similar Condition in the
+  /// Policy's status.
+  sectionName: String(
+    length.isBetween(1, 253),
+    matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )?
+}
+
+class TargetSelector {
+  /// Group is the group that this selector targets. Defaults to gateway.networking.k8s.io
+  group: String(
+    length <= 253,
+    matches(Regex(#"^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )?
+
+  /// Kind is the resource kind that this selector targets.
+  kind: String(length.isBetween(1, 63), matches(Regex("^[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?$")))
+
+  /// MatchExpressions is a list of label selector requirements. The requirements are ANDed.
+  matchExpressions: Listing<SelectorMatchExpression>?
+
+  /// MatchLabels are the set of label selectors for identifying the targeted resource.
+  matchLabels: Mapping<String, String>?
+
+  /// Namespaces determines which namespaces are considered for target selection.
+  ///
+  /// If unspecified, only targets in the same namespace as this policy are considered.
+  ///
+  /// When specified, the effective set of namespaces is always constrained to the namespaces watched by
+  /// Envoy Gateway.
+  ///
+  /// Selecting targets across namespaces requires a ReferenceGrant in the target namespace that allows
+  /// this policy kind to reference the selected target kind. Cross-namespace targets without a matching
+  /// ReferenceGrant are ignored.
+  namespaces: Namespaces?
+}
+
+/// A label selector requirement is a selector that contains values, a key, and an operator that relates
+/// the key and values.
+class SelectorMatchExpression {
+  /// key is the label key that the selector applies to.
+  key: String
+
+  /// operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists
+  /// and DoesNotExist.
+  operator: String
+
+  /// values is an array of string values. If the operator is In or NotIn, the values array must be
+  /// non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is
+  /// replaced during a strategic merge patch.
+  values: Listing<String>?
+}
+
+/// Namespaces determines which namespaces are considered for target selection.
+///
+/// If unspecified, only targets in the same namespace as this policy are considered.
+///
+/// When specified, the effective set of namespaces is always constrained to the namespaces watched by
+/// Envoy Gateway.
+///
+/// Selecting targets across namespaces requires a ReferenceGrant in the target namespace that allows
+/// this policy kind to reference the selected target kind. Cross-namespace targets without a matching
+/// ReferenceGrant are ignored.
+class Namespaces {
+  /// From indicates how namespaces are selected for this target selector.
+  ///
+  /// All means all namespaces watched by Envoy Gateway. Selector means namespaces watched by Envoy
+  /// Gateway that match Selector.
+  from: "Same" | "All" | "Selector"
+
+  /// Selector selects namespaces when From is set to Selector.
+  selector: Selector?
+}
+
+/// Selector selects namespaces when From is set to Selector.
+class Selector {
+  /// matchExpressions is a list of label selector requirements. The requirements are ANDed.
+  matchExpressions: Listing<SelectorMatchExpression>?
+
+  /// matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is
+  /// equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and
+  /// the values array contains only "value". The requirements are ANDed.
+  matchLabels: Mapping<String, String>?
+}
+
+/// Wasm defines a Wasm extension.
+///
+/// Note: at the moment, Envoy Gateway does not support configuring Wasm runtime. v8 is used as the VM
+/// runtime for the Wasm extensions.
+class Wasm {
+  /// Code is the Wasm code for the extension.
+  code: Code
+
+  /// Config is the configuration for the Wasm extension. This configuration will be passed as a JSON
+  /// string to the Wasm extension.
+  config: base.Dynamic?
+
+  /// Env configures the environment for the Wasm extension
+  env: Env?
+
+  /// FailOpen is a switch used to control the behavior when a fatal error occurs during the
+  /// initialization or the execution of the Wasm extension.
+  ///
+  /// If FailOpen is set to true, the system bypasses the Wasm extension and allows the traffic to pass
+  /// through. If it is set to false or not set (defaulting to false), the system blocks the traffic and
+  /// returns an HTTP 5xx error.
+  ///
+  /// If set to true, the Wasm extension will also be bypassed if the configuration is invalid.
+  failOpen: Boolean?
+
+  /// Name is a unique name for this Wasm extension. It is used to identify the Wasm extension if
+  /// multiple extensions are handled by the same vm_id and root_id. It's also used for
+  /// logging/debugging. If not specified, EG will generate a unique name for the Wasm extension.
+  name: String?
+
+  /// RootID is a unique ID for a set of extensions in a VM which will share a RootContext and Contexts
+  /// if applicable (e.g., an Wasm HttpFilter and an Wasm AccessLog). If left blank, all extensions with
+  /// a blank root_id with the same vm_id will share Context(s).
+  ///
+  /// Note: RootID must match the root_id parameter used to register the Context in the Wasm code.
+  rootID: String?
+}
+
+/// Code is the Wasm code for the extension.
+class Code {
+  /// HTTP is the HTTP URL containing the Wasm code.
+  ///
+  /// Note that the HTTP server must be accessible from the Envoy proxy.
+  http: CodeHttp?
+
+  /// Image is the OCI image containing the Wasm code.
+  ///
+  /// Note that the image must be accessible from the Envoy Gateway.
+  image: Image?
+
+  /// PullPolicy is the policy to use when pulling the Wasm module by either the HTTP or Image source.
+  /// This field is only applicable when the SHA256 field is not set.
+  ///
+  /// If not specified, the default policy is IfNotPresent except for OCI images whose tag is latest.
+  ///
+  /// Note: EG does not update the Wasm module every time an Envoy proxy requests the Wasm module even if
+  /// the pull policy is set to Always. It only updates the Wasm module when the EnvoyExtension resource
+  /// version changes.
+  pullPolicy: ("IfNotPresent" | "Always")?
+
+  /// Type is the type of the source of the Wasm code. Valid WasmCodeSourceType values are "HTTP" or
+  /// "Image".
+  type: String(this == "HTTP" || this == "Image" || this == "ConfigMap")
+}
+
+/// HTTP is the HTTP URL containing the Wasm code.
+///
+/// Note that the HTTP server must be accessible from the Envoy proxy.
+class CodeHttp {
+  /// SHA256 checksum that will be used to verify the Wasm code.
+  ///
+  /// If not specified, Envoy Gateway will not verify the downloaded Wasm code.
+  /// kubebuilder:validation:Pattern=`^[a-f0-9]{64}$`
+  sha256: String?
+
+  /// TLS configuration when connecting to the Wasm code source.
+  tls: ImageTls?
+
+  /// URL is the URL containing the Wasm code.
+  url: String(
+    matches(
+      Regex(
+        #"^((https?:)(\/\/\/?)([\w]*(?::[\w]*)?@)?([\d\w\.-]+)(?::(\d+))?)?([\/\\\w\.()-]*)?(?:([?][^#]*)?(#.*)?)*"#,
+      ),
+    ),
+  )
+}
+
+/// TLS configuration when connecting to the Wasm code source.
+class ImageTls {
+  /// CACertificateRef contains a reference to Kubernetes objects that contain TLS certificates of the
+  /// Certificate Authorities that can be used as a trust anchor to validate the certificates presented
+  /// by the Wasm code source.
+  ///
+  /// Kubernetes ConfigMap, Kubernetes Secret, and Kubernetes ClusterTrustBundle are supported.
+  caCertificateRef: TlsCaCertificateRef
+}
+
+/// CACertificateRef contains a reference to Kubernetes objects that contain TLS certificates of the
+/// Certificate Authorities that can be used as a trust anchor to validate the certificates presented by
+/// the Wasm code source.
+///
+/// Kubernetes ConfigMap, Kubernetes Secret, and Kubernetes ClusterTrustBundle are supported.
+class TlsCaCertificateRef {
+  /// Group is the group of the referent. For example, "gateway.networking.k8s.io". When unspecified or
+  /// empty string, core API group is inferred.
+  group: String(
+    length <= 253,
+    matches(Regex(#"^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )?
+
+  /// Kind is kind of the referent. For example "Secret".
+  kind: String(length.isBetween(1, 63), matches(Regex("^[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?$")))?
+
+  /// Name is the name of the referent.
+  name: String(length.isBetween(1, 253))
+
+  /// Namespace is the namespace of the referenced object. When unspecified, the local namespace is
+  /// inferred.
+  ///
+  /// Note that when a namespace different than the local namespace is specified, a ReferenceGrant object
+  /// is required in the referent namespace to allow that namespace's owner to accept the reference. See
+  /// the ReferenceGrant documentation for details.
+  ///
+  /// Support: Core
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// Image is the OCI image containing the Wasm code.
+///
+/// Note that the image must be accessible from the Envoy Gateway.
+class Image {
+  /// PullSecretRef is a reference to the secret containing the credentials to pull the image.
+  pullSecretRef: PullSecretRef?
+
+  /// SHA256 checksum that will be used to verify the OCI image.
+  ///
+  /// It must match the digest of the OCI image.
+  ///
+  /// If not specified, Envoy Gateway will not verify the downloaded OCI image.
+  /// kubebuilder:validation:Pattern=`^[a-f0-9]{64}$`
+  sha256: String?
+
+  /// TLS configuration when connecting to the Wasm code source.
+  tls: ImageTls?
+
+  /// URL is the URL of the OCI image. URL can be in the format of `registry/image:tag` or
+  /// `registry/image@sha256:digest`.
+  url: String
+}
+
+/// PullSecretRef is a reference to the secret containing the credentials to pull the image.
+class PullSecretRef {
+  /// Group is the group of the referent. For example, "gateway.networking.k8s.io". When unspecified or
+  /// empty string, core API group is inferred.
+  group: String(
+    length <= 253,
+    matches(Regex(#"^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )?
+
+  /// Kind is kind of the referent. For example "Secret".
+  kind: String(length.isBetween(1, 63), matches(Regex("^[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?$")))?
+
+  /// Name is the name of the referent.
+  name: String(length.isBetween(1, 253))
+
+  /// Namespace is the namespace of the referenced object. When unspecified, the local namespace is
+  /// inferred.
+  ///
+  /// Note that when a namespace different than the local namespace is specified, a ReferenceGrant object
+  /// is required in the referent namespace to allow that namespace's owner to accept the reference. See
+  /// the ReferenceGrant documentation for details.
+  ///
+  /// Support: Core
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// Env configures the environment for the Wasm extension
+class Env {
+  /// HostKeys is a list of keys for environment variables from the host envoy process that should be
+  /// passed into the Wasm VM. This is useful for passing secrets to to Wasm extensions.
+  hostKeys: Listing<String>?
+}
+
+/// Status defines the current status of EnvoyExtensionPolicy.
+class Status {
+  /// Ancestors is a list of ancestor resources (usually Gateways) that are associated with the policy,
+  /// and the status of the policy with respect to each ancestor. When this policy attaches to a parent,
+  /// the controller that manages the parent and the ancestors MUST add an entry to this list when the
+  /// controller first sees the policy and SHOULD update the entry as appropriate when the relevant
+  /// ancestor is modified.
+  ///
+  /// Note that choosing the relevant ancestor is left to the Policy designers; an important part of
+  /// Policy design is designing the right object level at which to namespace this status.
+  ///
+  /// Note also that implementations MUST ONLY populate ancestor status for the Ancestor resources they
+  /// are responsible for. Implementations MUST use the ControllerName field to uniquely identify the
+  /// entries in this list that they are responsible for.
+  ///
+  /// Note that to achieve this, the list of PolicyAncestorStatus structs MUST be treated as a map with a
+  /// composite key, made up of the AncestorRef and ControllerName fields combined.
+  ///
+  /// A maximum of 16 ancestors will be represented in this list. An empty list means the Policy is not
+  /// relevant for any ancestors.
+  ///
+  /// If this slice is full, implementations MUST NOT add further entries. Instead they MUST consider the
+  /// policy unimplementable and signal that on any related resources such as the ancestor that would be
+  /// referenced here. For example, if this list was full on BackendTLSPolicy, no additional Gateways
+  /// would be able to reference the Service targeted by the BackendTLSPolicy.
+  ancestors: Listing<Ancestor>(length <= 16)
+}
+
+/// PolicyAncestorStatus describes the status of a route with respect to an associated Ancestor.
+///
+/// Ancestors refer to objects that are either the Target of a policy or above it in terms of object
+/// hierarchy. For example, if a policy targets a Service, the Policy's Ancestors are, in order, the
+/// Service, the HTTPRoute, the Gateway, and the GatewayClass. Almost always, in this hierarchy, the
+/// Gateway will be the most useful object to place Policy status on, so we recommend that
+/// implementations SHOULD use Gateway as the PolicyAncestorStatus object unless the designers have a
+/// _very_ good reason otherwise.
+///
+/// In the context of policy attachment, the Ancestor is used to distinguish which resource results in a
+/// distinct application of this policy. For example, if a policy targets a Service, it may have a
+/// distinct result per attached Gateway.
+///
+/// Policies targeting the same resource may have different effects depending on the ancestors of those
+/// resources. For example, different Gateways targeting the same Service may have different
+/// capabilities, especially if they have different underlying implementations.
+///
+/// For example, in BackendTLSPolicy, the Policy attaches to a Service that is used as a backend in a
+/// HTTPRoute that is itself attached to a Gateway. In this case, the relevant object for status is the
+/// Gateway, and that is the ancestor object referred to in this status.
+///
+/// Note that a parent is also an ancestor, so for objects where the parent is the relevant object for
+/// status, this struct SHOULD still be used.
+///
+/// This struct is intended to be used in a slice that's effectively a map, with a composite key made up
+/// of the AncestorRef and the ControllerName.
+class Ancestor {
+  /// AncestorRef corresponds with a ParentRef in the spec that this PolicyAncestorStatus struct
+  /// describes the status of.
+  ancestorRef: AncestorRef
+
+  /// Conditions describes the status of the Policy with respect to the given Ancestor.
+  ///
+  /// <gateway:util:excludeFromCRD>
+  ///
+  /// Notes for implementors:
+  ///
+  /// Conditions are a listType `map`, which means that they function like a map with a key of the `type`
+  /// field _in the k8s apiserver_.
+  ///
+  /// This means that implementations must obey some rules when updating this section.
+  ///
+  /// * Implementations MUST perform a read-modify-write cycle on this field before modifying it. That
+  /// is, when modifying this field, implementations must be confident they have fetched the most recent
+  /// version of this field, and ensure that changes they make are on that recent version. *
+  /// Implementations MUST NOT remove or reorder Conditions that they are not directly responsible for.
+  /// For example, if an implementation sees a Condition with type `special.io/SomeField`, it MUST NOT
+  /// remove, change or update that Condition. * Implementations MUST always _merge_ changes into
+  /// Conditions of the same Type, rather than creating more than one Condition of the same Type. *
+  /// Implementations MUST always update the `observedGeneration` field of the Condition to the
+  /// `metadata.generation` of the Gateway at the time of update creation. * If the `observedGeneration`
+  /// of a Condition is _greater than_ the value the implementation knows about, then it MUST NOT perform
+  /// the update on that Condition, but must wait for a future reconciliation and status update. (The
+  /// assumption is that the implementation's copy of the object is stale and an update will be
+  /// re-triggered if relevant.)
+  ///
+  /// </gateway:util:excludeFromCRD>
+  conditions: Listing<Condition>(length.isBetween(1, 8))
+
+  /// ControllerName is a domain/path string that indicates the name of the controller that wrote this
+  /// status. This corresponds with the controllerName field on GatewayClass.
+  ///
+  /// Example: "example.net/gateway-controller".
+  ///
+  /// The format of this field is DOMAIN "/" PATH, where DOMAIN and PATH are valid Kubernetes names
+  /// (https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names).
+  ///
+  /// Controllers MUST populate this field when writing status. Controllers should ensure that entries to
+  /// status populated with their ControllerName are cleaned up when they are no longer necessary.
+  controllerName: String(
+    length.isBetween(1, 253),
+    matches(
+      Regex(
+        #"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*\/[A-Za-z0-9\/\-._~%!$&'()*+,;=:]+$"#,
+      ),
+    ),
+  )
+}
+
+/// AncestorRef corresponds with a ParentRef in the spec that this PolicyAncestorStatus struct describes
+/// the status of.
+class AncestorRef {
+  /// Group is the group of the referent. When unspecified, "gateway.networking.k8s.io" is inferred. To
+  /// set the core API group (such as for a "Service" kind referent), Group must be explicitly set to ""
+  /// (empty string).
+  ///
+  /// Support: Core
+  group: String(
+    length <= 253,
+    matches(Regex(#"^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )?
+
+  /// Kind is kind of the referent.
+  ///
+  /// There are two kinds of parent resources with "Core" support:
+  ///
+  /// * Gateway (Gateway conformance profile) * Service (Mesh conformance profile, ClusterIP Services
+  /// only)
+  ///
+  /// Support for other resources is Implementation-Specific.
+  kind: String(length.isBetween(1, 63), matches(Regex("^[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?$")))?
+
+  /// Name is the name of the referent.
+  ///
+  /// Support: Core
+  name: String(length.isBetween(1, 253))
+
+  /// Namespace is the namespace of the referent. When unspecified, this refers to the local namespace of
+  /// the Route.
+  ///
+  /// Note that there are specific rules for ParentRefs which cross namespace boundaries. Cross-namespace
+  /// references are only valid if they are explicitly allowed by something in the namespace they are
+  /// referring to. For example: Gateway has the AllowedRoutes field, and ReferenceGrant provides a
+  /// generic way to enable any other kind of cross-namespace reference.
+  ///
+  /// <gateway:experimental:description> ParentRefs from a Route to a Service in the same namespace are
+  /// "producer" routes, which apply default routing rules to inbound connections from any namespace to
+  /// the Service.
+  ///
+  /// ParentRefs from a Route to a Service in a different namespace are "consumer" routes, and these
+  /// routing rules are only applied to outbound connections originating from the same namespace as the
+  /// Route, for which the intended destination of the connections are a Service targeted as a ParentRef
+  /// of the Route. </gateway:experimental:description>
+  ///
+  /// Support: Core
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+
+  /// Port is the network port this Route targets. It can be interpreted differently based on the type of
+  /// parent resource.
+  ///
+  /// When the parent resource is a Gateway, this targets all listeners listening on the specified port
+  /// that also support this kind of Route(and select this Route). It's not recommended to set `Port`
+  /// unless the networking behaviors specified in a Route must apply to a specific port as opposed to a
+  /// listener(s) whose port(s) may be changed. When both Port and SectionName are specified, the name
+  /// and port of the selected listener must match both specified values.
+  ///
+  /// <gateway:experimental:description> When the parent resource is a Service, this targets a specific
+  /// port in the Service spec. When both Port (experimental) and SectionName are specified, the name and
+  /// port of the selected port must match both specified values. </gateway:experimental:description>
+  ///
+  /// Implementations MAY choose to support other parent resources. Implementations supporting other
+  /// types of parent resources MUST clearly document how/if Port is interpreted.
+  ///
+  /// For the purpose of status, an attachment is considered successful as long as the parent resource
+  /// accepts it partially. For example, Gateway listeners can restrict which Routes can attach to them
+  /// by Route kind, namespace, or hostname. If 1 of 2 Gateway listeners accept attachment from the
+  /// referencing Route, the Route MUST be considered successfully attached. If no Gateway listeners
+  /// accept attachment from this Route, the Route MUST be considered detached from the Gateway.
+  ///
+  /// Support: Extended
+  port: Int(isBetween(1, 65535))?
+
+  /// SectionName is the name of a section within the target resource. In the following resources,
+  /// SectionName is interpreted as the following:
+  ///
+  /// * Gateway: Listener name. When both Port (experimental) and SectionName are specified, the name and
+  /// port of the selected listener must match both specified values. * Service: Port name. When both
+  /// Port (experimental) and SectionName are specified, the name and port of the selected listener must
+  /// match both specified values.
+  ///
+  /// Implementations MAY choose to support attaching Routes to other resources. If that is the case,
+  /// they MUST clearly document how SectionName is interpreted.
+  ///
+  /// When unspecified (empty string), this will reference the entire resource. For the purpose of
+  /// status, an attachment is considered successful if at least one section in the parent resource
+  /// accepts it. For example, Gateway listeners can restrict which Routes can attach to them by Route
+  /// kind, namespace, or hostname. If 1 of 2 Gateway listeners accept attachment from the referencing
+  /// Route, the Route MUST be considered successfully attached. If no Gateway listeners accept
+  /// attachment from this Route, the Route MUST be considered detached from the Gateway.
+  ///
+  /// Support: Core
+  sectionName: String(
+    length.isBetween(1, 253),
+    matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)),
+  )?
+}
+
+/// Condition contains details for one aspect of the current state of this API Resource.
+class Condition {
+  /// lastTransitionTime is the last time the condition transitioned from one status to another. This
+  /// should be when the underlying condition changed. If that is not known, then using the time when the
+  /// API field changed is acceptable.
+  lastTransitionTime: String
+
+  /// message is a human readable message indicating details about the transition. This may be an empty
+  /// string.
+  message: String(length <= 32768)
+
+  /// observedGeneration represents the .metadata.generation that the condition was set based upon. For
+  /// instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration
+  /// is 9, the condition is out of date with respect to the current state of the instance.
+  observedGeneration: Int(isPositive)?
+
+  /// reason contains a programmatic identifier indicating the reason for the condition's last
+  /// transition. Producers of specific condition types may define expected values and meanings for this
+  /// field, and whether the values are considered a guaranteed API. The value should be a CamelCase
+  /// string. This field may not be empty.
+  reason: String(
+    length.isBetween(1, 1024),
+    matches(Regex("^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$")),
+  )
+
+  /// status of the condition, one of True, False, Unknown.
+  status: "True" | "False" | "Unknown"
+
+  /// type of condition in CamelCase or in foo.example.com/CamelCase.
+  type: String(
+    length <= 316,
+    matches(
+      Regex(
+        #"^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$"#,
+      ),
+    ),
+  )
+}
