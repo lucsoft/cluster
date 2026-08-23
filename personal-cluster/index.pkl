@@ -16,6 +16,7 @@ import "./apps/Mqtt2Prometheus.pkl"
 import "./apps/PklPackages.pkl"
 import "./apps/Porffor.pkl"
 import "./apps/Satisfactory.pkl"
+import "./apps/VmPush.pkl"
 
 local apps: Listing<App> = new {
   new {
@@ -49,6 +50,7 @@ local apps: Listing<App> = new {
   Emqx
   Monitoring
   Mqtt2Prometheus
+  VmPush
 }
 
 resources {

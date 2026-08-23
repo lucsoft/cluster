@@ -22,6 +22,9 @@ dependencies {
   ["sops"] {
     uri = "package://pkl-pkgs.lucsoft.de/packages/com.SopsSecretsOperator@0.5.13"
   }
+  ["VictoriaMetrics"] {
+    uri = "package://pkl-pkgs.lucsoft.de/packages/com.VictoriaMetrics@0.5.16"
+  }
   ["Traefik"] {
     uri = "package://pkl-pkgs.lucsoft.de/packages/io.Traefik@0.5.13"
   }

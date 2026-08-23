@@ -1,0 +1,31 @@
+/// vmauth ingest endpoint for metrics pushed from outside the cluster. Separate from the
+/// `monitoring` app so a broken push token can't block a sync of the whole stack.
+amends "@ArgoCD/App.pkl"
+
+name = "vm-push"
+namespace = "monitoring"
+
+sources {
+  new {
+    repoURL = "https://github.com/lucsoft/cluster"
+    targetRevision = "main"
+    path = "personal-cluster"
+    plugin {
+      parameters {
+        new {
+          name = "path"
+          string = "components/VmPush.pkl"
+        }
+      }
+    }
+  }
+  // Per-device push tokens; decrypted in-cluster by sops-secrets-operator.
+  new {
+    repoURL = "https://github.com/lucsoft/cluster"
+    targetRevision = "main"
+    path = "personal-cluster/secrets"
+    directory {
+      include = "vm-push-auth.sops.yaml"
+    }
+  }
+}

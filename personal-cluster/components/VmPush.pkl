@@ -1,0 +1,147 @@
+/// Public write-only metrics endpoint: vmauth in front of the VMSingle that
+/// apps/Monitoring.pkl deploys, so hosts outside the cluster can push samples into
+/// VictoriaMetrics without a tunnel.
+///
+/// vmauth is what makes this safe to expose. Each VMUser is scoped to the single import
+/// path, so a leaked token can append samples and nothing else — no query API, no delete
+/// series, no admin endpoints, and no reaching the rest of the cluster.
+///
+/// One VMUser per pushing device, each with its own token, so a compromised device is
+/// revoked by dropping one key rather than rotating a shared secret.
+///
+/// Tokens come from the `vm-push-auth` Secret sealed in secrets/vm-push-auth.sops.yaml,
+/// applied by the second source of apps/VmPush.pkl.
+amends "@Resource/Entrypoint.pkl"
+
+import "@VictoriaMetrics/VMAuth.pkl"
+import "@VictoriaMetrics/VMUser.pkl"
+import "@k8s/api/networking/v1/Ingress.pkl"
+
+local appName = "vm-push"
+local appNamespace = "monitoring"
+
+local hostName = "vm-push.lucsoft.de"
+
+// Pinned rather than left to default so the Ingress below can name the port it targets.
+local vmauthPort = 8427
+
+// The only path a pusher gets: raw Prometheus exposition format in, nothing out.
+local importPath = "/api/v1/import/prometheus"
+
+local authSecret = "vm-push-auth"
+
+// `<release>-<chart>`, the name victoria-metrics-k8s-stack gives its VMSingle CR under the
+// `monitoring` release name set in apps/Monitoring.pkl.
+local vmsingle = "monitoring-victoria-metrics-k8s-stack"
+
+// Referencing the CRD rather than a static URL lets the operator resolve the service and
+// port, so the chart moving either one doesn't silently break the route.
+local vmsingleRef: VMUser.TargetRef = new {
+  crd {
+    kind = "VMSingle"
+    name = vmsingle
+    namespace = appNamespace
+  }
+  paths {
+    importPath
+  }
+  // A stalled push should be retried, not swallowed as a successful write.
+  retry_status_codes {
+    429
+    502
+    503
+  }
+}
+
+resources {
+  new VMAuth {
+    metadata {
+      name = appName
+      namespace = appNamespace
+    }
+    spec {
+      port = vmauthPort.toString()
+      replicaCount = 1
+      // Only the VMUsers below. The chart's VMAgent runs with selectAllByDefault, and
+      // inheriting that here would silently expose any VMUser that lands in this namespace.
+      userSelector {
+        matchLabels {
+          ["app.kubernetes.io/name"] = appName
+        }
+      }
+      // Operator-side hardening: non-root, read-only rootfs, all capabilities dropped.
+      useStrictSecurity = true
+      resources {
+        requests {
+          ["memory"] = "64Mi"
+          ["cpu"] = "10m"
+        }
+      }
+    }
+  }
+  new VMUser {
+    metadata {
+      name = "\(appName)-glinet"
+      namespace = appNamespace
+      labels {
+        ["app.kubernetes.io/name"] = appName
+      }
+    }
+    spec {
+      name = "glinet"
+      // Bearer token; the router sends it as `Authorization: Bearer <token>`.
+      tokenRef {
+        name = authSecret
+        key = "glinet-token"
+      }
+      targetRefs {
+        vmsingleRef
+      }
+    }
+  }
+  new Ingress {
+    metadata {
+      name = appName
+      namespace = appNamespace
+    }
+    spec {
+      ingressClassName = "traefik"
+      // No cert-manager annotation: the Grafana Ingress from apps/Monitoring.pkl already
+      // mints this wildcard into the namespace, and a second owner would fight it over the
+      // same Secret. `vm-push` is covered by the `*.lucsoft.de` SAN either way.
+      tls {
+        new {
+          hosts {
+            "*.lucsoft.de"
+            "lucsoft.de"
+          }
+          secretName = "lucsoft-tls"
+        }
+      }
+      rules {
+        new {
+          host = hostName
+          http {
+            paths {
+              // Narrowed here as well as in the VMUser, so an unauthenticated request to
+              // anything else never reaches vmauth at all.
+              new {
+                path = importPath
+                pathType = "Prefix"
+                backend {
+                  service {
+                    // The operator names it after the CR, as `vmauth-<name>`.
+                    name = "vmauth-\(appName)"
+                    port {
+                      number = vmauthPort
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
