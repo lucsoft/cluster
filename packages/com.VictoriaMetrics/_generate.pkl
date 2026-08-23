@@ -182,6 +182,8 @@ converters {
     [List("spec", "startupProbe")] = Probe
     [List("spec", "topologySpreadConstraints", "[]")] = PodSpec.TopologySpreadConstraint
     [List("spec", "volumes", "[]")] = Volume
+    // Hoisted to a module-level `class Service`, colliding with the `Service.pkl` import above.
+    [List("spec", "ingress", "extraRules", "[]")] = Dynamic
     // Untyped in the CRD — generated as `Null` (unsettable) without this.
     [List("spec", "unauthorizedAccessConfig")] = Dynamic
     [List("spec", "unauthorizedUserAccessSpec", "url_map", "[]", "url_prefix")] = Dynamic
