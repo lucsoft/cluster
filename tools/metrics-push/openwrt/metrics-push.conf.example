@@ -1,0 +1,15 @@
+# Install as /etc/metrics-push.conf, chmod 600 — it holds the push token.
+# Sourced by /etc/init.d/metrics-push, so shell syntax, no spaces around `=`.
+
+METRICS_PUSH_URL=https://vm-push.lucsoft.de/api/v1/import/prometheus
+
+# The `glinet-token` value from personal-cluster/secrets/vm-push-auth.sops.yaml.
+METRICS_PUSH_TOKEN=
+
+# Becomes the `instance` label on every sample. Keep the `host:port` shape a scraped target
+# would have had — Grafana dashboard 18153 splits this label on the colon and rebuilds it as
+# `instance=~"$node:$port"` in 115 of its 117 queries, so a bare hostname renders it empty.
+METRICS_PUSH_INSTANCE=glinet:9100
+
+# Seconds. The point of the daemon over a cron job — crond floors at 60.
+METRICS_PUSH_INTERVAL=15

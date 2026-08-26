@@ -1,0 +1,14 @@
+# This crate only ever runs on the router, so the musl target is the default build.
+#
+# rustls' crypto provider builds C and asm sources, so `rust-lld` alone is not enough — the
+# cross toolchain is needed for its musl headers too:
+#   brew install messense/macos-cross-toolchains/aarch64-unknown-linux-musl
+[build]
+target = "aarch64-unknown-linux-musl"
+
+[target.aarch64-unknown-linux-musl]
+linker = "aarch64-unknown-linux-musl-gcc"
+
+[env]
+CC_aarch64_unknown_linux_musl = "aarch64-unknown-linux-musl-gcc"
+AR_aarch64_unknown_linux_musl = "aarch64-unknown-linux-musl-ar"

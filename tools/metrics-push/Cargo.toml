@@ -1,0 +1,17 @@
+[package]
+name = "metrics-push"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# No async runtime: a blocking Agent keeps the binary small and one connection is all this needs.
+# `rustls` alone (without platform-verifier) bundles the webpki roots, so the router's
+# ca-certificates package is not a dependency.
+ureq = { version = "3", default-features = false, features = ["rustls"] }
+
+[profile.release]
+opt-level = "z"
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = true
