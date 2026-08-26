@@ -2,7 +2,7 @@
 from alpine:3.23.3 as kubectl
 arg TARGETARCH
 # renovate: datasource=github-releases depName=kubectl packageName=kubernetes/kubernetes
-env KUBECTL_VERSION=v1.36.3
+env KUBECTL_VERSION=v1.37.0
 run <<-EOF
     apk add --no-cache curl
     curl -fsSL -o /kubectl "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${TARGETARCH}/kubectl"
