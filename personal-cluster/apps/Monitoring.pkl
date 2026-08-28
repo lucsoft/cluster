@@ -25,7 +25,7 @@ sources {
     repoURL = "https://victoriametrics.github.io/helm-charts"
     chart = "victoria-metrics-k8s-stack"
     // renovate: datasource=helm registryUrl=https://victoriametrics.github.io/helm-charts packageName=victoria-metrics-k8s-stack
-    targetRevision = "0.90.0"
+    targetRevision = "0.91.2"
     helm {
       releaseName = "monitoring"
       valuesObject {
