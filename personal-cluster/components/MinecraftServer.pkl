@@ -92,6 +92,9 @@ local mcServers: Listing<McServer> = new {
     }
     motd = "Running: Craftoria"
     memory = 8.gb
+    // Heavier than the one-core default: a large modpack spends real time off the tick loop in
+    // mod init and chunk generation, and with no limit set this only raises the guarantee.
+    cpu = "2"
     modpackSlug = "craftoria"
     curseforgeApiKey {
       secretKeyRef {
@@ -118,6 +121,9 @@ local mcServers: Listing<McServer> = new {
     }
     motd = "Running: All The Mods 10"
     memory = 8.gb
+    // Heavier than the one-core default: a large modpack spends real time off the tick loop in
+    // mod init and chunk generation, and with no limit set this only raises the guarantee.
+    cpu = "2"
     modpackSlug = "all-the-mods-10"
     curseforgeApiKey {
       secretKeyRef {

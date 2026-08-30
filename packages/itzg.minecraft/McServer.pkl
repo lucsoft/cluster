@@ -20,6 +20,12 @@ modpackSlug: String? = null
 curseforgeProjects: Listing<String> = new {}
 curseforgeApiKey: EnvVar.EnvVarSource = new {}
 memory: DataSize = 2.gb
+
+/// CPU request. Minecraft's tick loop is single-threaded, so this reserves a core for it rather
+/// than capping anything — no limit is set, leaving chunk generation and mod loading free to use
+/// whatever else is idle. Modpacks want more than the default; see the servers in personal-cluster.
+cpu: String = "1"
+
 motd: String? = null
 
 local moduleThis = this
@@ -50,9 +56,13 @@ fixed podSpec = new PodSpec {
           containerPort = 25565
         }
       }
+      // Requests only, deliberately. A memory limit would need to sit above the JVM heap that
+      // `memory` also sets — RSS is heap plus metaspace, direct buffers and GC overhead — and
+      // getting that wrong OOM-kills the server mid-session.
       resources {
         requests {
           ["memory"] = "\(memory.toUnit("mb").value)M"
+          ["cpu"] = cpu
         }
       }
       env {
