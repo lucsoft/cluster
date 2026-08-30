@@ -1,0 +1,194 @@
+/// Renders the SopsSecret holding cluster-autoscaler's `HCLOUD_CLUSTER_CONFIG`.
+///
+///   deno task autoscaler-config
+///
+/// which is just `pkl eval` piped through `sops encrypt` — sops is the only step Pkl cannot do,
+/// because it is a process rather than a document.
+///
+/// The interesting output is `cloudInit`: a full Talos *worker* machine config, one per pool. The
+/// autoscaler hands it to the hcloud API as user-data, so a fresh server boots the Talos snapshot,
+/// applies this config and joins unattended. Everything is derived — talos/talconfig.yaml for the
+/// cluster facts, talos/clusterconfig/ for the installer image the control plane actually runs,
+/// talos/talsecret.yaml for the PKI, ClusterAutoscalerPools.pkl for the pools.
+///
+/// This module reads the plaintext secrets bundle, so it lives in tools/ rather than under
+/// personal-cluster/: nothing here may ever end up on the end of an ArgoCD `path`.
+///
+/// Re-run whenever talconfig.yaml or the pool definitions change, then commit the sealed file.
+module main
+
+import "pkl:yaml"
+import "../../personal-cluster/components/ClusterAutoscalerPools.pkl"
+
+local parser = new yaml.Parser {}
+
+// ---- Cluster facts -------------------------------------------------------
+local talconfig = parser.parse(read("../../talos/talconfig.yaml")) as Dynamic
+local controlPlane = talconfig.nodes.toList().first as Dynamic
+
+// talhelper resolves the schematic into a factory installer URL. Reading it back rather than
+// rebuilding it keeps autoscaled workers on the exact image the control plane runs.
+local renderedCp = parser.parseAll(
+  read("../../talos/clusterconfig/hmsys.de-\(controlPlane.hostname).yaml")
+).map((doc) -> doc as Dynamic)
+
+/// Bumping talosVersion in talconfig.yaml does nothing until talhelper regenerates clusterconfig/,
+/// and a stale file would pair an old installer with a new snapshot — a mismatch that only shows up
+/// as a node that boots and never joins. The type constraint turns that into an eval error.
+local v1alpha1Cp = renderedCp.findOrNull((doc) -> doc.toMap().containsKey("machine")) ??
+  throw("No v1alpha1 document in clusterconfig/ — run `talhelper genconfig` in talos/ first.")
+
+local installImage: String(endsWith(":\(talconfig.talosVersion)")) = v1alpha1Cp.machine.install.image
+
+// Pkl cannot shell out to sops, so `deno task autoscaler-config` decrypts the bundle into the
+// gitignored .out/ first and removes it afterwards. Nothing reads the plaintext but this module.
+local secretsText = read?("../../.out/talsecret.yaml")?.text ??
+  throw("`.out/talsecret.yaml` is missing — run this through `deno task autoscaler-config`, which decrypts it.")
+
+local secrets = parser.parse(secretsText) as Dynamic
+
+// ---- Talos worker machine config ----------------------------------------
+/// Documents appended after the v1alpha1 one. `talosctl gen config --with-kubespan` emits the first
+/// two; ZswapConfig matches the control plane's patch in talconfig.yaml.
+local extraDocuments: Listing<Dynamic> = new {
+  new {
+    apiVersion = "v1alpha1"
+    kind = "HostnameConfig"
+    // Talos still prefers the hcloud platform's hostname (the server name), which is what lets the
+    // autoscaler match a Node to its server; `stable` is only the fallback.
+    auto = "stable"
+  }
+  new {
+    apiVersion = "v1alpha1"
+    kind = "KubeSpanConfig"
+    enabled = true
+  }
+  new {
+    apiVersion = "v1alpha1"
+    kind = "ZswapConfig"
+    maxPoolPercent = 40
+  }
+}
+
+local function machineConfig(pool: ClusterAutoscalerPools.Pool) = new Dynamic {
+  version = "v1alpha1"
+  debug = false
+  persist = true
+  machine {
+    type = "worker"
+    token = secrets.trustdinfo.token
+    ca {
+      crt = secrets.certs.os.crt
+      // Workers get the certificate but never the signing key.
+      key = ""
+    }
+    certSANs = new Listing {}
+    kubelet {
+      image = "ghcr.io/siderolabs/kubelet:\(talconfig.kubernetesVersion)"
+      extraConfig = pool.kubeletExtraConfig
+      defaultRuntimeSeccompProfileEnabled = true
+      disableManifestsDirectory = true
+    }
+    install {
+      disk = controlPlane.installDisk
+      image = installImage
+      wipe = false
+      grubUseUKICmdline = true
+    }
+    features {
+      diskQuotaSupport = true
+      kubePrism {
+        enabled = true
+        port = 7445
+      }
+      hostDNS {
+        enabled = true
+        forwardKubeDNSToHost = true
+      }
+    }
+    nodeLabels = pool.labels
+  }
+  cluster {
+    id = secrets.cluster.id
+    secret = secrets.cluster.secret
+    controlPlane {
+      endpoint = talconfig.endpoint
+    }
+    clusterName = talconfig.clusterName
+    network {
+      dnsDomain = "cluster.local"
+      podSubnets = new Listing { "10.244.0.0/16" }
+      serviceSubnets = new Listing { "10.96.0.0/12" }
+    }
+    token = secrets.secrets.bootstraptoken
+    ca {
+      crt = secrets.certs.k8s.crt
+      key = ""
+    }
+    // Only the Service registry distributes KubeSpan peers; the Kubernetes one is disabled to match
+    // what `talosctl gen config --with-kubespan` produces.
+    discovery {
+      enabled = true
+      registries {
+        kubernetes {
+          disabled = true
+        }
+        service {}
+      }
+    }
+    // Deliberately the opposite of the control plane's patch in talconfig.yaml. `true` makes the
+    // kubelet register with --cloud-provider=external, which taints the node
+    // node.cloudprovider.kubernetes.io/uninitialized:NoSchedule until a CCM clears it. No hcloud CCM
+    // runs here, so the taint would never lift: the autoscaler would boot nodes, watch the pods stay
+    // Pending, and boot more. Flip this the day CCM is deployed.
+    externalCloudProvider {
+      enabled = false
+    }
+  }
+}
+
+local yamlRenderer = new YamlRenderer {}
+
+/// Hetzner caps user-data at 32 KiB. A worker config lands around 3 KiB, but a stray addition could
+/// blow past it, and the failure mode is a server that boots and silently never joins.
+local function cloudInit(pool: ClusterAutoscalerPools.Pool): String(length <= 32768) =
+  (List(machineConfig(pool)) + extraDocuments.toList())
+    .map((doc) -> yamlRenderer.renderDocument(doc))
+    .join("---\n")
+
+// ---- Output --------------------------------------------------------------
+local clusterConfig = new Dynamic {
+  imagesForArch = ClusterAutoscalerPools.imagesForArch
+  nodeConfigs = new Dynamic {
+    for (pool in ClusterAutoscalerPools.pools) {
+      [pool.name] {
+        cloudInit = cloudInit(pool)
+        labels = pool.labels
+        taints = pool.taints
+      }
+    }
+  }
+}
+
+output {
+  value = new Dynamic {
+    apiVersion = "isindir.github.com/v1alpha3"
+    kind = "SopsSecret"
+    metadata {
+      name = "cluster-autoscaler-config"
+      namespace = "kube-system"
+    }
+    spec {
+      secretTemplates = new Listing {
+        new Dynamic {
+          name = "cluster-autoscaler-hetzner-config"
+          // `encrypted_suffix: Data` is what makes sops encrypt this map and leave the rest legible.
+          stringData {
+            ["cluster-config"] = new JsonRenderer {}.renderDocument(clusterConfig)
+          }
+        }
+      }
+    }
+  }
+  renderer = yamlRenderer
+}

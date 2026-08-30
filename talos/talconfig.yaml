@@ -1,5 +1,5 @@
 clusterName: hmsys.de
-talosVersion: v1.12.7
+talosVersion: v1.13.9
 kubernetesVersion: v1.34.2
 endpoint: https://49.13.88.50:6443
 allowSchedulingOnControlPlanes: true
@@ -30,6 +30,17 @@ patches:
         extraConfig:
           memorySwap:
             swapBehavior: LimitedSwap
+  # Autoscaled workers get no hcloud private network, so flannel's VXLAN would otherwise cross the
+  # public internet in cleartext. KubeSpan wraps all node-to-node traffic in WireGuard; peers find
+  # each other through the discovery service, which only ever sees encrypted peer data.
+  - |
+    machine:
+      network:
+        kubespan:
+          enabled: true
+    cluster:
+      discovery:
+        enabled: true
   - |
     apiVersion: v1alpha1
     kind: ZswapConfig

@@ -1,0 +1,37 @@
+/// Envoy Gateway: the Gateway API control plane. Runs alongside Traefik, which stays the
+/// Ingress controller — nothing is routed through Envoy until a Gateway is created.
+amends "@ArgoCD/App.pkl"
+
+import "@ArgoCD/Application.pkl"
+
+name = "infra-envoy-gateway"
+namespace = "envoy-gateway-system"
+
+// The certgen pre-install hook mints the webhook serving cert in-cluster and patches the caBundle
+// in, so the rendered manifest never carries one to compare against.
+ignoreDifferences = new Listing<Application.ComparedToIgnoreDifference> {
+  new {
+    group = "admissionregistration.k8s.io"
+    kind = "MutatingWebhookConfiguration"
+    jqPathExpressions {
+      ".webhooks[]?.clientConfig.caBundle"
+    }
+  }
+}
+
+source {
+  repoURL = "docker.io/envoyproxy"
+  chart = "gateway-helm"
+  // renovate: datasource=docker packageName=docker.io/envoyproxy/gateway-helm
+  targetRevision = "v1.9.0"
+  // The chart carries all 21 CRDs in a subchart's Helm `crds/` directory rather than in templates,
+  // so no chart value toggles them — ArgoCD applies them because it renders with `--include-crds`,
+  // and `helm.skipCrds` is what would turn them off. Stock values otherwise.
+  //
+  // That bundle is Gateway API v1.6.1 *experimental* channel. `io.k8s.GatewayAPI` models the
+  // standard channel, a subset of it with identical `v1` schemas, so the package types every kind
+  // worth writing here; only the extra `gateway.networking.x-k8s.io` kinds have no bindings.
+  helm {
+    releaseName = "envoy-gateway"
+  }
+}

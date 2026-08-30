@@ -1,0 +1,88 @@
+/// The autoscaler's node pools, defined once.
+///
+/// Two consumers read this: apps/InfraClusterAutoscaler.pkl turns it into the chart's
+/// `autoscalingGroups`, and tools/autoscaler-config/main.pkl turns it into the Hetzner provider's
+/// `nodeConfigs` plus one Talos worker machine config per pool. They have to agree on pool names —
+/// the autoscaler looks a pool's config up by the name it was given — so neither owns a copy.
+///
+/// Unlike its neighbours this module renders no Kubernetes resources; it is a definition, and
+/// nothing in index.pkl points an Application at it.
+module ClusterAutoscalerPools
+
+/// A kubelet `registerWithTaints` entry, applied by Talos when the node first registers.
+class Taint {
+  key: String
+  value: String?
+  effect: "NoSchedule" | "PreferNoSchedule" | "NoExecute"
+}
+
+class Pool {
+  /// Also the hcloud server-name prefix, so nodes come up as `<name>-<hex>`. Talos takes its
+  /// hostname from hcloud metadata, which is how the autoscaler maps a Node back to its server
+  /// without a providerID — there is no hcloud CCM on this cluster.
+  name: String
+
+  /// hcloud server type. Its architecture decides which entry of `imagesForArch` is used.
+  instanceType: String
+
+  region: String
+
+  /// 0 costs nothing while the cluster is idle; the pool only exists to absorb bursts.
+  minSize: Int(this >= 0) = 0
+
+  maxSize: Int(this >= minSize)
+
+  /// Set on the node by Talos *and* handed to the autoscaler, which simulates scheduling against
+  /// them before deciding a new node would help. The two must match, or it scales up for pods that
+  /// then refuse to land.
+  labels: Mapping<String, String> = new {}
+
+  /// Empty by default and worth keeping that way: a taint means nothing schedules here, so the
+  /// pending pods that would justify a scale-up never appear and the pool sits at minSize.
+  taints: Listing<Taint> = new {}
+
+  /// Becomes `machine.kubelet.extraConfig` in this pool's worker machine config.
+  kubeletExtraConfig: Dynamic = new {
+    memorySwap {
+      swapBehavior = "LimitedSwap"
+    }
+    when (taints.length > 0) {
+      registerWithTaints = taints
+    }
+    // Without a reservation a cx22 hands its whole 4 GB to pods, and the kubelet is the first
+    // thing the OOM killer reaches for. Figures from hcloud-k8s/terraform-hcloud-kubernetes.
+    systemReserved {
+      ["cpu"] = "100m"
+      ["memory"] = "300Mi"
+      ["ephemeral-storage"] = "1Gi"
+    }
+    kubeReserved {
+      ["cpu"] = "100m"
+      ["memory"] = "350Mi"
+      ["ephemeral-storage"] = "1Gi"
+    }
+  }
+}
+
+/// hcloud snapshots to boot, as label selectors — the newest snapshot matching wins, so uploading
+/// a newer Talos build is picked up without editing this file.
+///
+/// These must be snapshots you uploaded. Hetzner's official Talos offering is a public ISO, and
+/// server creation takes an Image; the autoscaler issues one Server.Create and never attaches an
+/// ISO. Build one with hcloud-upload-image from the same schematic the control plane runs.
+imagesForArch: Mapping<String, String> = new {
+  ["amd64"] = "os=talos,cluster=hmsys.de"
+  ["arm64"] = "os=talos,cluster=hmsys.de"
+}
+
+pools: Listing<Pool> = new {
+  new {
+    name = "hmsys-fsn1-cx22"
+    instanceType = "cx22"
+    region = "fsn1"
+    maxSize = 3
+    labels {
+      ["hmsys.de/autoscaled"] = "true"
+    }
+  }
+}

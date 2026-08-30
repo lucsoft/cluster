@@ -6,6 +6,13 @@
   "tasks": {
     "diff-preview": "deno run -A personal-cluster/diff-preview/main.ts",
     "bootstrap-secret": "deno run -A tools/bootstrap-secret/main.ts",
+    // Renders tools/autoscaler-config/main.pkl and seals it. Pkl needs the plaintext secrets
+    // bundle, which it cannot decrypt itself, so sops brackets the eval on both sides.
+    //
+    // The render is piped straight into sops and only lands in secrets/ once encrypted — a failure
+    // anywhere in the pipe leaves the tracked directory untouched rather than holding cluster PKI
+    // in the clear.
+    "autoscaler-config": "mkdir -p .out && sops decrypt talos/talsecret.sops.yaml > .out/talsecret.yaml && pkl eval tools/autoscaler-config/main.pkl | sops encrypt --input-type yaml --output-type yaml --gcp-kms projects/idyllic-pottery-414714/locations/global/keyRings/sops/cryptoKeys/sops-key --encrypted-suffix Data /dev/stdin > .out/cluster-autoscaler-config.sops.yaml && rm .out/talsecret.yaml && mv .out/cluster-autoscaler-config.sops.yaml personal-cluster/secrets/cluster-autoscaler-config.sops.yaml",
     "mc-router-scaler": "deno run -A tools/mc-router-scaler/main.ts"
   }
 }

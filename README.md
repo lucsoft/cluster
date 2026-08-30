@@ -26,9 +26,11 @@ The following Pkl packages are available under `/packages`:
 - **dev.Knative** — Knative serverless workloads.
 - **io.CertManager** — TLS certificate management with cert-manager.
 - **io.CloudNativePG** — PostgreSQL clusters via CloudNativePG.
+- **io.EnvoyGateway** — Envoy Gateway policy and proxy CRDs (`gateway.envoyproxy.io`).
 - **io.Fission** — Fission serverless functions.
 - **io.Traefik** — Traefik ingress controller.
 - **io.k3s.HelmController** — Managing Helm charts via the k3s Helm controller.
+- **io.k8s.GatewayAPI** — Upstream Gateway API standard channel (Gateway, HTTPRoute, …).
 - **itzg.minecraft** — Minecraft server workloads.
 - **lucsoft.k8s.NetworkPolicies** — Kubernetes network policies.
 - **lucsoft.k8s.Resource** — Generic Kubernetes resource helpers.

@@ -6,6 +6,8 @@ import "./apps/Andromeda.pkl"
 import "./apps/ArgoCD.pkl"
 import "./apps/Emqx.pkl"
 import "./apps/InfraCertManager.pkl"
+import "./apps/InfraClusterAutoscaler.pkl"
+import "./apps/InfraEnvoyGateway.pkl"
 import "./apps/InfraFission.pkl"
 import "./apps/InfraIngressController.pkl"
 import "./apps/InfraSopsOperator.pkl"
@@ -38,7 +40,9 @@ local apps: Listing<App> = new {
   }
   ArgoCD
   InfraCertManager
+  InfraClusterAutoscaler
   InfraIngressController
+  InfraEnvoyGateway
   InfraSopsOperator
   Satisfactory
   InfraFission
