@@ -77,8 +77,8 @@ imagesForArch: Mapping<String, String> = new {
 
 pools: Listing<Pool> = new {
   new {
-    name = "hmsys-fsn1-cx22"
-    instanceType = "cx22"
+    name = "hmsys-fsn1-cx23"
+    instanceType = "cx23"
     region = "fsn1"
     maxSize = 3
     labels {
