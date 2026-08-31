@@ -21,7 +21,7 @@ sourceContents =
     List(
       "cert-manager.io_clusterissuers.yaml",
       "cert-manager.io_issuers.yaml",
-      "cert-manager.io_certificaterequests.yaml",
+      "cert-manager.io_certificates.yaml",
     ).map((item) -> (new yaml.Parser {}.parse(read("\(baseUrl)/\(item)")) as Dynamic)),
   )
 
