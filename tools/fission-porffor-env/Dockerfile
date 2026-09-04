@@ -1,7 +1,7 @@
 # porffor binary (fetched on the builder's own arch, copied into the runtime below)
 # Porffor ships a bun-compiled single binary, which segfaults under qemu — so this stage
 # must never run it, and cross-builds can only verify it in the target-arch runtime.
-from --platform=$BUILDPLATFORM alpine:3.23.3 as porffor
+from --platform=$BUILDPLATFORM alpine:3.24.1 as porffor
 arg TARGETARCH
 # renovate: datasource=github-releases depName=porffor packageName=CanadaHonk/porffor
 env PORFFOR_VERSION=alpha-1
