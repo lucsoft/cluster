@@ -20,7 +20,7 @@ EOF
 # Fission environment that AOT-compiles function JS to a native binary with Porffor.
 # Deno stays in the runtime image on purpose: specialize shells out to porf, which
 # shells out to cc, so neither a distroless nor a scratch base would work.
-from denoland/deno:2.8.2
+from denoland/deno:2.9.6
 
 # porffor defaults to `cc`; name gcc explicitly so it never depends on the alternatives link.
 env CC=gcc
