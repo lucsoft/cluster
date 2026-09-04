@@ -1,7 +1,7 @@
 # Fission environment that runs function TS/JS on Andromeda.
 # Deno stays in the runtime image on purpose: invoking shells out to the andromeda binary.
 # Upstream publishes no linux/arm64 build, so this image is amd64-only.
-from denoland/deno:2.8.2
+from denoland/deno:2.9.6
 
 # renovate: datasource=github-releases depName=andromeda packageName=tryandromeda/andromeda
 env ANDROMEDA_VERSION=0.1.14
