@@ -15,6 +15,12 @@ destination: Application.Destination = new {
 
 ignoreDifferences: Listing<Application.ComparedToIgnoreDifference>? = null
 
+/// Off by default: on ArgoCD 2.10 the server-side diff panics the application
+/// controller with a nil dereference in gitops-engine's removeWebhookMutation
+/// as soon as a resource's GVK is missing from the OpenAPI schema. The app then
+/// never gets a status at all. Enable it only on a controller known to survive it.
+serverSideDiff: Boolean = false
+
 project = "default"
 
 namespace = "default"
@@ -27,8 +33,10 @@ application: Application = new {
   metadata {
     name = app.name
     namespace = "argocd"
-    annotations {
-      ["argocd.argoproj.io/compare-options"] = "ServerSideDiff=true"
+    when (app.serverSideDiff) {
+      annotations {
+        ["argocd.argoproj.io/compare-options"] = "ServerSideDiff=true"
+      }
     }
   }
   spec {
