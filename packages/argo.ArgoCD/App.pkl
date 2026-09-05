@@ -44,7 +44,7 @@ application: Application = new {
           "RespectIgnoreDifferences=true"
         }
         "ApplyOutOfSyncOnly=true"
-        "AutoCreateNamespace=true"
+        "CreateNamespace=true"
         "ServerSideApply=true"
       }
     }
