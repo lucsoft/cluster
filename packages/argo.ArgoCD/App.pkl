@@ -21,6 +21,15 @@ ignoreDifferences: Listing<Application.ComparedToIgnoreDifference>? = null
 /// never gets a status at all. Enable it only on a controller known to survive it.
 serverSideDiff: Boolean = false
 
+/// Deleting an Application only removes the resources it manages if it carries a
+/// propagation-policy finalizer -- the controller reaches its cleanup routine solely
+/// through the deletionTimestamp that finalizers cause. Without one, dropping an app
+/// from an app-of-apps listing prunes the Application and orphans everything under it.
+///
+/// This is the foreground variant, so the Application sticks around until its
+/// resources are gone and a failed cleanup stays visible.
+cascadeDelete: Boolean = true
+
 project = "default"
 
 namespace = "default"
@@ -33,6 +42,11 @@ application: Application = new {
   metadata {
     name = app.name
     namespace = "argocd"
+    when (app.cascadeDelete) {
+      finalizers {
+        "resources-finalizer.argocd.argoproj.io"
+      }
+    }
     when (app.serverSideDiff) {
       annotations {
         ["argocd.argoproj.io/compare-options"] = "ServerSideDiff=true"
