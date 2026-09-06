@@ -32,9 +32,12 @@ const defaultAllowedHosts = [
     "objects.githubusercontent.com",
     "raw.githubusercontent.com",
     "ghcr.io",
+    // A reference names docker.io, which oci.ts rewrites to the registry and auth hosts
+    // it actually talks to; the allowlist has to accept the name as written.
+    "docker.io",
+    "index.docker.io",
     "registry-1.docker.io",
     "auth.docker.io",
-    "index.docker.io",
 ];
 
 export const allowedHosts = Deno.env.get("ALLOWED_HOSTS")
