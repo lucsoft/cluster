@@ -12,6 +12,7 @@ This project uses [Pkl](https://pkl-lang.org/) for configuration management, ena
   - `secrets/` — sealed SopsSecrets.
 - **/packages**: Reusable Pkl packages for various workloads and tools.
 - **/pkl-packages**: Source for the Pkl registry hosting the packages. <https://pkl-pkgs.lucsoft.de/>
+- **/pkl-helmchart**: Serves any Helm chart's values as a typed Pkl package. <https://pkl-helm.lucsoft.de/>
 - **/pkl-argo-plugin**: ArgoCD `ConfigManagementPlugin` that renders Pkl into manifests.
 - **/talos**, **/talos-test**: Talos node configuration.
 - **/tools**: Deno utilities (e.g. `bootstrap-secret`, `mc-router-scaler`).
@@ -51,6 +52,26 @@ Render any component locally with:
 ```sh
 pkl eval personal-cluster/components/<Component>.pkl
 ```
+
+## Helm values as Pkl
+
+`pkl-helmchart` turns a chart into a typed Pkl package, so `helm.valuesObject` is checked
+at eval time instead of being a free-form `Dynamic`:
+
+```
+package://pkl-helm.lucsoft.de/charts/https/charts.jetstack.io/cert-manager@1.20.2
+package://pkl-helm.lucsoft.de/charts/oci/ghcr.io/traefik/helm/traefik@37.3.0
+```
+
+```pkl
+valuesObject = Values.toValues(new Values {
+  crds { enabled = true }
+})
+```
+
+Every property is nullable with no default, so only what you set is rendered and the
+chart's own defaults still apply. Append `/Values.pkl`, `/Values.json` or `/values.yaml`
+to any chart URL to inspect what was generated.
 
 ---
 

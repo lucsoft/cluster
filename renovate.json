@@ -73,12 +73,39 @@
                 "/\\.pkl$/"
             ],
             "matchStrings": [
-                "\"package:\/\/(?<registryUrl>.*)\/(?<depName>.*?)@(?<currentValue>.*?)(#.*)?\""
+                "\"package:\/\/(?!pkl-helm\\.lucsoft\\.de)(?<registryUrl>.*)\/(?<depName>.*?)@(?<currentValue>.*?)(#.*)?\""
             ],
             "registryUrlTemplate": "https://github.com/",
             "packageNameTemplate": "{{#if (equals registryUrl 'pkl-pkgs.lucsoft.de/packages')}}lucsoft/cluster{{else}}{{{replace 'pkg\\.pkl-lang\\.org' 'apple' registryUrl}}}{{/if}}",
             "datasourceTemplate": "{{#if (equals registryUrl 'pkl-pkgs.lucsoft.de/packages')}}github-tags{{else}}github-releases{{/if}}",
             "extractVersionTemplate": "{{#if (equals registryUrl 'pkl-pkgs.lucsoft.de/packages')}}(?<version>.*){{else}}{{depName}}@(?<version>.*){{/if}}"
+        },
+        {
+            "customType": "regex",
+            "description": "Update Helm charts consumed as pkl-helmchart packages",
+            "managerFilePatterns": [
+                "/(^|/)PklProject$/",
+                "/\\.pkl$/"
+            ],
+            "matchStrings": [
+                "\"package:\/\/pkl-helm\\.lucsoft\\.de\/charts\/https\/(?<registryUrl>[^\"]+?)\/(?<depName>[^\/\"]+?)@(?<currentValue>[^\"\/]+?)\""
+            ],
+            "registryUrlTemplate": "https://{{{registryUrl}}}",
+            "datasourceTemplate": "helm",
+            "extractVersionTemplate": "^v?(?<version>.*)$"
+        },
+        {
+            "customType": "regex",
+            "description": "Update OCI Helm charts consumed as pkl-helmchart packages",
+            "managerFilePatterns": [
+                "/(^|/)PklProject$/",
+                "/\\.pkl$/"
+            ],
+            "matchStrings": [
+                "\"package:\/\/pkl-helm\\.lucsoft\\.de\/charts\/oci\/(?<packageName>[^\"]+?)@(?<currentValue>[^\"\/]+?)\""
+            ],
+            "datasourceTemplate": "docker",
+            "extractVersionTemplate": "^v?(?<version>.*)$"
         }
     ]
 }

@@ -15,6 +15,7 @@ import "./apps/MinecraftBedrockRelay.pkl"
 import "./apps/MinecraftServer.pkl"
 import "./apps/Monitoring.pkl"
 import "./apps/Mqtt2Prometheus.pkl"
+import "./apps/PklHelmchart.pkl"
 import "./apps/PklPackages.pkl"
 import "./apps/Porffor.pkl"
 import "./apps/Satisfactory.pkl"
@@ -51,6 +52,7 @@ local apps: Listing<App> = new {
   MinecraftServer
   MinecraftBedrockRelay
   PklPackages
+  PklHelmchart
   Emqx
   Monitoring
   Mqtt2Prometheus

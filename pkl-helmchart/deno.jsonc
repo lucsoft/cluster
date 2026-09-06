@@ -1,0 +1,23 @@
+{
+    "tasks": {
+        "dev": "deno run --watch --unstable-kv --allow-env --allow-read --allow-write --allow-net --allow-run main.ts",
+        "test": "deno test --allow-env --allow-read --allow-net"
+    },
+    "compilerOptions": {
+        "checkJs": true
+    },
+    "unstable": [
+        "kv",
+        "raw-imports"
+    ],
+    "imports": {
+        "@lit-labs/ssr": "npm:@lit-labs/ssr@^4.0.0",
+        "@std/assert": "jsr:@std/assert@^1.0.18",
+        "@std/path": "jsr:@std/path@^1.1.2",
+        "@std/semver": "jsr:@std/semver@^1.0.8",
+        "@std/streams": "jsr:@std/streams@^1.0.12",
+        "@std/tar": "jsr:@std/tar@^0.1.7",
+        "@std/yaml": "jsr:@std/yaml@^1.0.5",
+        "lit": "npm:lit@^3.3.2"
+    }
+}
