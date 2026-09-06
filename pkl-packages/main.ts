@@ -46,14 +46,20 @@ Deno.serve(async (req: Request) => {
         const cachedResponse = await safeGet<{ output: string; }>(kv, [ "packages", packageName, version ]);
         const output = cachedResponse.value?.output ?? await buildPackage(kv, version, packageName);
 
-        const isRelativePath = fullPattern.exec(url)!.pathname.groups[ "0" ];
+        const requestedPath = fullPattern.exec(url)!.pathname.groups[ "0" ];
         const notFoundError = new Response("File not found", { status: 404 });
 
-        const fileName = isRelativePath
-            ? output.match(matching)?.groups?.fileName
-            : output.split("\n").toSorted((a, b) => a.localeCompare(b))[ 0 ].match(matching)?.groups?.fileName;
+        const artifacts = output.split("\n")
+            .map(line => ({ line, fileName: line.match(matching)?.groups?.fileName }))
+            .filter((entry): entry is { line: string; fileName: string; } => entry.fileName !== undefined);
 
-        if (!fileName) return notFoundError;
+        // Without a path Pkl is asking for the metadata document, which sorts first.
+        const wanted = requestedPath
+            ? artifacts.find(entry => entry.fileName === requestedPath)
+            : artifacts.toSorted((a, b) => a.line.localeCompare(b.line))[ 0 ];
+
+        if (!wanted) return notFoundError;
+        const fileName = wanted.fileName;
 
         let data = await readPackageFile(packageName, version, fileName);
         if (!data) {
