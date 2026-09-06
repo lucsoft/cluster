@@ -10,6 +10,7 @@
 amends "@ArgoCD/App.pkl"
 
 import "../components/ClusterAutoscalerPools.pkl"
+import "@clusterAutoscalerValues/Values.pkl"
 
 name = "infra-cluster-autoscaler"
 namespace = "kube-system"
@@ -18,11 +19,10 @@ sources {
   new {
     repoURL = "https://kubernetes.github.io/autoscaler"
     chart = "cluster-autoscaler"
-    // renovate: datasource=helm registryUrl=https://kubernetes.github.io/autoscaler packageName=cluster-autoscaler
-    targetRevision = "9.59.0"
+    targetRevision = "\(Values.chartVersion)"
     helm {
       releaseName = "cluster-autoscaler"
-      valuesObject {
+      valuesObject = new Values {
         cloudProvider = "hetzner"
         // The chart's default tag tracks the newest minor (1.35), which would run ahead of this
         // cluster's 1.34.2 API server. Cluster Autoscaler is only supported on a matching minor.
@@ -82,7 +82,7 @@ sources {
             operator = "Exists"
           }
         }
-      }
+      }.toDynamic()
     }
   }
   // hcloud API token + the sealed worker machine config; decrypted in-cluster by

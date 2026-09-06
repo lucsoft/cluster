@@ -1,5 +1,7 @@
 amends "@ArgoCD/App.pkl"
 
+import "@argoCdValues/Values.pkl"
+
 name = "argo"
 namespace = "argocd"
 autoSync = false
@@ -7,11 +9,10 @@ autoSync = false
 source {
   repoURL = "https://argoproj.github.io/argo-helm"
   chart = "argo-cd"
-  // renovate: datasource=helm registryUrl=https://argoproj.github.io/argo-helm packageName=argo-cd
-  targetRevision = "9.7.1"
+  targetRevision = "\(Values.chartVersion)"
   helm {
     releaseName = "argocd"
-    valuesObject {
+    valuesObject = new Values {
       redis {
         serviceAccount {
           create = true
@@ -49,6 +50,6 @@ source {
           }
         }
       }
-    }
+    }.toDynamic()
   }
 }

@@ -1,5 +1,7 @@
 amends "@ArgoCD/App.pkl"
 
+import "@traefikValues/Values.pkl"
+
 name = "infra-ingress-controller"
 namespace = "traefik-system"
 autoSync = false
@@ -7,10 +9,10 @@ autoSync = false
 source {
   chart = "traefik"
   repoURL = "ghcr.io/traefik/helm"
-  targetRevision = "37.3.0"
+  targetRevision = "\(Values.chartVersion)"
   helm {
     releaseName = "traefik"
-    valuesObject {
+    valuesObject = new Values {
       podSecurityContext {
         sysctls {
           new {
@@ -52,6 +54,6 @@ source {
           }
         }
       }
-    }
+    }.toDynamic()
   }
 }

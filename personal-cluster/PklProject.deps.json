@@ -1,13 +1,6 @@
 {
   "schemaVersion": 1,
   "resolvedDependencies": {
-    "package://pkl-pkgs.lucsoft.de/packages/itzg.minecraft@0": {
-      "type": "remote",
-      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/itzg.minecraft@0.5.17",
-      "checksums": {
-        "sha256": "f2b77a078360738ef36b4f1e692f0daa0c592f42625da01727f80688885a8fc7"
-      }
-    },
     "package://pkg.pkl-lang.org/pkl-k8s/k8s@1": {
       "type": "remote",
       "uri": "projectpackage://pkg.pkl-lang.org/pkl-k8s/k8s@1.4.1",
@@ -15,11 +8,11 @@
         "sha256": "0520f82219c074d2f4b69ab9c57a4a1c1d0b3c4acc1e5d12749e72e0d567d9bf"
       }
     },
-    "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Workload@0": {
+    "package://pkl-helm.lucsoft.de/charts/https/kubernetes.github.io/autoscaler/cluster-autoscaler@9": {
       "type": "remote",
-      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Workload@0.5.13",
+      "uri": "projectpackage://pkl-helm.lucsoft.de/charts/https/kubernetes.github.io/autoscaler/cluster-autoscaler@9.59.0",
       "checksums": {
-        "sha256": "2ecd2322879183a9c671629c90810fa77d5d2210c94eda7903850f45381d89ed"
+        "sha256": "d5f2330c31c76ba5a557e63490f51921e88c125c09f101cc9bdfc5cdbba5b5fd"
       }
     },
     "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Resource@0": {
@@ -29,18 +22,18 @@
         "sha256": "6fcf0a3c64a94c0f37fa5bbf3eafa2dc130cc366ed952104bf6664ba8ff4cf78"
       }
     },
-    "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.NetworkPolicies@0": {
+    "package://pkl-helm.lucsoft.de/charts/oci/ghcr.io/traefik/helm/traefik@37": {
       "type": "remote",
-      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.NetworkPolicies@0.3.0",
+      "uri": "projectpackage://pkl-helm.lucsoft.de/charts/oci/ghcr.io/traefik/helm/traefik@37.3.0",
       "checksums": {
-        "sha256": "8366d0203bc4c0e373e59148f93e13d90196d0bed50d446920df7e2cbfe8258a"
+        "sha256": "d23878749ac5aca0006fd47ad687dec678d70345e48b841842291d65febdbd80"
       }
     },
-    "package://pkl-helm.lucsoft.de/charts/https/charts.jetstack.io/cert-manager@1": {
+    "package://pkl-helm.lucsoft.de/charts/https/isindir.github.io/sops-secrets-operator/sops-secrets-operator@0": {
       "type": "remote",
-      "uri": "projectpackage://pkl-helm.lucsoft.de/charts/https/charts.jetstack.io/cert-manager@1.20.2",
+      "uri": "projectpackage://pkl-helm.lucsoft.de/charts/https/isindir.github.io/sops-secrets-operator/sops-secrets-operator@0.27.1",
       "checksums": {
-        "sha256": "3154ef7d28f854f83e966a4fa64e309994ff21cdc7efe380ba2858f380e7a738"
+        "sha256": "9dbedb03fc641658c4c6821b595c4227e1a5b3428e0503ce1996be04db90947e"
       }
     },
     "package://pkl-pkgs.lucsoft.de/packages/com.SopsSecretsOperator@0": {
@@ -57,20 +50,6 @@
         "sha256": "84c7feb391f4ac273a99dc89b8fd51dbcd21dbda4ce640f6908527f83acdd4d6"
       }
     },
-    "package://pkl-pkgs.lucsoft.de/packages/argo.ArgoCD@0": {
-      "type": "remote",
-      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/argo.ArgoCD@0.5.13",
-      "checksums": {
-        "sha256": "39ca9c267170175c013c7cf3a9058447aba5f7c7fbd738c0b98a050539e62f33"
-      }
-    },
-    "package://pkl-pkgs.lucsoft.de/packages/io.Traefik@0": {
-      "type": "remote",
-      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/io.Traefik@0.5.13",
-      "checksums": {
-        "sha256": "547b50469c3d22826336f06da1fb5da4c0f8a56e135d27ff57bd30978e294ee3"
-      }
-    },
     "package://pkl-pkgs.lucsoft.de/packages/io.Fission@0": {
       "type": "remote",
       "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/io.Fission@0.5.13",
@@ -83,6 +62,69 @@
       "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/com.VictoriaMetrics@0.5.16",
       "checksums": {
         "sha256": "c6ec8c720d5c15d693c1c9a92af14943c6e52d450600449adfdb94b97ba50a98"
+      }
+    },
+    "package://pkl-helm.lucsoft.de/charts/https/victoriametrics.github.io/helm-charts/victoria-metrics-k8s-stack@0": {
+      "type": "remote",
+      "uri": "projectpackage://pkl-helm.lucsoft.de/charts/https/victoriametrics.github.io/helm-charts/victoria-metrics-k8s-stack@0.90.0",
+      "checksums": {
+        "sha256": "953f4fb94b978fa225a0c5c437c3426d6f4a8d03613d759e637dbeb7d9f1c33c"
+      }
+    },
+    "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Workload@0": {
+      "type": "remote",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.Workload@0.5.13",
+      "checksums": {
+        "sha256": "2ecd2322879183a9c671629c90810fa77d5d2210c94eda7903850f45381d89ed"
+      }
+    },
+    "package://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.NetworkPolicies@0": {
+      "type": "remote",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/lucsoft.k8s.NetworkPolicies@0.3.0",
+      "checksums": {
+        "sha256": "8366d0203bc4c0e373e59148f93e13d90196d0bed50d446920df7e2cbfe8258a"
+      }
+    },
+    "package://pkl-helm.lucsoft.de/charts/https/fission.github.io/fission-charts/fission-all@1": {
+      "type": "remote",
+      "uri": "projectpackage://pkl-helm.lucsoft.de/charts/https/fission.github.io/fission-charts/fission-all@1.27.0",
+      "checksums": {
+        "sha256": "49bfe2516bc0e0acca445da774823125ff115f4542e0edb71abf7e641b4baab6"
+      }
+    },
+    "package://pkl-pkgs.lucsoft.de/packages/itzg.minecraft@0": {
+      "type": "remote",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/itzg.minecraft@0.5.17",
+      "checksums": {
+        "sha256": "f2b77a078360738ef36b4f1e692f0daa0c592f42625da01727f80688885a8fc7"
+      }
+    },
+    "package://pkl-helm.lucsoft.de/charts/https/argoproj.github.io/argo-helm/argo-cd@9": {
+      "type": "remote",
+      "uri": "projectpackage://pkl-helm.lucsoft.de/charts/https/argoproj.github.io/argo-helm/argo-cd@9.7.1",
+      "checksums": {
+        "sha256": "e519bf6762a00a1c4288918dce6abc57390361a247857614a35b3961df6fec16"
+      }
+    },
+    "package://pkl-helm.lucsoft.de/charts/https/charts.jetstack.io/cert-manager@1": {
+      "type": "remote",
+      "uri": "projectpackage://pkl-helm.lucsoft.de/charts/https/charts.jetstack.io/cert-manager@1.20.2",
+      "checksums": {
+        "sha256": "3154ef7d28f854f83e966a4fa64e309994ff21cdc7efe380ba2858f380e7a738"
+      }
+    },
+    "package://pkl-pkgs.lucsoft.de/packages/argo.ArgoCD@0": {
+      "type": "remote",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/argo.ArgoCD@0.5.13",
+      "checksums": {
+        "sha256": "39ca9c267170175c013c7cf3a9058447aba5f7c7fbd738c0b98a050539e62f33"
+      }
+    },
+    "package://pkl-pkgs.lucsoft.de/packages/io.Traefik@0": {
+      "type": "remote",
+      "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/io.Traefik@0.5.13",
+      "checksums": {
+        "sha256": "547b50469c3d22826336f06da1fb5da4c0f8a56e135d27ff57bd30978e294ee3"
       }
     }
   }

@@ -25,7 +25,6 @@ ignoreDifferences = new Listing<Application.ComparedToIgnoreDifference> {
 source {
   repoURL = "https://charts.jetstack.io"
   chart = "cert-manager"
-  // The chart follows the generated values package, so one Renovate bump moves both.
   targetRevision = "v\(Values.chartVersion)"
   helm {
     releaseName = "cert-manager"

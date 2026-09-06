@@ -1,21 +1,22 @@
 amends "@ArgoCD/App.pkl"
 
+import "@sopsOperatorValues/Values.pkl"
+
 name = "infra-sops-operator"
 namespace = "sops"
 sources {
   new {
     repoURL = "https://isindir.github.io/sops-secrets-operator/"
     chart = "sops-secrets-operator"
-    // renovate: datasource=helm registryUrl=https://isindir.github.io/sops-secrets-operator/ packageName=sops-secrets-operator
-    targetRevision = "0.27.1"
+    targetRevision = "\(Values.chartVersion)"
     helm {
       releaseName = "sops-secrets-operator"
-      valuesObject {
+      valuesObject = new Values {
         gcp {
           enabled = true
           existingSecretName = "sops-gcp-creds"
         }
-      }
+      }.toDynamic()
     }
   }
   new {

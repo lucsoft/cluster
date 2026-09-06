@@ -1,5 +1,6 @@
 amends "@ArgoCD/App.pkl"
 import "@ArgoCD/Application.pkl"
+import "@fissionValues/Values.pkl"
 
 name = "infra-fission"
 namespace = "fission"
@@ -26,18 +27,17 @@ sources {
   // The chart ships no CRDs; upstream expects `kubectl create -k crds/v1` at the matching tag.
   new {
     repoURL = "https://github.com/fission/fission"
-    // renovate: datasource=github-releases packageName=fission/fission
-    targetRevision = "v1.27.0"
+    // The CRD tag has to match the chart, so both follow the values package.
+    targetRevision = "v\(Values.chartVersion)"
     path = "crds/v1"
   }
   new {
     repoURL = "https://fission.github.io/fission-charts"
     chart = "fission-all"
-    // renovate: datasource=helm registryUrl=https://fission.github.io/fission-charts packageName=fission-all
-    targetRevision = "1.27.0"
+    targetRevision = "\(Values.chartVersion)"
     helm {
       releaseName = "fission"
-      valuesObject {
+      valuesObject = new Values {
         // Traefik fronts everything; a LoadBalancer here would ask Hetzner for an LB we don't need.
         routerServiceType = "ClusterIP"
         // The chart renders RBAC into this namespace but never creates it, so keep it on the release namespace.
@@ -55,7 +55,7 @@ sources {
           // under ArgoCD — leaving it on regenerates the secret every sync and breaks running pods.
           enabled = false
         }
-      }
+      }.toDynamic()
     }
   }
 }
