@@ -1,5 +1,6 @@
 amends "@ArgoCD/App.pkl"
 import "@ArgoCD/Application.pkl"
+import "@certManagerValues/Values.pkl"
 
 name = "infra-cert-manager"
 namespace = "cert-manager"
@@ -24,14 +25,14 @@ ignoreDifferences = new Listing<Application.ComparedToIgnoreDifference> {
 source {
   repoURL = "https://charts.jetstack.io"
   chart = "cert-manager"
-  // renovate: datasource=helm registryUrl=https://charts.jetstack.io packageName=cert-manager
-  targetRevision = "v1.20.2"
+  // The chart follows the generated values package, so one Renovate bump moves both.
+  targetRevision = "v\(Values.chartVersion)"
   helm {
     releaseName = "cert-manager"
-    valuesObject {
+    valuesObject = Values.toValues(new Values {
       crds {
         enabled = true
       }
-    }
+    }) as Dynamic
   }
 }

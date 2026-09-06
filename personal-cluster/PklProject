@@ -28,4 +28,7 @@ dependencies {
   ["Traefik"] {
     uri = "package://pkl-pkgs.lucsoft.de/packages/io.Traefik@0.5.13"
   }
+  ["certManagerValues"] {
+    uri = "package://pkl-helm.lucsoft.de/charts/https/charts.jetstack.io/cert-manager@1.20.2"
+  }
 }

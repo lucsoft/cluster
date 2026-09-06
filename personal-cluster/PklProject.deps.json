@@ -36,6 +36,13 @@
         "sha256": "8366d0203bc4c0e373e59148f93e13d90196d0bed50d446920df7e2cbfe8258a"
       }
     },
+    "package://pkl-helm.lucsoft.de/charts/https/charts.jetstack.io/cert-manager@1": {
+      "type": "remote",
+      "uri": "projectpackage://pkl-helm.lucsoft.de/charts/https/charts.jetstack.io/cert-manager@1.20.2",
+      "checksums": {
+        "sha256": "3154ef7d28f854f83e966a4fa64e309994ff21cdc7efe380ba2858f380e7a738"
+      }
+    },
     "package://pkl-pkgs.lucsoft.de/packages/com.SopsSecretsOperator@0": {
       "type": "remote",
       "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/com.SopsSecretsOperator@0.5.13",
