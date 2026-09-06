@@ -29,10 +29,10 @@ source {
   targetRevision = "v\(Values.chartVersion)"
   helm {
     releaseName = "cert-manager"
-    valuesObject = Values.toValues(new Values {
+    valuesObject = new Values {
       crds {
         enabled = true
       }
-    }) as Dynamic
+    }.toDynamic()
   }
 }
