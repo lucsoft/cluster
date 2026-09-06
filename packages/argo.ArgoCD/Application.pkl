@@ -262,7 +262,7 @@ class SourceHelm {
 
   /// ValuesObject specifies Helm values to be passed to helm template, defined as a map. This takes
   /// precedence over Values.
-  valuesObject: Dynamic?
+  valuesObject: (Dynamic | Typed | Mapping)?
 
   /// Version is the Helm version to use for templating ("3")
   version: String?
@@ -696,7 +696,7 @@ class DrySourceHelm {
 
   /// ValuesObject specifies Helm values to be passed to helm template, defined as a map. This takes
   /// precedence over Values.
-  valuesObject: Dynamic?
+  valuesObject: (Dynamic | Typed | Mapping)?
 
   /// Version is the Helm version to use for templating ("3")
   version: String?

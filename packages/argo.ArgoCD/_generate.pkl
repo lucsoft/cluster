@@ -22,3 +22,17 @@ sourceContents =
       .toList()
       .map((item) -> (new yaml.Parser {}.parse(read("\(baseUrl)/\(item)")) as Dynamic)),
   )
+
+// The CRD declares valuesObject as a free-form object, so the generator types it as
+// `Dynamic`. Widen it to any object type, which lets a typed values module -- the ones
+// pkl-helmchart generates -- be assigned without converting it to a Dynamic first.
+output {
+  files {
+    for (path, file in super.files) {
+      [path] = (file) {
+        text =
+          file.text.replaceAll("valuesObject: Dynamic?", "valuesObject: (Dynamic|Typed|Mapping)?")
+      }
+    }
+  }
+}

@@ -234,7 +234,7 @@ class SourceHelm {
 
   values: String?
 
-  valuesObject: Dynamic?
+  valuesObject: (Dynamic | Typed | Mapping)?
 
   version: String?
 }
