@@ -1,4 +1,4 @@
-from alpine:3.23.3
+from alpine:3.24.1
 
 copy plugin.yaml /home/argocd/cmp-server/config/plugin.yaml
 
