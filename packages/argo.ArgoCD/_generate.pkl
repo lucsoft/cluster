@@ -3,7 +3,7 @@ amends "package://pkg.pkl-lang.org/pkl-pantry/k8s.contrib.crd@4.2.6#/generate.pk
 import "pkl:yaml"
 
 // renovate: datasource=github-releases packageName=argoproj/argo-cd
-local version = "v3.4.6"
+local version = "v3.5.2"
 local baseUrl = "https://raw.githubusercontent.com/argoproj/argo-cd/\(version)/manifests/crds"
 // noinspection UnresolvedElement
 local kustomize: Listing<String> =

@@ -10,7 +10,7 @@ import "@k8s/api/core/v1/Service.pkl"
 import "@k8s/api/core/v1/Volume.pkl"
 
 // renovate: datasource=github-releases packageName=VictoriaMetrics/operator
-local version = "v0.72.0"
+local version = "v0.74.1"
 local crdBundle =
   "https://raw.githubusercontent.com/VictoriaMetrics/operator/\(version)/config/crd/overlay/crd.yaml"
 
