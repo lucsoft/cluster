@@ -1,0 +1,21 @@
+/// UUID generates a version 4 UUID (21061816-abbd-40ef-8985-6db0fbcbc4c4).
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <https://raw.githubusercontent.com/external-secrets/external-secrets/v2.12.0/config/crds/bases/kustomization.yaml>.
+module io.`external-secrets`.generators.v1alpha1.UUID
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "generators.external-secrets.io/v1alpha1"
+
+fixed kind: "UUID"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// UUIDSpec controls the behavior of the uuid generator.
+spec: Dynamic?

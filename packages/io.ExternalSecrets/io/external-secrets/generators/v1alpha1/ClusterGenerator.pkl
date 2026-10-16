@@ -1,0 +1,1655 @@
+/// ClusterGenerator represents a cluster-wide generator which can be referenced as part of
+/// `generatorRef` fields.
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <https://raw.githubusercontent.com/external-secrets/external-secrets/v2.12.0/config/crds/bases/kustomization.yaml>.
+module io.`external-secrets`.generators.v1alpha1.ClusterGenerator
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "generators.external-secrets.io/v1alpha1"
+
+fixed kind: "ClusterGenerator"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// ClusterGeneratorSpec defines the desired state of a ClusterGenerator.
+spec: Spec?
+
+/// ClusterGeneratorSpec defines the desired state of a ClusterGenerator.
+class Spec {
+  /// Generator the spec for this generator, must match the kind.
+  generator: Generator
+
+  /// Kind the kind of this generator.
+  kind: 
+    "ACRAccessToken"
+    |"BeyondtrustWorkloadCredentialsDynamicSecret"
+    |"CloudsmithAccessToken"
+    |"ECRAuthorizationToken"
+    |"Fake"
+    |"GCRAccessToken"
+    |"GithubAccessToken"
+    |"GitlabDeployToken"
+    |"QuayAccessToken"
+    |"Password"
+    |"SSHKey"
+    |"STSSessionToken"
+    |"UUID"
+    |"VaultDynamicSecret"
+    |"Webhook"
+    |"Grafana"
+    |"MFA"
+}
+
+/// Generator the spec for this generator, must match the kind.
+class Generator {
+  /// ACRAccessTokenSpec defines how to generate the access token e.g. how to authenticate and which
+  /// registry to use. see: https://github.com/Azure/acr/blob/main/docs/AAD-OAuth.md#overview
+  acrAccessTokenSpec: AcrAccessTokenSpec?
+
+  /// BeyondtrustWorkloadCredentialsDynamicSecretSpec defines the desired spec for
+  /// BeyondtrustWorkloadCredentials dynamic generator. This generator enables obtaining temporary,
+  /// short-lived credentials from BeyondTrust Workload Credentials. For more information, see:
+  /// https://docs.beyondtrust.com/bt-docs/docs/secrets-api
+  beyondtrustWorkloadCredentialsDynamicSecretSpec: BeyondtrustWorkloadCredentialsDynamicSecretSpec?
+
+  /// CloudsmithAccessTokenSpec defines the configuration for generating a Cloudsmith access token using
+  /// OIDC authentication.
+  cloudsmithAccessTokenSpec: CloudsmithAccessTokenSpec?
+
+  /// ECRAuthorizationTokenSpec defines the desired state to generate an AWS ECR authorization token.
+  ecrAuthorizationTokenSpec: EcrAuthorizationTokenSpec?
+
+  /// FakeSpec contains the static data.
+  fakeSpec: FakeSpec?
+
+  /// GCRAccessTokenSpec defines the desired state to generate a Google Container Registry access token.
+  gcrAccessTokenSpec: GcrAccessTokenSpec?
+
+  /// GithubAccessTokenSpec defines the desired state to generate a GitHub access token.
+  githubAccessTokenSpec: GithubAccessTokenSpec?
+
+  /// GitlabDeployTokenSpec defines the desired state to generate a GitLab deploy token.
+  gitlabDeployTokenSpec: GitlabDeployTokenSpec?
+
+  /// GrafanaSpec controls the behavior of the grafana generator.
+  grafanaSpec: GrafanaSpec?
+
+  /// MFASpec controls the behavior of the mfa generator.
+  mfaSpec: MfaSpec?
+
+  /// PasswordSpec controls the behavior of the password generator.
+  passwordSpec: PasswordSpec?
+
+  /// QuayAccessTokenSpec defines the desired state to generate a Quay access token.
+  quayAccessTokenSpec: QuayAccessTokenSpec?
+
+  /// SSHKeySpec controls the behavior of the ssh key generator.
+  sshKeySpec: SshKeySpec?
+
+  /// STSSessionTokenSpec defines the desired state to generate an AWS STS session token.
+  stsSessionTokenSpec: StsSessionTokenSpec?
+
+  /// UUIDSpec controls the behavior of the uuid generator.
+  uuidSpec: Dynamic?
+
+  /// VaultDynamicSecretSpec defines the desired spec of VaultDynamicSecret.
+  vaultDynamicSecretSpec: VaultDynamicSecretSpec?
+
+  /// WebhookSpec controls the behavior of the external generator. Any body parameters should be passed
+  /// to the server through the parameters field.
+  webhookSpec: WebhookSpec?
+}
+
+/// ACRAccessTokenSpec defines how to generate the access token e.g. how to authenticate and which
+/// registry to use. see: https://github.com/Azure/acr/blob/main/docs/AAD-OAuth.md#overview
+class AcrAccessTokenSpec {
+  /// ACRAuth defines the authentication methods for Azure Container Registry.
+  auth: Auth
+
+  /// EnvironmentType specifies the Azure cloud environment endpoints to use for connecting and
+  /// authenticating with Azure. By default, it points to the public cloud AAD endpoint. The following
+  /// endpoints are available, also see here:
+  /// https://github.com/Azure/go-autorest/blob/main/autorest/azure/environments.go#L152 PublicCloud,
+  /// USGovernmentCloud, ChinaCloud, GermanCloud
+  environmentType: ("PublicCloud"|"USGovernmentCloud"|"ChinaCloud"|"GermanCloud"|"AzureStackCloud")?
+
+  /// the domain name of the ACR registry e.g. foobarexample.azurecr.io
+  registry: String
+
+  /// Define the scope for the access token, e.g. pull/push access for a repository. if not provided it
+  /// will return a refresh token that has full scope. Note: you need to pin it down to the repository
+  /// level, there is no wildcard available.
+  ///
+  /// examples: repository:my-repository:pull,push repository:my-repository:pull
+  ///
+  /// see docs for details: https://docs.docker.com/registry/spec/auth/scope/
+  scope: String?
+
+  /// TenantID configures the Azure Tenant to send requests to. Required for ServicePrincipal auth type.
+  tenantId: String?
+}
+
+/// ACRAuth defines the authentication methods for Azure Container Registry.
+class Auth {
+  /// ManagedIdentity uses Azure Managed Identity to authenticate with Azure.
+  managedIdentity: ManagedIdentity?
+
+  /// ServicePrincipal uses Azure Service Principal credentials to authenticate with Azure.
+  servicePrincipal: ServicePrincipal?
+
+  /// WorkloadIdentity uses Azure Workload Identity to authenticate with Azure.
+  workloadIdentity: WorkloadIdentity?
+}
+
+/// ManagedIdentity uses Azure Managed Identity to authenticate with Azure.
+class ManagedIdentity {
+  /// If multiple Managed Identity is assigned to the pod, you can select the one to be used
+  identityId: String?
+}
+
+/// ServicePrincipal uses Azure Service Principal credentials to authenticate with Azure.
+class ServicePrincipal {
+  /// AzureACRServicePrincipalAuthSecretRef defines the secret references for Azure Service Principal
+  /// authentication. It uses static credentials stored in a Kind=Secret.
+  secretRef: SecretRef
+}
+
+/// AzureACRServicePrincipalAuthSecretRef defines the secret references for Azure Service Principal
+/// authentication. It uses static credentials stored in a Kind=Secret.
+class SecretRef {
+  /// The Azure clientId of the service principle used for authentication.
+  clientId: ClientId?
+
+  /// The Azure ClientSecret of the service principle used for authentication.
+  clientSecret: ClientSecret?
+}
+
+/// The Azure clientId of the service principle used for authentication.
+class ClientId {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// The Azure ClientSecret of the service principle used for authentication.
+class ClientSecret {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// WorkloadIdentity uses Azure Workload Identity to authenticate with Azure.
+class WorkloadIdentity {
+  /// ServiceAccountRef specified the service account that should be used when authenticating with
+  /// WorkloadIdentity.
+  serviceAccountRef: ServiceAccountRef?
+}
+
+/// ServiceAccountRef specified the service account that should be used when authenticating with
+/// WorkloadIdentity.
+class ServiceAccountRef {
+  /// Audience specifies the `aud` claim for the service account token Some providers automatically
+  /// extend the audience field based on well-known annotations for workload identity (e.g. IRSA or GCP
+  /// Workload Identity)
+  audiences: Listing<String>?
+
+  /// The name of the ServiceAccount resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))
+
+  /// Namespace of the resource being referred to. Ignored if referent is not cluster-scoped, otherwise
+  /// defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// BeyondtrustWorkloadCredentialsDynamicSecretSpec defines the desired spec for
+/// BeyondtrustWorkloadCredentials dynamic generator. This generator enables obtaining temporary,
+/// short-lived credentials from BeyondTrust Workload Credentials. For more information, see:
+/// https://docs.beyondtrust.com/bt-docs/docs/secrets-api
+class BeyondtrustWorkloadCredentialsDynamicSecretSpec {
+  /// Controller selects the controller that should handle this generator. Leave empty to use the default
+  /// controller.
+  controller: String?
+
+  /// Provider contains the BeyondtrustWorkloadCredentials provider configuration including
+  /// authentication, server connection details, and the folder path to the dynamic secret definition.
+  /// The folderPath should point to a dynamic secret definition that has been created in BeyondTrust
+  /// Workload Credentials (e.g., "production/aws-temp"). For setup details, see:
+  /// https://docs.beyondtrust.com/bt-docs/docs/secrets-api
+  provider: Provider
+
+  /// RetrySettings configures exponential backoff for failed API requests. If not specified, uses the
+  /// default retry settings.
+  retrySettings: RetrySettings?
+}
+
+/// Provider contains the BeyondtrustWorkloadCredentials provider configuration including authentication,
+/// server connection details, and the folder path to the dynamic secret definition. The folderPath
+/// should point to a dynamic secret definition that has been created in BeyondTrust Workload Credentials
+/// (e.g., "production/aws-temp"). For setup details, see:
+/// https://docs.beyondtrust.com/bt-docs/docs/secrets-api
+class Provider {
+  /// Auth configures how the Operator authenticates with the BeyondTrust Workload Credentials API.
+  /// Currently supports API key authentication via Kubernetes secret reference. For authentication
+  /// setup, see: https://docs.beyondtrust.com/bt-docs/docs/secrets-api#authentication
+  auth: ProviderAuth
+
+  /// CABundle is a base64-encoded CA certificate used to validate the BeyondTrust Workload Credentials
+  /// API TLS certificate. Use this when your BeyondTrust instance uses a self-signed certificate or
+  /// internal CA. If not set, the system's trusted root certificates are used.
+  caBundle: String?
+
+  /// CAProvider points to a Secret or ConfigMap containing a PEM-encoded CA certificate. This is used to
+  /// validate the BeyondTrust Workload Credentials API TLS certificate. Use this as an alternative to
+  /// CABundle when you want to reference an existing Kubernetes resource.
+  caProvider: CaProvider?
+
+  /// FolderPath specifies the default folder path for secret retrieval. Secrets will be fetched from
+  /// this folder unless overridden in the ExternalSecret spec. Example: "production/database" or
+  /// "dev/api-keys" Leave empty to retrieve secrets from the root folder. For folder organization, see:
+  /// https://docs.beyondtrust.com/bt-docs/docs/secrets-api#folders
+  folderPath: String?
+
+  /// Server configures the BeyondTrust Workload Credentials server connection details. Includes the API
+  /// URL and Site ID for your BeyondTrust instance. For API reference, see:
+  /// https://docs.beyondtrust.com/bt-docs/docs/secrets-api
+  server: Server
+}
+
+/// Auth configures how the Operator authenticates with the BeyondTrust Workload Credentials API.
+/// Currently supports API key authentication via Kubernetes secret reference. For authentication setup,
+/// see: https://docs.beyondtrust.com/bt-docs/docs/secrets-api#authentication
+class ProviderAuth {
+  /// APIKey configures API token authentication for BeyondTrust Workload Credentials. The token is
+  /// retrieved from a Kubernetes secret and used as a Bearer token for API requests.
+  apikey: Apikey
+}
+
+/// APIKey configures API token authentication for BeyondTrust Workload Credentials. The token is
+/// retrieved from a Kubernetes secret and used as a Bearer token for API requests.
+class Apikey {
+  /// Token references the Kubernetes secret containing the BeyondTrust Workload Credentials API token.
+  /// The secret should contain the API key used to authenticate with BeyondTrust Workload Credentials.
+  /// Create an API token in your BeyondTrust Workload Credentials console and store it in a Kubernetes
+  /// secret. For details on creating API tokens, see:
+  /// https://docs.beyondtrust.com/bt-docs/docs/secrets-api#authentication
+  token: Token
+}
+
+/// Token references the Kubernetes secret containing the BeyondTrust Workload Credentials API token. The
+/// secret should contain the API key used to authenticate with BeyondTrust Workload Credentials. Create
+/// an API token in your BeyondTrust Workload Credentials console and store it in a Kubernetes secret.
+/// For details on creating API tokens, see:
+/// https://docs.beyondtrust.com/bt-docs/docs/secrets-api#authentication
+class Token {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// CAProvider points to a Secret or ConfigMap containing a PEM-encoded CA certificate. This is used to
+/// validate the BeyondTrust Workload Credentials API TLS certificate. Use this as an alternative to
+/// CABundle when you want to reference an existing Kubernetes resource.
+class CaProvider {
+  /// The key where the CA certificate can be found in the Secret or ConfigMap.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the object located at the provider type.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))
+
+  /// The namespace the Provider type is in. Can only be defined when used in a ClusterSecretStore.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+
+  /// The type of provider to use such as "Secret", or "ConfigMap".
+  type: "Secret"|"ConfigMap"
+}
+
+/// Server configures the BeyondTrust Workload Credentials server connection details. Includes the API
+/// URL and Site ID for your BeyondTrust instance. For API reference, see:
+/// https://docs.beyondtrust.com/bt-docs/docs/secrets-api
+class Server {
+  /// APIURL is the base URL of your BeyondTrust Workload Credentials API server. This should be the full
+  /// URL to your BeyondTrust instance. Example: https://api.beyondtrust.io/siie For more information,
+  /// see: https://docs.beyondtrust.com/bt-docs/docs/secrets-api#base-url
+  apiUrl: String
+
+  /// SiteID is your BeyondTrust Workload Credentials site identifier (UUID format). This identifier is
+  /// unique to your BeyondTrust Workload Credentials instance. You can find your Site ID in the
+  /// BeyondTrust Workload Credentials admin console. Example: a1b2c3d4-e5f6-4890-abcd-ef1234567890 For
+  /// more information, see: https://docs.beyondtrust.com/bt-docs/docs/secrets-api
+  siteId: String
+}
+
+/// RetrySettings configures exponential backoff for failed API requests. If not specified, uses the
+/// default retry settings.
+class RetrySettings {
+  maxRetries: Int?
+
+  retryInterval: String?
+}
+
+/// CloudsmithAccessTokenSpec defines the configuration for generating a Cloudsmith access token using
+/// OIDC authentication.
+class CloudsmithAccessTokenSpec {
+  /// APIURL configures the Cloudsmith API URL. Defaults to https://api.cloudsmith.io.
+  apiUrl: String?
+
+  /// OrgSlug is the organization slug in Cloudsmith
+  orgSlug: String
+
+  /// Name of the service account you are federating with
+  serviceAccountRef: QuayAccessTokenSpecServiceAccountRef
+
+  /// ServiceSlug is the service slug in Cloudsmith for OIDC authentication
+  serviceSlug: String
+}
+
+/// Name of the service account you are federating with
+class QuayAccessTokenSpecServiceAccountRef {
+  /// Audience specifies the `aud` claim for the service account token Some providers automatically
+  /// extend the audience field based on well-known annotations for workload identity (e.g. IRSA or GCP
+  /// Workload Identity)
+  audiences: Listing<String>?
+
+  /// The name of the ServiceAccount resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))
+
+  /// Namespace of the resource being referred to. Ignored if referent is not cluster-scoped, otherwise
+  /// defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// ECRAuthorizationTokenSpec defines the desired state to generate an AWS ECR authorization token.
+class EcrAuthorizationTokenSpec {
+  /// Auth defines how to authenticate with AWS
+  auth: StsSessionTokenSpecAuth?
+
+  /// Region specifies the region to operate in.
+  region: String
+
+  /// You can assume a role before making calls to the desired AWS service.
+  role: String?
+
+  /// Scope specifies the ECR service scope. Valid options are private and public.
+  scope: String?
+}
+
+/// Auth defines how to authenticate with AWS
+class StsSessionTokenSpecAuth {
+  /// AWSJWTAuth provides configuration to authenticate against AWS using service account tokens.
+  jwt: AuthJwt?
+
+  /// AWSAuthSecretRef holds secret references for AWS credentials both AccessKeyID and SecretAccessKey
+  /// must be defined in order to properly authenticate.
+  secretRef: StsSessionTokenSpecAuthSecretRef?
+}
+
+/// AWSJWTAuth provides configuration to authenticate against AWS using service account tokens.
+class AuthJwt {
+  /// ServiceAccountSelector is a reference to a ServiceAccount resource.
+  serviceAccountRef: JwtServiceAccountRef?
+}
+
+/// ServiceAccountSelector is a reference to a ServiceAccount resource.
+class JwtServiceAccountRef {
+  /// Audience specifies the `aud` claim for the service account token Some providers automatically
+  /// extend the audience field based on well-known annotations for workload identity (e.g. IRSA or GCP
+  /// Workload Identity)
+  audiences: Listing<String>?
+
+  /// The name of the ServiceAccount resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))
+
+  /// Namespace of the resource being referred to. Ignored if referent is not cluster-scoped, otherwise
+  /// defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// AWSAuthSecretRef holds secret references for AWS credentials both AccessKeyID and SecretAccessKey
+/// must be defined in order to properly authenticate.
+class StsSessionTokenSpecAuthSecretRef {
+  /// The AccessKeyID is used for authentication
+  accessKeyIDSecretRef: AccessKeyIDSecretRef?
+
+  /// The SecretAccessKey is used for authentication
+  secretAccessKeySecretRef: SecretAccessKeySecretRef?
+
+  /// The SessionToken used for authentication This must be defined if AccessKeyID and SecretAccessKey
+  /// are temporary credentials see:
+  /// https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_use-resources.html
+  sessionTokenSecretRef: SessionTokenSecretRef?
+}
+
+/// The AccessKeyID is used for authentication
+class AccessKeyIDSecretRef {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// The SecretAccessKey is used for authentication
+class SecretAccessKeySecretRef {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// The SessionToken used for authentication This must be defined if AccessKeyID and SecretAccessKey are
+/// temporary credentials see:
+/// https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_use-resources.html
+class SessionTokenSecretRef {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// FakeSpec contains the static data.
+class FakeSpec {
+  /// Used to select the correct ESO controller (think: ingress.ingressClassName) The ESO controller is
+  /// instantiated with a specific controller name and filters VDS based on this property
+  controller: String?
+
+  /// Data defines the static data returned by this generator.
+  data: Mapping<String, String>?
+}
+
+/// GCRAccessTokenSpec defines the desired state to generate a Google Container Registry access token.
+class GcrAccessTokenSpec {
+  /// Auth defines the means for authenticating with GCP
+  auth: GcrAccessTokenSpecAuth
+
+  /// ProjectID defines which project to use to authenticate with
+  projectID: String
+}
+
+/// Auth defines the means for authenticating with GCP
+class GcrAccessTokenSpecAuth {
+  /// GCPSMAuthSecretRef defines the reference to a secret containing Google Cloud Platform credentials.
+  secretRef: GcrAccessTokenSpecAuthSecretRef?
+
+  /// GCPWorkloadIdentity defines the configuration for using GCP Workload Identity authentication.
+  workloadIdentity: AuthWorkloadIdentity?
+
+  /// GCPWorkloadIdentityFederation holds the configurations required for generating federated access
+  /// tokens.
+  workloadIdentityFederation: WorkloadIdentityFederation?
+}
+
+/// GCPSMAuthSecretRef defines the reference to a secret containing Google Cloud Platform credentials.
+class GcrAccessTokenSpecAuthSecretRef {
+  /// The SecretAccessKey is used for authentication
+  secretAccessKeySecretRef: SecretAccessKeySecretRef?
+}
+
+/// GCPWorkloadIdentity defines the configuration for using GCP Workload Identity authentication.
+class AuthWorkloadIdentity {
+  clusterLocation: String
+
+  clusterName: String
+
+  clusterProjectID: String?
+
+  /// ServiceAccountSelector is a reference to a ServiceAccount resource.
+  serviceAccountRef: JwtServiceAccountRef
+}
+
+/// GCPWorkloadIdentityFederation holds the configurations required for generating federated access
+/// tokens.
+class WorkloadIdentityFederation {
+  /// audience is the Secure Token Service (STS) audience which contains the resource name for the
+  /// workload identity pool and the provider identifier in that pool. If specified, Audience found in
+  /// the external account credential config will be overridden with the configured value. audience must
+  /// be provided when serviceAccountRef or awsSecurityCredentials is configured.
+  audience: String?
+
+  /// awsSecurityCredentials is for configuring AWS region and credentials to use for obtaining the
+  /// access token, when using the AWS metadata server is not an option.
+  awsSecurityCredentials: AwsSecurityCredentials?
+
+  /// credConfig holds the configmap reference containing the GCP external account credential
+  /// configuration in JSON format and the key name containing the json data. For using Kubernetes
+  /// cluster as the identity provider, use serviceAccountRef instead. Operators mounted serviceaccount
+  /// token cannot be used as the token source, instead serviceAccountRef must be used by providing
+  /// operators service account details.
+  credConfig: CredConfig?
+
+  /// externalTokenEndpoint is the endpoint explicitly set up to provide tokens, which will be matched
+  /// against the credential_source.url in the provided credConfig. This field is merely to double-check
+  /// the external token source URL is having the expected value.
+  externalTokenEndpoint: String?
+
+  /// GCPServiceAccountEmail is the email of the Google Cloud service account to impersonate after
+  /// Workload Identity Federation. Use this to grant access through the service account's IAM bindings
+  /// (for example roles/secretmanager.secretAccessor). When set, it overrides
+  /// service_account_impersonation_url in the external account JSON from credConfig; when
+  /// serviceAccountRef is set, it also overrides the "iam.gke.io/gcp-service-account" annotation on that
+  /// ServiceAccount.
+  gcpServiceAccountEmail: String(!isEmpty, matches(Regex(#"^.*@.*\.iam\.gserviceaccount\.com$"#)))?
+
+  /// serviceAccountRef is the reference to the kubernetes ServiceAccount to be used for obtaining the
+  /// tokens, when Kubernetes is configured as provider in workload identity pool.
+  serviceAccountRef: WorkloadIdentityFederationServiceAccountRef?
+}
+
+/// awsSecurityCredentials is for configuring AWS region and credentials to use for obtaining the access
+/// token, when using the AWS metadata server is not an option.
+class AwsSecurityCredentials {
+  /// awsCredentialsSecretRef is the reference to the secret which holds the AWS credentials. Secret
+  /// should be created with below names for keys - aws_access_key_id: Access Key ID, which is the unique
+  /// identifier for the AWS account or the IAM user. - aws_secret_access_key: Secret Access Key, which
+  /// is used to authenticate requests made to AWS services. - aws_session_token: Session Token, is the
+  /// short-lived token to authenticate requests made to AWS services.
+  awsCredentialsSecretRef: AwsCredentialsSecretRef
+
+  /// region is for configuring the AWS region to be used.
+  region: String(length.isBetween(1, 50), matches(Regex("^[a-z0-9-]+$")))
+}
+
+/// awsCredentialsSecretRef is the reference to the secret which holds the AWS credentials. Secret should
+/// be created with below names for keys - aws_access_key_id: Access Key ID, which is the unique
+/// identifier for the AWS account or the IAM user. - aws_secret_access_key: Secret Access Key, which is
+/// used to authenticate requests made to AWS services. - aws_session_token: Session Token, is the
+/// short-lived token to authenticate requests made to AWS services.
+class AwsCredentialsSecretRef {
+  /// name of the secret.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))
+
+  /// namespace in which the secret exists. If empty, secret will looked up in local namespace.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// credConfig holds the configmap reference containing the GCP external account credential configuration
+/// in JSON format and the key name containing the json data. For using Kubernetes cluster as the
+/// identity provider, use serviceAccountRef instead. Operators mounted serviceaccount token cannot be
+/// used as the token source, instead serviceAccountRef must be used by providing operators service
+/// account details.
+class CredConfig {
+  /// key name holding the external account credential config.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))
+
+  /// name of the configmap.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))
+
+  /// namespace in which the configmap exists. If empty, configmap will looked up in local namespace.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// serviceAccountRef is the reference to the kubernetes ServiceAccount to be used for obtaining the
+/// tokens, when Kubernetes is configured as provider in workload identity pool.
+class WorkloadIdentityFederationServiceAccountRef {
+  /// Audience specifies the `aud` claim for the service account token Some providers automatically
+  /// extend the audience field based on well-known annotations for workload identity (e.g. IRSA or GCP
+  /// Workload Identity)
+  audiences: Listing<String>?
+
+  /// The name of the ServiceAccount resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))
+
+  /// Namespace of the resource being referred to. Ignored if referent is not cluster-scoped, otherwise
+  /// defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// GithubAccessTokenSpec defines the desired state to generate a GitHub access token.
+class GithubAccessTokenSpec {
+  appID: String
+
+  /// Auth configures how ESO authenticates with a Github instance.
+  auth: GithubAccessTokenSpecAuth
+
+  installID: String
+
+  /// Map of permissions the token will have. If omitted, defaults to all permissions the GitHub App has.
+  permissions: Mapping<String, String>?
+
+  /// List of repositories the token will have access to. If omitted, defaults to all repositories the
+  /// GitHub App is installed to.
+  repositories: Listing<String>?
+
+  /// URL configures the GitHub instance URL. Defaults to https://github.com/.
+  url: String?
+}
+
+/// Auth configures how ESO authenticates with a Github instance.
+class GithubAccessTokenSpecAuth {
+  /// GithubSecretRef references a secret containing GitHub credentials.
+  privateKey: PrivateKey
+}
+
+/// GithubSecretRef references a secret containing GitHub credentials.
+class PrivateKey {
+  /// SecretKeySelector is a reference to a specific 'key' within a Secret resource. In some instances,
+  /// `key` is a required field.
+  secretRef: UsernameSecret
+}
+
+/// SecretKeySelector is a reference to a specific 'key' within a Secret resource. In some instances,
+/// `key` is a required field.
+class UsernameSecret {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// GitlabDeployTokenSpec defines the desired state to generate a GitLab deploy token.
+class GitlabDeployTokenSpec {
+  /// Auth configures how ESO authenticates with the GitLab API.
+  auth: GitlabDeployTokenSpecAuth
+
+  /// ExpiresAt is an optional expiry for the deploy token. If omitted the token does not expire on the
+  /// GitLab side and is revoked only when the generator state is cleaned up (on regeneration or when the
+  /// consuming ExternalSecret is deleted).
+  expiresAt: String?
+
+  /// GroupID is the numeric ID or unescaped path (e.g. parent/group) of the group to create the deploy
+  /// token in. The generator URL-escapes paths before calling the GitLab API, so do not pre-encode.
+  /// Mutually exclusive with projectID.
+  groupID: String(!isEmpty)?
+
+  /// Name of the deploy token.
+  name: String(!isEmpty)
+
+  /// ProjectID is the numeric ID or unescaped path (e.g. group/project) of the project to create the
+  /// deploy token in. The generator URL-escapes paths before calling the GitLab API, so do not
+  /// pre-encode. Mutually exclusive with groupID.
+  projectID: String(!isEmpty)?
+
+  /// Scopes granted to the deploy token. At least one scope is required.
+  scopes: Listing<
+    "read_repository"
+    |"read_registry"
+    |"write_registry"
+    |"read_package_registry"
+    |"write_package_registry"
+    |"read_virtual_registry"
+    |"write_virtual_registry">(!isEmpty)
+
+  /// URL configures the GitLab instance URL. Defaults to https://gitlab.com.
+  url: String?
+
+  /// Username is an optional username for the deploy token. GitLab defaults it to
+  /// gitlab+deploy-token-{n} when omitted.
+  username: String?
+}
+
+/// Auth configures how ESO authenticates with the GitLab API.
+class GitlabDeployTokenSpecAuth {
+  /// Token references a secret containing a GitLab access token (personal, group, or project) with the
+  /// api scope and at least the Maintainer role on the target.
+  token: AuthToken
+}
+
+/// Token references a secret containing a GitLab access token (personal, group, or project) with the api
+/// scope and at least the Maintainer role on the target.
+class AuthToken {
+  /// SecretKeySelector is a reference to a specific 'key' within a Secret resource. In some instances,
+  /// `key` is a required field.
+  secretRef: UsernameSecret
+}
+
+/// GrafanaSpec controls the behavior of the grafana generator.
+class GrafanaSpec {
+  /// Auth is the authentication configuration to authenticate against the Grafana instance.
+  auth: GrafanaSpecAuth
+
+  /// ServiceAccount is the configuration for the service account that is supposed to be generated by the
+  /// generator.
+  serviceAccount: ServiceAccount
+
+  /// URL is the URL of the Grafana instance.
+  url: String
+}
+
+/// Auth is the authentication configuration to authenticate against the Grafana instance.
+class GrafanaSpecAuth {
+  /// Basic auth credentials used to authenticate against the Grafana instance. Note: you need a token
+  /// which has elevated permissions to create service accounts. See here for the documentation on basic
+  /// roles offered by Grafana:
+  /// https://grafana.com/docs/grafana/latest/administration/roles-and-permissions/access-control/rbac-fixed-basic-role-definitions/
+  basic: Basic?
+
+  /// A service account token used to authenticate against the Grafana instance. Note: you need a token
+  /// which has elevated permissions to create service accounts. See here for the documentation on basic
+  /// roles offered by Grafana:
+  /// https://grafana.com/docs/grafana/latest/administration/roles-and-permissions/access-control/rbac-fixed-basic-role-definitions/
+  token: GrafanaSpecAuthToken?
+}
+
+/// Basic auth credentials used to authenticate against the Grafana instance. Note: you need a token
+/// which has elevated permissions to create service accounts. See here for the documentation on basic
+/// roles offered by Grafana:
+/// https://grafana.com/docs/grafana/latest/administration/roles-and-permissions/access-control/rbac-fixed-basic-role-definitions/
+class Basic {
+  /// A basic auth password used to authenticate against the Grafana instance.
+  password: Password
+
+  /// A basic auth username used to authenticate against the Grafana instance.
+  username: String
+}
+
+/// A basic auth password used to authenticate against the Grafana instance.
+class Password {
+  /// The key where the token is found.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+}
+
+/// A service account token used to authenticate against the Grafana instance. Note: you need a token
+/// which has elevated permissions to create service accounts. See here for the documentation on basic
+/// roles offered by Grafana:
+/// https://grafana.com/docs/grafana/latest/administration/roles-and-permissions/access-control/rbac-fixed-basic-role-definitions/
+class GrafanaSpecAuthToken {
+  /// The key where the token is found.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+}
+
+/// ServiceAccount is the configuration for the service account that is supposed to be generated by the
+/// generator.
+class ServiceAccount {
+  /// Name is the name of the service account that will be created by ESO.
+  name: String
+
+  /// Role is the role of the service account. See here for the documentation on basic roles offered by
+  /// Grafana:
+  /// https://grafana.com/docs/grafana/latest/administration/roles-and-permissions/access-control/rbac-fixed-basic-role-definitions/
+  role: String
+
+  /// SecondsToLive is the number of seconds before the generated service account token will expire. Some
+  /// Grafana deployments (e.g. AWS Managed Grafana) require this value to be set.
+  secondsToLive: Int(this >= 1)?
+}
+
+/// MFASpec controls the behavior of the mfa generator.
+class MfaSpec {
+  /// Algorithm to use for encoding. Defaults to SHA1 as per the RFC.
+  algorithm: String?
+
+  /// Length defines the token length. Defaults to 6 characters.
+  length: Int?
+
+  /// Secret is a secret selector to a secret containing the seed secret to generate the TOTP value from.
+  secret: Secret
+
+  /// TimePeriod defines how long the token can be active. Defaults to 30 seconds.
+  timePeriod: Int?
+
+  /// When defines a time parameter that can be used to pin the origin time of the generated token.
+  `when`: String?
+}
+
+/// Secret is a secret selector to a secret containing the seed secret to generate the TOTP value from.
+class Secret {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// PasswordSpec controls the behavior of the password generator.
+class PasswordSpec {
+  /// set AllowRepeat to true to allow repeating characters.
+  allowRepeat: Boolean
+
+  /// Digits specifies the number of digits in the generated password. If omitted it defaults to 25% of
+  /// the length of the password
+  digits: Int?
+
+  /// Encoding specifies the encoding of the generated password. Valid values are: - "raw" (default): no
+  /// encoding - "base64": standard base64 encoding - "base64url": base64url encoding - "base32": base32
+  /// encoding - "hex": hexadecimal encoding
+  encoding: ("base64"|"base64url"|"base32"|"hex"|"raw")?
+
+  /// Length of the password to be generated. Defaults to 24
+  length: Int
+
+  /// Set NoUpper to disable uppercase characters
+  noUpper: Boolean
+
+  /// Prefix is prepended to every generated password after encoding. It is not counted in length or
+  /// subject to the character settings.
+  prefix: String?
+
+  /// SecretKeys defines the keys that will be populated with generated passwords. Defaults to "password"
+  /// when not set.
+  secretKeys: Listing<String>(!isEmpty)?
+
+  /// Suffix is appended to every generated password after encoding. It is not counted in length or
+  /// subject to the character settings.
+  suffix: String?
+
+  /// SymbolCharacters specifies the special characters that should be used in the generated password.
+  symbolCharacters: String?
+
+  /// Symbols specifies the number of symbol characters in the generated password. If omitted it defaults
+  /// to 25% of the length of the password
+  symbols: Int?
+}
+
+/// QuayAccessTokenSpec defines the desired state to generate a Quay access token.
+class QuayAccessTokenSpec {
+  /// Name of the robot account you are federating with
+  robotAccount: String
+
+  /// Name of the service account you are federating with
+  serviceAccountRef: QuayAccessTokenSpecServiceAccountRef
+
+  /// URL configures the Quay instance URL. Defaults to quay.io.
+  url: String?
+}
+
+/// SSHKeySpec controls the behavior of the ssh key generator.
+class SshKeySpec {
+  /// Comment specifies an optional comment for the SSH key
+  comment: String?
+
+  /// KeySize specifies the key size for RSA keys (default: 2048) and ECDSA keys (default: 256). For RSA
+  /// keys: 2048, 3072, 4096 For ECDSA keys: 256, 384, 521 Ignored for ed25519 keys
+  keySize: Int(isBetween(256, 8192))?
+
+  /// KeyType specifies the SSH key type (rsa, ecdsa, ed25519)
+  keyType: ("rsa"|"ecdsa"|"ed25519")?
+}
+
+/// STSSessionTokenSpec defines the desired state to generate an AWS STS session token.
+class StsSessionTokenSpec {
+  /// Auth defines how to authenticate with AWS
+  auth: StsSessionTokenSpecAuth?
+
+  /// Region specifies the region to operate in.
+  region: String
+
+  /// RequestParameters contains parameters that can be passed to the STS service.
+  requestParameters: RequestParameters?
+
+  /// You can assume a role before making calls to the desired AWS service.
+  role: String?
+}
+
+/// RequestParameters contains parameters that can be passed to the STS service.
+class RequestParameters {
+  /// SerialNumber is the identification number of the MFA device that is associated with the IAM user
+  /// who is making the GetSessionToken call. Possible values: hardware device (such as GAHT12345678) or
+  /// an Amazon Resource Name (ARN) for a virtual device (such as arn:aws:iam::123456789012:mfa/user)
+  serialNumber: String?
+
+  sessionDuration: Int?
+
+  /// TokenCode is the value provided by the MFA device, if MFA is required.
+  tokenCode: String?
+}
+
+/// VaultDynamicSecretSpec defines the desired spec of VaultDynamicSecret.
+class VaultDynamicSecretSpec {
+  /// Do not fail if no secrets are found. Useful for requests where no data is expected.
+  allowEmptyResponse: Boolean?
+
+  /// Used to select the correct ESO controller (think: ingress.ingressClassName) The ESO controller is
+  /// instantiated with a specific controller name and filters VDS based on this property
+  controller: String?
+
+  /// GetParameters are query-string parameters passed to Vault on GET calls. Each key may map to
+  /// multiple values, matching HTTP query-string semantics. Ignored for non-GET methods; use Parameters
+  /// for write bodies.
+  getParameters: Mapping<String, Listing<String>>?
+
+  /// Vault API method to use (GET/POST/other)
+  method: String?
+
+  /// Parameters to pass to Vault write (for non-GET methods)
+  parameters: Null?
+
+  /// Vault path to obtain the dynamic secret from
+  path: String
+
+  /// Vault provider common spec
+  provider: VaultDynamicSecretSpecProvider
+
+  /// Result type defines which data is returned from the generator. By default, it is the "data" section
+  /// of the Vault API response. When using e.g. /auth/token/create the "data" section is empty but the
+  /// "auth" section contains the generated token. Please refer to the vault docs regarding the result
+  /// data structure. Additionally, accessing the raw response is possibly by using "Raw" result type.
+  resultType: ("Data"|"Auth"|"Raw")?
+
+  /// Used to configure http retries if failed
+  retrySettings: VaultDynamicSecretSpecRetrySettings?
+}
+
+/// Vault provider common spec
+class VaultDynamicSecretSpecProvider {
+  /// Auth configures how secret-manager authenticates with the Vault server.
+  auth: VaultDynamicSecretSpecProviderAuth?
+
+  /// PEM encoded CA bundle used to validate Vault server certificate. Only used if the Server URL is
+  /// using HTTPS protocol. This parameter is ignored for plain HTTP protocol connection. If not set the
+  /// system root certificates are used to validate the TLS connection.
+  caBundle: String?
+
+  /// The provider for the CA bundle to use to validate Vault server certificate.
+  caProvider: ProviderCaProvider?
+
+  /// CheckAndSet defines the Check-And-Set (CAS) settings for PushSecret operations. Only applies to
+  /// Vault KV v2 stores. When enabled, write operations must include the current version of the secret
+  /// to prevent unintentional overwrites.
+  checkAndSet: CheckAndSet?
+
+  /// ForwardInconsistent tells Vault to forward read-after-write requests to the Vault leader instead of
+  /// simply retrying within a loop. This can increase performance if the option is enabled serverside.
+  /// https://www.vaultproject.io/docs/configuration/replication#allow_forwarding_via_header
+  forwardInconsistent: Boolean?
+
+  /// Headers to be added in Vault request
+  headers: Mapping<String, String>?
+
+  /// Name of the vault namespace. Namespaces is a set of features within Vault Enterprise that allows
+  /// Vault environments to support Secure Multi-tenancy. e.g: "ns1". More about namespaces can be found
+  /// here https://www.vaultproject.io/docs/enterprise/namespaces
+  namespace: String?
+
+  /// Path is the mount path of the Vault KV backend endpoint, e.g: "secret". The v2 KV secret engine
+  /// version specific "/data" path suffix for fetching secrets from Vault is optional and will be
+  /// appended if not present in specified path.
+  path: String?
+
+  /// ReadYourWrites ensures isolated read-after-write semantics by providing discovered cluster
+  /// replication states in each request. More information about eventual consistency in Vault can be
+  /// found here https://www.vaultproject.io/docs/enterprise/consistency
+  readYourWrites: Boolean?
+
+  /// Server is the connection address for the Vault server, e.g: "https://vault.example.com:8200".
+  server: String
+
+  /// The configuration used for client side related TLS communication, when the Vault server requires
+  /// mutual authentication. Only used if the Server URL is using HTTPS protocol. This parameter is
+  /// ignored for plain HTTP protocol connection. It's worth noting this configuration is different from
+  /// the "TLS certificates auth method", which is available under the `auth.cert` section.
+  tls: Tls?
+
+  /// Version is the Vault KV secret engine version. This can be either "v1" or "v2". Version defaults to
+  /// "v2".
+  version: ("v1"|"v2")?
+}
+
+/// Auth configures how secret-manager authenticates with the Vault server.
+class VaultDynamicSecretSpecProviderAuth {
+  /// AppRole authenticates with Vault using the App Role auth mechanism, with the role and secret stored
+  /// in a Kubernetes Secret resource.
+  appRole: AppRole?
+
+  /// Cert authenticates with TLS Certificates by passing client certificate, private key and ca
+  /// certificate Cert authentication method
+  cert: Cert?
+
+  /// Gcp authenticates with Vault using Google Cloud Platform authentication method GCP authentication
+  /// method
+  gcp: Gcp?
+
+  /// Iam authenticates with vault by passing a special AWS request signed with AWS IAM credentials AWS
+  /// IAM authentication method
+  iam: Iam?
+
+  /// Jwt authenticates with Vault by passing role and JWT token using the JWT/OIDC authentication method
+  jwt: ProviderAuthJwt?
+
+  /// Kubernetes authenticates with Vault by passing the ServiceAccount token stored in the named Secret
+  /// resource to the Vault server.
+  kubernetes: Kubernetes?
+
+  /// Ldap authenticates with Vault by passing username/password pair using the LDAP authentication
+  /// method
+  ldap: Ldap?
+
+  /// Name of the vault namespace to authenticate to. This can be different than the namespace your
+  /// secret is in. Namespaces is a set of features within Vault Enterprise that allows Vault
+  /// environments to support Secure Multi-tenancy. e.g: "ns1". More about namespaces can be found here
+  /// https://www.vaultproject.io/docs/enterprise/namespaces This will default to Vault.Namespace field
+  /// if set, or empty otherwise
+  namespace: String?
+
+  /// TokenSecretRef authenticates with Vault by presenting a token.
+  tokenSecretRef: AuthTokenSecretRef?
+
+  /// UserPass authenticates with Vault by passing username/password pair
+  userPass: UserPass?
+}
+
+/// AppRole authenticates with Vault using the App Role auth mechanism, with the role and secret stored
+/// in a Kubernetes Secret resource.
+class AppRole {
+  /// Path where the App Role authentication backend is mounted in Vault, e.g: "approle"
+  path: String
+
+  /// RoleID configured in the App Role authentication backend when setting up the authentication backend
+  /// in Vault.
+  roleId: String?
+
+  /// Reference to a key in a Secret that contains the App Role ID used to authenticate with Vault. The
+  /// `key` field must be specified and denotes which entry within the Secret resource is used as the app
+  /// role id.
+  roleRef: RoleRef?
+
+  /// Reference to a key in a Secret that contains the App Role secret used to authenticate with Vault.
+  /// The `key` field must be specified and denotes which entry within the Secret resource is used as the
+  /// app role secret.
+  secretRef: AppRoleSecretRef
+}
+
+/// Reference to a key in a Secret that contains the App Role ID used to authenticate with Vault. The
+/// `key` field must be specified and denotes which entry within the Secret resource is used as the app
+/// role id.
+class RoleRef {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// Reference to a key in a Secret that contains the App Role secret used to authenticate with Vault. The
+/// `key` field must be specified and denotes which entry within the Secret resource is used as the app
+/// role secret.
+class AppRoleSecretRef {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// Cert authenticates with TLS Certificates by passing client certificate, private key and ca
+/// certificate Cert authentication method
+class Cert {
+  /// ClientCert is a certificate to authenticate using the Cert Vault authentication method
+  clientCert: ClientCert?
+
+  /// Path where the Certificate authentication backend is mounted in Vault, e.g: "cert"
+  path: String?
+
+  /// SecretRef to a key in a Secret resource containing client private key to authenticate with Vault
+  /// using the Cert authentication method
+  secretRef: CertSecretRef?
+
+  /// VaultRole specifies the Vault role to use for TLS certificate authentication.
+  vaultRole: String?
+}
+
+/// ClientCert is a certificate to authenticate using the Cert Vault authentication method
+class ClientCert {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// SecretRef to a key in a Secret resource containing client private key to authenticate with Vault
+/// using the Cert authentication method
+class CertSecretRef {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// Gcp authenticates with Vault using Google Cloud Platform authentication method GCP authentication
+/// method
+class Gcp {
+  /// Location optionally defines a location/region for the secret
+  location: String?
+
+  /// Path where the GCP auth method is enabled in Vault, e.g: "gcp"
+  path: String?
+
+  /// Project ID of the Google Cloud Platform project
+  projectID: String?
+
+  /// Vault Role. In Vault, a role describes an identity with a set of permissions, groups, or policies
+  /// you want to attach to a user of the secrets engine.
+  role: String
+
+  /// Specify credentials in a Secret object
+  secretRef: GcpSecretRef?
+
+  /// ServiceAccountRef to a service account for impersonation
+  serviceAccountRef: GcpServiceAccountRef?
+
+  /// Specify a service account with Workload Identity
+  workloadIdentity: GcpWorkloadIdentity?
+}
+
+/// Specify credentials in a Secret object
+class GcpSecretRef {
+  /// The SecretAccessKey is used for authentication
+  secretAccessKeySecretRef: SecretAccessKeySecretRef?
+}
+
+/// ServiceAccountRef to a service account for impersonation
+class GcpServiceAccountRef {
+  /// Audience specifies the `aud` claim for the service account token Some providers automatically
+  /// extend the audience field based on well-known annotations for workload identity (e.g. IRSA or GCP
+  /// Workload Identity)
+  audiences: Listing<String>?
+
+  /// The name of the ServiceAccount resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))
+
+  /// Namespace of the resource being referred to. Ignored if referent is not cluster-scoped, otherwise
+  /// defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// Specify a service account with Workload Identity
+class GcpWorkloadIdentity {
+  /// ClusterLocation is the location of the cluster If not specified, it fetches information from the
+  /// metadata server
+  clusterLocation: String?
+
+  /// ClusterName is the name of the cluster If not specified, it fetches information from the metadata
+  /// server
+  clusterName: String?
+
+  /// ClusterProjectID is the project ID of the cluster If not specified, it fetches information from the
+  /// metadata server
+  clusterProjectID: String?
+
+  /// ServiceAccountSelector is a reference to a ServiceAccount resource.
+  serviceAccountRef: JwtServiceAccountRef
+}
+
+/// Iam authenticates with vault by passing a special AWS request signed with AWS IAM credentials AWS IAM
+/// authentication method
+class Iam {
+  /// AWS External ID set on assumed IAM roles
+  externalID: String?
+
+  /// Specify a service account with IRSA enabled
+  jwt: Jwt?
+
+  /// Path where the AWS auth method is enabled in Vault, e.g: "aws"
+  path: String?
+
+  /// AWS region
+  region: String?
+
+  /// This is the AWS role to be assumed before talking to vault
+  role: String?
+
+  /// Specify credentials in a Secret object
+  secretRef: IamSecretRef?
+
+  /// X-Vault-AWS-IAM-Server-ID is an additional header used by Vault IAM auth method to mitigate against
+  /// different types of replay attacks. More details here:
+  /// https://developer.hashicorp.com/vault/docs/auth/aws
+  vaultAwsIamServerID: String?
+
+  /// Vault Role. In vault, a role describes an identity with a set of permissions, groups, or policies
+  /// you want to attach a user of the secrets engine
+  vaultRole: String
+}
+
+/// Specify a service account with IRSA enabled
+class Jwt {
+  /// ServiceAccountSelector is a reference to a ServiceAccount resource.
+  serviceAccountRef: JwtServiceAccountRef?
+}
+
+/// Specify credentials in a Secret object
+class IamSecretRef {
+  /// The AccessKeyID is used for authentication
+  accessKeyIDSecretRef: AccessKeyIDSecretRef?
+
+  /// The SecretAccessKey is used for authentication
+  secretAccessKeySecretRef: SecretAccessKeySecretRef?
+
+  /// The SessionToken used for authentication This must be defined if AccessKeyID and SecretAccessKey
+  /// are temporary credentials see:
+  /// https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_use-resources.html
+  sessionTokenSecretRef: SessionTokenSecretRef?
+}
+
+/// Jwt authenticates with Vault by passing role and JWT token using the JWT/OIDC authentication method
+class ProviderAuthJwt {
+  /// Optional ServiceAccountToken specifies the Kubernetes service account for which to request a token
+  /// for with the `TokenRequest` API.
+  kubernetesServiceAccountToken: KubernetesServiceAccountToken?
+
+  /// Path where the JWT authentication backend is mounted in Vault, e.g: "jwt"
+  path: String
+
+  /// Role is a JWT role to authenticate using the JWT/OIDC Vault authentication method
+  role: String?
+
+  /// Optional SecretRef that refers to a key in a Secret resource containing JWT token to authenticate
+  /// with Vault using the JWT/OIDC authentication method.
+  secretRef: JwtSecretRef?
+}
+
+/// Optional ServiceAccountToken specifies the Kubernetes service account for which to request a token
+/// for with the `TokenRequest` API.
+class KubernetesServiceAccountToken {
+  /// Optional audiences field that will be used to request a temporary Kubernetes service account token
+  /// for the service account referenced by `serviceAccountRef`. Defaults to a single audience `vault` it
+  /// not specified.
+  ///
+  /// Deprecated: use serviceAccountRef.Audiences instead
+  audiences: Listing<String>?
+
+  /// Optional expiration time in seconds that will be used to request a temporary Kubernetes service
+  /// account token for the service account referenced by `serviceAccountRef`.
+  ///
+  /// Deprecated: this will be removed in the future. Defaults to 10 minutes.
+  expirationSeconds: Int?
+
+  /// Service account field containing the name of a kubernetes ServiceAccount.
+  serviceAccountRef: KubernetesServiceAccountTokenServiceAccountRef
+}
+
+/// Service account field containing the name of a kubernetes ServiceAccount.
+class KubernetesServiceAccountTokenServiceAccountRef {
+  /// Audience specifies the `aud` claim for the service account token Some providers automatically
+  /// extend the audience field based on well-known annotations for workload identity (e.g. IRSA or GCP
+  /// Workload Identity)
+  audiences: Listing<String>?
+
+  /// The name of the ServiceAccount resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))
+
+  /// Namespace of the resource being referred to. Ignored if referent is not cluster-scoped, otherwise
+  /// defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// Optional SecretRef that refers to a key in a Secret resource containing JWT token to authenticate
+/// with Vault using the JWT/OIDC authentication method.
+class JwtSecretRef {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// Kubernetes authenticates with Vault by passing the ServiceAccount token stored in the named Secret
+/// resource to the Vault server.
+class Kubernetes {
+  /// Path where the Kubernetes authentication backend is mounted in Vault, e.g: "kubernetes"
+  mountPath: String
+
+  /// A required field containing the Vault Role to assume. A Role binds a Kubernetes ServiceAccount with
+  /// a set of Vault policies.
+  role: String
+
+  /// Optional secret field containing a Kubernetes ServiceAccount JWT used for authenticating with
+  /// Vault. If a name is specified without a key, `token` is the default. If one is not specified, the
+  /// one bound to the controller will be used.
+  secretRef: KubernetesSecretRef?
+
+  /// Optional service account field containing the name of a kubernetes ServiceAccount. If the service
+  /// account is specified, the service account secret token JWT will be used for authenticating with
+  /// Vault. If the service account selector is not supplied, the secretRef will be used instead.
+  serviceAccountRef: KubernetesServiceAccountRef?
+}
+
+/// Optional secret field containing a Kubernetes ServiceAccount JWT used for authenticating with Vault.
+/// If a name is specified without a key, `token` is the default. If one is not specified, the one bound
+/// to the controller will be used.
+class KubernetesSecretRef {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// Optional service account field containing the name of a kubernetes ServiceAccount. If the service
+/// account is specified, the service account secret token JWT will be used for authenticating with
+/// Vault. If the service account selector is not supplied, the secretRef will be used instead.
+class KubernetesServiceAccountRef {
+  /// Audience specifies the `aud` claim for the service account token Some providers automatically
+  /// extend the audience field based on well-known annotations for workload identity (e.g. IRSA or GCP
+  /// Workload Identity)
+  audiences: Listing<String>?
+
+  /// The name of the ServiceAccount resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))
+
+  /// Namespace of the resource being referred to. Ignored if referent is not cluster-scoped, otherwise
+  /// defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// Ldap authenticates with Vault by passing username/password pair using the LDAP authentication method
+class Ldap {
+  /// Path where the LDAP authentication backend is mounted in Vault, e.g: "ldap"
+  path: String
+
+  /// SecretRef to a key in a Secret resource containing password for the LDAP user used to authenticate
+  /// with Vault using the LDAP authentication method
+  secretRef: LdapSecretRef?
+
+  /// Username is an LDAP username used to authenticate using the LDAP Vault authentication method
+  username: String
+}
+
+/// SecretRef to a key in a Secret resource containing password for the LDAP user used to authenticate
+/// with Vault using the LDAP authentication method
+class LdapSecretRef {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// TokenSecretRef authenticates with Vault by presenting a token.
+class AuthTokenSecretRef {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// UserPass authenticates with Vault by passing username/password pair
+class UserPass {
+  /// Path where the UserPassword authentication backend is mounted in Vault, e.g: "userpass"
+  path: String
+
+  /// SecretRef to a key in a Secret resource containing password for the user used to authenticate with
+  /// Vault using the UserPass authentication method
+  secretRef: UserPassSecretRef?
+
+  /// Username is a username used to authenticate using the UserPass Vault authentication method
+  username: String
+}
+
+/// SecretRef to a key in a Secret resource containing password for the user used to authenticate with
+/// Vault using the UserPass authentication method
+class UserPassSecretRef {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// The provider for the CA bundle to use to validate Vault server certificate.
+class ProviderCaProvider {
+  /// The key where the CA certificate can be found in the Secret or ConfigMap.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the object located at the provider type.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))
+
+  /// The namespace the Provider type is in. Can only be defined when used in a ClusterSecretStore.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+
+  /// The type of provider to use such as "Secret", or "ConfigMap".
+  type: "Secret"|"ConfigMap"
+}
+
+/// CheckAndSet defines the Check-And-Set (CAS) settings for PushSecret operations. Only applies to Vault
+/// KV v2 stores. When enabled, write operations must include the current version of the secret to
+/// prevent unintentional overwrites.
+class CheckAndSet {
+  /// Required when true, all write operations must include a check-and-set parameter. This helps prevent
+  /// unintentional overwrites of secrets.
+  required: Boolean?
+}
+
+/// The configuration used for client side related TLS communication, when the Vault server requires
+/// mutual authentication. Only used if the Server URL is using HTTPS protocol. This parameter is ignored
+/// for plain HTTP protocol connection. It's worth noting this configuration is different from the "TLS
+/// certificates auth method", which is available under the `auth.cert` section.
+class Tls {
+  /// CertSecretRef is a certificate added to the transport layer when communicating with the Vault
+  /// server. If no key for the Secret is specified, external-secret will default to 'tls.crt'.
+  certSecretRef: TlsCertSecretRef?
+
+  /// KeySecretRef to a key in a Secret resource containing client private key added to the transport
+  /// layer when communicating with the Vault server. If no key for the Secret is specified,
+  /// external-secret will default to 'tls.key'.
+  keySecretRef: KeySecretRef?
+}
+
+/// CertSecretRef is a certificate added to the transport layer when communicating with the Vault server.
+/// If no key for the Secret is specified, external-secret will default to 'tls.crt'.
+class TlsCertSecretRef {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// KeySecretRef to a key in a Secret resource containing client private key added to the transport layer
+/// when communicating with the Vault server. If no key for the Secret is specified, external-secret will
+/// default to 'tls.key'.
+class KeySecretRef {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// Used to configure http retries if failed
+class VaultDynamicSecretSpecRetrySettings {
+  maxRetries: Int?
+
+  retryInterval: String?
+}
+
+/// WebhookSpec controls the behavior of the external generator. Any body parameters should be passed to
+/// the server through the parameters field.
+class WebhookSpec {
+  /// Auth specifies a authorization protocol. Only one protocol may be set.
+  auth: WebhookSpecAuth?
+
+  /// Body
+  body: String?
+
+  /// PEM encoded CA bundle used to validate webhook server certificate. Only used if the Server URL is
+  /// using HTTPS protocol. This parameter is ignored for plain HTTP protocol connection. If not set the
+  /// system root certificates are used to validate the TLS connection.
+  caBundle: String?
+
+  /// The provider for the CA bundle to use to validate webhook server certificate.
+  caProvider: WebhookSpecCaProvider?
+
+  /// Headers
+  headers: Mapping<String, String>?
+
+  /// Webhook Method
+  method: String?
+
+  /// Result formatting
+  result: Result
+
+  /// Secrets to fill in templates These secrets will be passed to the templating function as key value
+  /// pairs under the given name
+  secrets: Listing<WebhookSpecSecret>?
+
+  /// Timeout
+  timeout: String?
+
+  /// Webhook url to call
+  url: String
+}
+
+/// Auth specifies a authorization protocol. Only one protocol may be set.
+class WebhookSpecAuth {
+  /// NTLMProtocol configures the store to use NTLM for auth
+  ntlm: Ntlm?
+}
+
+/// NTLMProtocol configures the store to use NTLM for auth
+class Ntlm {
+  /// SecretKeySelector is a reference to a specific 'key' within a Secret resource. In some instances,
+  /// `key` is a required field.
+  passwordSecret: UsernameSecret
+
+  /// SecretKeySelector is a reference to a specific 'key' within a Secret resource. In some instances,
+  /// `key` is a required field.
+  usernameSecret: UsernameSecret
+}
+
+/// The provider for the CA bundle to use to validate webhook server certificate.
+class WebhookSpecCaProvider {
+  /// The key where the CA certificate can be found in the Secret or ConfigMap.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the object located at the provider type.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))
+
+  /// The namespace the Provider type is in.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+
+  /// The type of provider to use such as "Secret", or "ConfigMap".
+  type: "Secret"|"ConfigMap"
+}
+
+/// Result formatting
+class Result {
+  /// Json path of return value
+  jsonPath: String?
+}
+
+/// WebhookSecret defines a secret reference that will be used in webhook templates.
+class WebhookSpecSecret {
+  /// Name of this secret in templates
+  name: String
+
+  /// Secret ref to fill in credentials
+  secretRef: SecretSecretRef
+}
+
+/// Secret ref to fill in credentials
+class SecretSecretRef {
+  /// The key where the token is found.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+}

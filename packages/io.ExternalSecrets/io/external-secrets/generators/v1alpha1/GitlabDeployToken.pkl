@@ -1,0 +1,92 @@
+/// GitlabDeployToken generates a GitLab deploy token.
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <https://raw.githubusercontent.com/external-secrets/external-secrets/v2.12.0/config/crds/bases/kustomization.yaml>.
+module io.`external-secrets`.generators.v1alpha1.GitlabDeployToken
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "generators.external-secrets.io/v1alpha1"
+
+fixed kind: "GitlabDeployToken"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// GitlabDeployTokenSpec defines the desired state to generate a GitLab deploy token.
+spec: Spec?
+
+/// GitlabDeployTokenSpec defines the desired state to generate a GitLab deploy token.
+class Spec {
+  /// Auth configures how ESO authenticates with the GitLab API.
+  auth: Auth
+
+  /// ExpiresAt is an optional expiry for the deploy token. If omitted the token does not expire on the
+  /// GitLab side and is revoked only when the generator state is cleaned up (on regeneration or when the
+  /// consuming ExternalSecret is deleted).
+  expiresAt: String?
+
+  /// GroupID is the numeric ID or unescaped path (e.g. parent/group) of the group to create the deploy
+  /// token in. The generator URL-escapes paths before calling the GitLab API, so do not pre-encode.
+  /// Mutually exclusive with projectID.
+  groupID: String(!isEmpty)?
+
+  /// Name of the deploy token.
+  name: String(!isEmpty)
+
+  /// ProjectID is the numeric ID or unescaped path (e.g. group/project) of the project to create the
+  /// deploy token in. The generator URL-escapes paths before calling the GitLab API, so do not
+  /// pre-encode. Mutually exclusive with groupID.
+  projectID: String(!isEmpty)?
+
+  /// Scopes granted to the deploy token. At least one scope is required.
+  scopes: Listing<
+    "read_repository"
+    |"read_registry"
+    |"write_registry"
+    |"read_package_registry"
+    |"write_package_registry"
+    |"read_virtual_registry"
+    |"write_virtual_registry">(!isEmpty)
+
+  /// URL configures the GitLab instance URL. Defaults to https://gitlab.com.
+  url: String?
+
+  /// Username is an optional username for the deploy token. GitLab defaults it to
+  /// gitlab+deploy-token-{n} when omitted.
+  username: String?
+}
+
+/// Auth configures how ESO authenticates with the GitLab API.
+class Auth {
+  /// Token references a secret containing a GitLab access token (personal, group, or project) with the
+  /// api scope and at least the Maintainer role on the target.
+  token: Token
+}
+
+/// Token references a secret containing a GitLab access token (personal, group, or project) with the api
+/// scope and at least the Maintainer role on the target.
+class Token {
+  /// SecretKeySelector is a reference to a specific 'key' within a Secret resource. In some instances,
+  /// `key` is a required field.
+  secretRef: SecretRef
+}
+
+/// SecretKeySelector is a reference to a specific 'key' within a Secret resource. In some instances,
+/// `key` is a required field.
+class SecretRef {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}

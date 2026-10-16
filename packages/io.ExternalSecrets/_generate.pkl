@@ -1,0 +1,37 @@
+amends "package://pkg.pkl-lang.org/pkl-pantry/k8s.contrib.crd@4.2.6#/generate.pkl"
+
+import "pkl:yaml"
+
+// renovate: datasource=github-releases packageName=external-secrets/external-secrets
+local version = "v2.12.0"
+local baseUrl =
+  "https://raw.githubusercontent.com/external-secrets/external-secrets/\(version)/config/crds/bases"
+// noinspection UnresolvedElement
+local kustomize: Listing<String> =
+  new yaml.Parser {}.parse(read("\(baseUrl)/kustomization.yaml")).resources
+
+/// Only the version each CRD stores. The `external-secrets.io` kinds still list `v1beta1` next to
+/// `v1`, but with `served: false` — the API server answers nothing for it, so a module for it would
+/// render manifests no cluster accepts. The generators have a single version anyway.
+local function storageVersionOnly(crd: Dynamic): Dynamic =
+  (crd) {
+    spec {
+      versions = new Listing {
+        ...crd.spec.versions.toList().filter((v) -> v.storage == true)
+      }
+    }
+  }
+
+source = "\(baseUrl)/kustomization.yaml"
+baseApiGroup = "v1.external-secrets.io"
+
+k8sImportPath = "@k8s"
+
+sourceContents =
+  new YamlRenderer {
+    isStream = true
+  }.renderDocument(
+    kustomize
+      .toList()
+      .map((item) -> storageVersionOnly(new yaml.Parser {}.parse(read("\(baseUrl)/\(item)")) as Dynamic)),
+  )

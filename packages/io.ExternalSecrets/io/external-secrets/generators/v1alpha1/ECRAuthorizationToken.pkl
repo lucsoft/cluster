@@ -1,0 +1,131 @@
+/// ECRAuthorizationToken uses the GetAuthorizationToken API to retrieve an authorization token. The
+/// authorization token is valid for 12 hours. The authorizationToken returned is a base64 encoded string
+/// that can be decoded and used in a docker login command to authenticate to a registry. For more
+/// information, see Registry authentication
+/// (https://docs.aws.amazon.com/AmazonECR/latest/userguide/Registries.html#registry_auth) in the Amazon
+/// Elastic Container Registry User Guide.
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <https://raw.githubusercontent.com/external-secrets/external-secrets/v2.12.0/config/crds/bases/kustomization.yaml>.
+module io.`external-secrets`.generators.v1alpha1.ECRAuthorizationToken
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "generators.external-secrets.io/v1alpha1"
+
+fixed kind: "ECRAuthorizationToken"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// ECRAuthorizationTokenSpec defines the desired state to generate an AWS ECR authorization token.
+spec: Spec?
+
+/// ECRAuthorizationTokenSpec defines the desired state to generate an AWS ECR authorization token.
+class Spec {
+  /// Auth defines how to authenticate with AWS
+  auth: Auth?
+
+  /// Region specifies the region to operate in.
+  region: String
+
+  /// You can assume a role before making calls to the desired AWS service.
+  role: String?
+
+  /// Scope specifies the ECR service scope. Valid options are private and public.
+  scope: String?
+}
+
+/// Auth defines how to authenticate with AWS
+class Auth {
+  /// AWSJWTAuth provides configuration to authenticate against AWS using service account tokens.
+  jwt: Jwt?
+
+  /// AWSAuthSecretRef holds secret references for AWS credentials both AccessKeyID and SecretAccessKey
+  /// must be defined in order to properly authenticate.
+  secretRef: SecretRef?
+}
+
+/// AWSJWTAuth provides configuration to authenticate against AWS using service account tokens.
+class Jwt {
+  /// ServiceAccountSelector is a reference to a ServiceAccount resource.
+  serviceAccountRef: ServiceAccountRef?
+}
+
+/// ServiceAccountSelector is a reference to a ServiceAccount resource.
+class ServiceAccountRef {
+  /// Audience specifies the `aud` claim for the service account token Some providers automatically
+  /// extend the audience field based on well-known annotations for workload identity (e.g. IRSA or GCP
+  /// Workload Identity)
+  audiences: Listing<String>?
+
+  /// The name of the ServiceAccount resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))
+
+  /// Namespace of the resource being referred to. Ignored if referent is not cluster-scoped, otherwise
+  /// defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// AWSAuthSecretRef holds secret references for AWS credentials both AccessKeyID and SecretAccessKey
+/// must be defined in order to properly authenticate.
+class SecretRef {
+  /// The AccessKeyID is used for authentication
+  accessKeyIDSecretRef: AccessKeyIDSecretRef?
+
+  /// The SecretAccessKey is used for authentication
+  secretAccessKeySecretRef: SecretAccessKeySecretRef?
+
+  /// The SessionToken used for authentication This must be defined if AccessKeyID and SecretAccessKey
+  /// are temporary credentials see:
+  /// https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_use-resources.html
+  sessionTokenSecretRef: SessionTokenSecretRef?
+}
+
+/// The AccessKeyID is used for authentication
+class AccessKeyIDSecretRef {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// The SecretAccessKey is used for authentication
+class SecretAccessKeySecretRef {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// The SessionToken used for authentication This must be defined if AccessKeyID and SecretAccessKey are
+/// temporary credentials see:
+/// https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_use-resources.html
+class SessionTokenSecretRef {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}

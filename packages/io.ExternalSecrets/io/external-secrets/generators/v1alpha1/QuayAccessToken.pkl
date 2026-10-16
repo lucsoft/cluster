@@ -1,0 +1,48 @@
+/// QuayAccessToken generates Quay oauth token for pulling/pushing images
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <https://raw.githubusercontent.com/external-secrets/external-secrets/v2.12.0/config/crds/bases/kustomization.yaml>.
+module io.`external-secrets`.generators.v1alpha1.QuayAccessToken
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "generators.external-secrets.io/v1alpha1"
+
+fixed kind: "QuayAccessToken"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// QuayAccessTokenSpec defines the desired state to generate a Quay access token.
+spec: Spec?
+
+/// QuayAccessTokenSpec defines the desired state to generate a Quay access token.
+class Spec {
+  /// Name of the robot account you are federating with
+  robotAccount: String
+
+  /// Name of the service account you are federating with
+  serviceAccountRef: ServiceAccountRef
+
+  /// URL configures the Quay instance URL. Defaults to quay.io.
+  url: String?
+}
+
+/// Name of the service account you are federating with
+class ServiceAccountRef {
+  /// Audience specifies the `aud` claim for the service account token Some providers automatically
+  /// extend the audience field based on well-known annotations for workload identity (e.g. IRSA or GCP
+  /// Workload Identity)
+  audiences: Listing<String>?
+
+  /// The name of the ServiceAccount resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))
+
+  /// Namespace of the resource being referred to. Ignored if referent is not cluster-scoped, otherwise
+  /// defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}

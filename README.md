@@ -28,6 +28,7 @@ The following Pkl packages are available under `/packages`:
 - **io.CertManager** — TLS certificate management with cert-manager.
 - **io.CloudNativePG** — PostgreSQL clusters via CloudNativePG.
 - **io.EnvoyGateway** — Envoy Gateway policy and proxy CRDs (`gateway.envoyproxy.io`).
+- **io.ExternalSecrets** — External Secrets Operator CRDs, including the generators (`Password`, …).
 - **io.Fission** — Fission serverless functions.
 - **io.Traefik** — Traefik ingress controller.
 - **io.k3s.HelmController** — Managing Helm charts via the k3s Helm controller.

@@ -1,0 +1,60 @@
+/// GeneratorState represents the state created and managed by a generator resource.
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <https://raw.githubusercontent.com/external-secrets/external-secrets/v2.12.0/config/crds/bases/kustomization.yaml>.
+module io.`external-secrets`.generators.v1alpha1.GeneratorState
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "generators.external-secrets.io/v1alpha1"
+
+fixed kind: "GeneratorState"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// GeneratorStateSpec defines the desired state of a generator state resource.
+spec: Spec?
+
+/// GeneratorStateStatus defines the observed state of a generator state resource.
+status: Status?
+
+/// GeneratorStateSpec defines the desired state of a generator state resource.
+class Spec {
+  /// GarbageCollectionDeadline is the time after which the generator state will be deleted. It is set by
+  /// the controller which creates the generator state and can be set configured by the user. If the
+  /// garbage collection deadline is not set the generator state will not be deleted.
+  garbageCollectionDeadline: String?
+
+  /// Resource is the generator manifest that produced the state. It is a snapshot of the generator
+  /// manifest at the time the state was produced. This manifest will be used to delete the resource. Any
+  /// configuration that is referenced in the manifest should be available at the time of garbage
+  /// collection. If that is not the case deletion will be blocked by a finalizer.
+  resource: Null
+
+  /// State is the state that was produced by the generator implementation.
+  state: Null
+}
+
+/// GeneratorStateStatus defines the observed state of a generator state resource.
+class Status {
+  conditions: Listing<Condition>?
+}
+
+/// GeneratorStateStatusCondition represents the observed condition of a generator state.
+class Condition {
+  lastTransitionTime: String?
+
+  message: String?
+
+  reason: String?
+
+  status: String
+
+  /// GeneratorStateConditionType represents the type of condition for a generator state.
+  type: String
+}

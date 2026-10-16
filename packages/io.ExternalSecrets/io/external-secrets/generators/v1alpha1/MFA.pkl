@@ -1,0 +1,53 @@
+/// MFA generates a new TOTP token that is compliant with RFC 6238.
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <https://raw.githubusercontent.com/external-secrets/external-secrets/v2.12.0/config/crds/bases/kustomization.yaml>.
+module io.`external-secrets`.generators.v1alpha1.MFA
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "generators.external-secrets.io/v1alpha1"
+
+fixed kind: "MFA"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// MFASpec controls the behavior of the mfa generator.
+spec: Spec?
+
+/// MFASpec controls the behavior of the mfa generator.
+class Spec {
+  /// Algorithm to use for encoding. Defaults to SHA1 as per the RFC.
+  algorithm: String?
+
+  /// Length defines the token length. Defaults to 6 characters.
+  length: Int?
+
+  /// Secret is a secret selector to a secret containing the seed secret to generate the TOTP value from.
+  secret: Secret
+
+  /// TimePeriod defines how long the token can be active. Defaults to 30 seconds.
+  timePeriod: Int?
+
+  /// When defines a time parameter that can be used to pin the origin time of the generated token.
+  `when`: String?
+}
+
+/// Secret is a secret selector to a secret containing the seed secret to generate the TOTP value from.
+class Secret {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}

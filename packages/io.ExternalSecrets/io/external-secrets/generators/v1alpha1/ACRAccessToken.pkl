@@ -1,0 +1,142 @@
+/// ACRAccessToken returns an Azure Container Registry token that can be used for pushing/pulling images.
+/// Note: by default it will return an ACR Refresh Token with full access (depending on the identity).
+/// This can be scoped down to the repository level using .spec.scope. In case scope is defined it will
+/// return an ACR Access Token.
+///
+/// See docs: https://github.com/Azure/acr/blob/main/docs/AAD-OAuth.md
+///
+/// This module was generated from the CustomResourceDefinition at
+/// <https://raw.githubusercontent.com/external-secrets/external-secrets/v2.12.0/config/crds/bases/kustomization.yaml>.
+module io.`external-secrets`.generators.v1alpha1.ACRAccessToken
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "generators.external-secrets.io/v1alpha1"
+
+fixed kind: "ACRAccessToken"
+
+/// Standard object's metadata.
+///
+/// More info: <https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata>.
+metadata: ObjectMeta?
+
+/// ACRAccessTokenSpec defines how to generate the access token e.g. how to authenticate and which
+/// registry to use. see: https://github.com/Azure/acr/blob/main/docs/AAD-OAuth.md#overview
+spec: Spec?
+
+/// ACRAccessTokenSpec defines how to generate the access token e.g. how to authenticate and which
+/// registry to use. see: https://github.com/Azure/acr/blob/main/docs/AAD-OAuth.md#overview
+class Spec {
+  /// ACRAuth defines the authentication methods for Azure Container Registry.
+  auth: Auth
+
+  /// EnvironmentType specifies the Azure cloud environment endpoints to use for connecting and
+  /// authenticating with Azure. By default, it points to the public cloud AAD endpoint. The following
+  /// endpoints are available, also see here:
+  /// https://github.com/Azure/go-autorest/blob/main/autorest/azure/environments.go#L152 PublicCloud,
+  /// USGovernmentCloud, ChinaCloud, GermanCloud
+  environmentType: ("PublicCloud"|"USGovernmentCloud"|"ChinaCloud"|"GermanCloud"|"AzureStackCloud")?
+
+  /// the domain name of the ACR registry e.g. foobarexample.azurecr.io
+  registry: String
+
+  /// Define the scope for the access token, e.g. pull/push access for a repository. if not provided it
+  /// will return a refresh token that has full scope. Note: you need to pin it down to the repository
+  /// level, there is no wildcard available.
+  ///
+  /// examples: repository:my-repository:pull,push repository:my-repository:pull
+  ///
+  /// see docs for details: https://docs.docker.com/registry/spec/auth/scope/
+  scope: String?
+
+  /// TenantID configures the Azure Tenant to send requests to. Required for ServicePrincipal auth type.
+  tenantId: String?
+}
+
+/// ACRAuth defines the authentication methods for Azure Container Registry.
+class Auth {
+  /// ManagedIdentity uses Azure Managed Identity to authenticate with Azure.
+  managedIdentity: ManagedIdentity?
+
+  /// ServicePrincipal uses Azure Service Principal credentials to authenticate with Azure.
+  servicePrincipal: ServicePrincipal?
+
+  /// WorkloadIdentity uses Azure Workload Identity to authenticate with Azure.
+  workloadIdentity: WorkloadIdentity?
+}
+
+/// ManagedIdentity uses Azure Managed Identity to authenticate with Azure.
+class ManagedIdentity {
+  /// If multiple Managed Identity is assigned to the pod, you can select the one to be used
+  identityId: String?
+}
+
+/// ServicePrincipal uses Azure Service Principal credentials to authenticate with Azure.
+class ServicePrincipal {
+  /// AzureACRServicePrincipalAuthSecretRef defines the secret references for Azure Service Principal
+  /// authentication. It uses static credentials stored in a Kind=Secret.
+  secretRef: SecretRef
+}
+
+/// AzureACRServicePrincipalAuthSecretRef defines the secret references for Azure Service Principal
+/// authentication. It uses static credentials stored in a Kind=Secret.
+class SecretRef {
+  /// The Azure clientId of the service principle used for authentication.
+  clientId: ClientId?
+
+  /// The Azure ClientSecret of the service principle used for authentication.
+  clientSecret: ClientSecret?
+}
+
+/// The Azure clientId of the service principle used for authentication.
+class ClientId {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// The Azure ClientSecret of the service principle used for authentication.
+class ClientSecret {
+  /// A key in the referenced Secret. Some instances of this field may be defaulted, in others it may be
+  /// required.
+  key: String(length.isBetween(1, 253), matches(Regex("^[-._a-zA-Z0-9]+$")))?
+
+  /// The name of the Secret resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))?
+
+  /// The namespace of the Secret resource being referred to. Ignored if referent is not cluster-scoped,
+  /// otherwise defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
+
+/// WorkloadIdentity uses Azure Workload Identity to authenticate with Azure.
+class WorkloadIdentity {
+  /// ServiceAccountRef specified the service account that should be used when authenticating with
+  /// WorkloadIdentity.
+  serviceAccountRef: ServiceAccountRef?
+}
+
+/// ServiceAccountRef specified the service account that should be used when authenticating with
+/// WorkloadIdentity.
+class ServiceAccountRef {
+  /// Audience specifies the `aud` claim for the service account token Some providers automatically
+  /// extend the audience field based on well-known annotations for workload identity (e.g. IRSA or GCP
+  /// Workload Identity)
+  audiences: Listing<String>?
+
+  /// The name of the ServiceAccount resource being referred to.
+  name: String(length.isBetween(1, 253), matches(Regex(#"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"#)))
+
+  /// Namespace of the resource being referred to. Ignored if referent is not cluster-scoped, otherwise
+  /// defaults to the namespace of the referent.
+  namespace: String(length.isBetween(1, 63), matches(Regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")))?
+}
