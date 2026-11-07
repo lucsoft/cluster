@@ -14,7 +14,8 @@ This project uses [Pkl](https://pkl-lang.org/) for configuration management, ena
 - **/pkl-packages**: Source for the Pkl registry hosting the packages. <https://pkl-pkgs.lucsoft.de/>
 - **/pkl-helmchart**: Serves any Helm chart's values as a typed Pkl package. <https://pkl-helm.lucsoft.de/>
 - **/pkl-argo-plugin**: ArgoCD `ConfigManagementPlugin` that renders Pkl into manifests.
-- **/talos**, **/talos-test**: Talos node configuration.
+- **/talos**: Talos node configuration, managed with [topf](https://github.com/postfinance/topf) (`topf apply` / `topf upgrade` from `talos/`).
+- **/talos-test**: Talos test cluster configuration.
 - **/tools**: Deno utilities (e.g. `bootstrap-secret`, `mc-router-scaler`).
 
 ## Packages

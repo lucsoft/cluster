@@ -2,19 +2,19 @@
 ///
 ///   deno task autoscaler-config
 ///
-/// which is just `pkl eval` piped through `sops encrypt` — sops is the only step Pkl cannot do,
-/// because it is a process rather than a document.
+/// which is `topf render` and `pkl eval` piped through `sops encrypt` — topf and sops are the steps
+/// Pkl cannot do, because they are processes rather than documents.
 ///
 /// The interesting output is `cloudInit`: a full Talos *worker* machine config, one per pool. The
 /// autoscaler hands it to the hcloud API as user-data, so a fresh server boots the Talos snapshot,
-/// applies this config and joins unattended. Everything is derived — talos/talconfig.yaml for the
-/// cluster facts, talos/clusterconfig/ for the installer image the control plane actually runs,
-/// talos/talsecret.yaml for the PKI, ClusterAutoscalerPools.pkl for the pools.
+/// applies this config and joins unattended. Everything is derived — talos/topf.yaml for the
+/// cluster facts, the `topf render` of the control plane for the installer image it actually runs,
+/// talos/secrets.yaml for the PKI, ClusterAutoscalerPools.pkl for the pools.
 ///
 /// This module reads the plaintext secrets bundle, so it lives in tools/ rather than under
 /// personal-cluster/: nothing here may ever end up on the end of an ArgoCD `path`.
 ///
-/// Re-run whenever talconfig.yaml or the pool definitions change, then commit the sealed file.
+/// Re-run whenever topf.yaml, the talos/ patches or the pool definitions change, then commit the sealed file.
 module main
 
 import "pkl:yaml"
@@ -23,33 +23,33 @@ import "../../personal-cluster/components/ClusterAutoscalerPools.pkl"
 local parser = new yaml.Parser {}
 
 // ---- Cluster facts -------------------------------------------------------
-local talconfig = parser.parse(read("../../talos/talconfig.yaml")) as Dynamic
-local controlPlane = talconfig.nodes.toList().first as Dynamic
+local topf = parser.parse(read("../../talos/topf.yaml")) as Dynamic
+local controlPlane = topf.nodes.toList().find((node) -> node.role == "control-plane") as Dynamic
 
-// talhelper resolves the schematic into a factory installer URL. Reading it back rather than
+// topf resolves the schematic into a factory installer URL. Reading it back rather than
 // rebuilding it keeps autoscaled workers on the exact image the control plane runs.
 local renderedCp = parser.parseAll(
-  read("../../talos/clusterconfig/hmsys.de-\(controlPlane.hostname).yaml")
+  read?("../../.out/topf-render/\(controlPlane.host).yaml")?.text ??
+    throw("`.out/topf-render/` is missing — run this through `deno task autoscaler-config`, which renders it.")
 ).map((doc) -> doc as Dynamic)
 
-/// Bumping talosVersion in talconfig.yaml does nothing until talhelper regenerates clusterconfig/,
-/// and a stale file would pair an old installer with a new snapshot — a mismatch that only shows up
-/// as a node that boots and never joins. The type constraint turns that into an eval error.
-local v1alpha1Cp = renderedCp.findOrNull((doc) -> doc.toMap().containsKey("machine")) ??
-  throw("No v1alpha1 document in clusterconfig/ — run `talhelper genconfig` in talos/ first.")
+/// Talos >= 1.14 renders the installer as its own document; workers reuse it verbatim (needs a >= 1.14 snapshot).
+local unattendedInstall = renderedCp.findOrNull((doc) -> doc.getPropertyOrNull("kind") == "UnattendedInstallConfig") ??
+  throw("No UnattendedInstallConfig in the topf render of \(controlPlane.host).")
 
-local installImage: String(endsWith(":\(talconfig.talosVersion)")) = v1alpha1Cp.machine.install.image
+/// Fails eval when the render's installer doesn't match topf.yaml's talosVersion (such workers boot but never join).
+local installImage: String(endsWith(":\(topf.talosVersion)")) = unattendedInstall.installer.image
 
 // Pkl cannot shell out to sops, so `deno task autoscaler-config` decrypts the bundle into the
 // gitignored .out/ first and removes it afterwards. Nothing reads the plaintext but this module.
-local secretsText = read?("../../.out/talsecret.yaml")?.text ??
-  throw("`.out/talsecret.yaml` is missing — run this through `deno task autoscaler-config`, which decrypts it.")
+local secretsText = read?("../../.out/secrets.yaml")?.text ??
+  throw("`.out/secrets.yaml` is missing — run this through `deno task autoscaler-config`, which decrypts it.")
 
 local secrets = parser.parse(secretsText) as Dynamic
 
 // ---- Talos worker machine config ----------------------------------------
 /// Documents appended after the v1alpha1 one. `talosctl gen config --with-kubespan` emits the first
-/// two; ZswapConfig matches the control plane's patch in talconfig.yaml.
+/// two; ZswapConfig matches talos/all/40-zswap.yaml, UnattendedInstallConfig is the control plane's.
 local extraDocuments: Listing<Dynamic> = new {
   new {
     apiVersion = "v1alpha1"
@@ -68,6 +68,7 @@ local extraDocuments: Listing<Dynamic> = new {
     kind = "ZswapConfig"
     maxPoolPercent = 40
   }
+  (unattendedInstall) { installer { image = installImage } }
 }
 
 local function machineConfig(pool: ClusterAutoscalerPools.Pool) = new Dynamic {
@@ -84,16 +85,10 @@ local function machineConfig(pool: ClusterAutoscalerPools.Pool) = new Dynamic {
     }
     certSANs = new Listing {}
     kubelet {
-      image = "ghcr.io/siderolabs/kubelet:\(talconfig.kubernetesVersion)"
+      image = "ghcr.io/siderolabs/kubelet:\(topf.kubernetesVersion)"
       extraConfig = pool.kubeletExtraConfig
       defaultRuntimeSeccompProfileEnabled = true
       disableManifestsDirectory = true
-    }
-    install {
-      disk = controlPlane.installDisk
-      image = installImage
-      wipe = false
-      grubUseUKICmdline = true
     }
     features {
       diskQuotaSupport = true
@@ -112,9 +107,9 @@ local function machineConfig(pool: ClusterAutoscalerPools.Pool) = new Dynamic {
     id = secrets.cluster.id
     secret = secrets.cluster.secret
     controlPlane {
-      endpoint = talconfig.endpoint
+      endpoint = topf.clusterEndpoint
     }
-    clusterName = talconfig.clusterName
+    clusterName = topf.clusterName
     network {
       dnsDomain = "cluster.local"
       podSubnets = new Listing { "10.244.0.0/16" }
@@ -136,7 +131,7 @@ local function machineConfig(pool: ClusterAutoscalerPools.Pool) = new Dynamic {
         service {}
       }
     }
-    // Deliberately the opposite of the control plane's patch in talconfig.yaml. `true` makes the
+    // Deliberately the opposite of the control plane's patch in talos/all/10-external-cloud-provider.yaml. `true` makes the
     // kubelet register with --cloud-provider=external, which taints the node
     // node.cloudprovider.kubernetes.io/uninitialized:NoSchedule until a CCM clears it. No hcloud CCM
     // runs here, so the taint would never lift: the autoscaler would boot nodes, watch the pods stay
