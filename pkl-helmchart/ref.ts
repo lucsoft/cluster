@@ -26,6 +26,7 @@ const defaultAllowedHosts = [
     "fission.github.io",
     "isindir.github.io",
     "kubernetes.github.io",
+    "charts.hetzner.cloud",
     "grafana.github.io",
     "prometheus-community.github.io",
     "github.com",
