@@ -113,6 +113,13 @@
         "sha256": "3154ef7d28f854f83e966a4fa64e309994ff21cdc7efe380ba2858f380e7a738"
       }
     },
+    "package://pkl-helm.lucsoft.de/charts/https/charts.hetzner.cloud/hcloud-cloud-controller-manager@1": {
+      "type": "remote",
+      "uri": "projectpackage://pkl-helm.lucsoft.de/charts/https/charts.hetzner.cloud/hcloud-cloud-controller-manager@1.39.3",
+      "checksums": {
+        "sha256": "1cde653cc051055df730b88afd6a0f46da0e701cbd65539261c11dcda9e614de"
+      }
+    },
     "package://pkl-pkgs.lucsoft.de/packages/argo.ArgoCD@0": {
       "type": "remote",
       "uri": "projectpackage://pkl-pkgs.lucsoft.de/packages/argo.ArgoCD@0.5.13",

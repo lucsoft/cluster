@@ -1,0 +1,30 @@
+/// hcloud cloud-controller-manager, reduced to the cloud-node-lifecycle controller: it deletes NotReady Nodes whose hcloud server is gone (autoscaler scale-downs).
+amends "@ArgoCD/App.pkl"
+
+import "@hcloudCcmValues/Values.pkl"
+
+name = "infra-hetzner-ccm"
+namespace = "kube-system"
+
+sources {
+  new {
+    repoURL = "https://charts.hetzner.cloud"
+    chart = "hcloud-cloud-controller-manager"
+    targetRevision = "\(Values.chartVersion)"
+    helm {
+      releaseName = "hccm"
+      // HCLOUD_TOKEN comes from the chart's default: the `hcloud` Secret InfraClusterAutoscaler deploys into kube-system.
+      valuesObject = (Values.toValues(new Values {
+        // Must outlive the nodes it deletes, so it stays on the control plane like the autoscaler.
+        nodeSelector {
+          ["node-role.kubernetes.io/control-plane"] = ""
+        }
+      }) as Dynamic) {
+        // No private network: the cloud-node controller would swap the nodes' public InternalIP for an ExternalIP, so it stays off.
+        args { ["controllers"] = "cloud-node-lifecycle" }
+        // The generated Env class only declares valueFrom, so plain values go in as entries.
+        env { ["HCLOUD_LOAD_BALANCERS_ENABLED"] { ["value"] = "false" } }
+      }
+    }
+  }
+}

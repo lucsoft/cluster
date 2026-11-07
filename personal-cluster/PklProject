@@ -37,6 +37,9 @@ dependencies {
   ["clusterAutoscalerValues"] {
     uri = "package://pkl-helm.lucsoft.de/charts/https/kubernetes.github.io/autoscaler/cluster-autoscaler@9.59.0"
   }
+  ["hcloudCcmValues"] {
+    uri = "package://pkl-helm.lucsoft.de/charts/https/charts.hetzner.cloud/hcloud-cloud-controller-manager@1.39.3"
+  }
   ["fissionValues"] {
     uri = "package://pkl-helm.lucsoft.de/charts/https/fission.github.io/fission-charts/fission-all@1.27.0"
   }

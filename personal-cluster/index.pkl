@@ -9,6 +9,7 @@ import "./apps/InfraCertManager.pkl"
 import "./apps/InfraClusterAutoscaler.pkl"
 import "./apps/InfraEnvoyGateway.pkl"
 import "./apps/InfraFission.pkl"
+import "./apps/InfraHetznerCCM.pkl"
 import "./apps/InfraIngressController.pkl"
 import "./apps/InfraSopsOperator.pkl"
 import "./apps/MinecraftBedrockRelay.pkl"
@@ -42,6 +43,7 @@ local apps: Listing<App> = new {
   ArgoCD
   InfraCertManager
   InfraClusterAutoscaler
+  InfraHetznerCCM
   InfraIngressController
   InfraEnvoyGateway
   InfraSopsOperator
