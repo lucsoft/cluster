@@ -56,6 +56,8 @@ sources {
           ["HCLOUD_PUBLIC_IPV6"] = "true"
           // Same perimeter as the control plane; without it a new worker exposes the Talos API and kubelet to the internet.
           ["HCLOUD_FIREWALL"] = "firewall-1"
+          // Talos ignores it, but without a key Hetzner mails a root password for every new server.
+          ["HCLOUD_SSH_KEY"] = "id_ed25519"
         }
         extraEnvSecrets {
           ["HCLOUD_TOKEN"] {
