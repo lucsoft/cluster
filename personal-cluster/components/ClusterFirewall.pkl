@@ -1,59 +1,334 @@
-/// Pods have public IPv6 addresses, so nothing is reachable from outside the cluster unless a policy here opens it.
-/// The Hetzner Cloud Firewall is the coarse filter in front; these decide which pod actually gets the traffic.
+/// Default deny in both directions for every pod; each policy below opens exactly one path a workload needs.
+/// Pods have public IPv6 addresses, the Hetzner Cloud Firewall is only the coarse filter in front of them.
+/// Host-network pods (Cilium, Talos CCM, control plane, node-exporter) are not endpoints and stay unaffected.
 amends "@Resource/Entrypoint.pkl"
 
 import "./cilium/CiliumClusterwideNetworkPolicy.pkl"
 import "./cilium/CiliumNetworkPolicy.pkl"
 
-local class Port {
-  port: Int
-  protocol: "TCP" | "UDP"
-}
-
-local function allowWorld(policyName: String, ns: String, appName: String, openPorts: Listing<Port>) = new CiliumNetworkPolicy {
-  metadata {
-    name = "allow-world-\(policyName)"
-    namespace = ns
-  }
-  spec {
-    endpointSelector { matchLabels { ["app.kubernetes.io/name"] = appName } }
-    ingress {
-      new {
-        fromEntities { "world" }
-        toPorts {
-          new {
-            ports {
-              for (p in openPorts) {
-                new Dynamic { port = p.port.toString(); protocol = p.protocol }
-              }
-            }
-          }
+/// "80/TCP"-style specs to a Cilium toPorts block.
+local function ports(specs: Listing<String>): Listing<Dynamic> = new Listing<Dynamic> {
+  new Dynamic {
+    ports = new Listing<Dynamic> {
+      for (s in specs) {
+        new Dynamic {
+          port = s.split("/")[0]
+          protocol = s.split("/")[1]
         }
       }
     }
   }
 }
 
+/// Endpoint selector for pods carrying `key=value` in namespace `ns`.
+local function pods(ns: String, key: String, value: String): Dynamic = new Dynamic {
+  matchLabels = new Dynamic {
+    ["k8s:io.kubernetes.pod.namespace"] = ns
+    [key] = value
+  }
+}
+
+/// Endpoint selector for every pod in namespace `ns`.
+local function namespace(ns: String): Dynamic = new Dynamic {
+  matchLabels = new Dynamic { ["k8s:io.kubernetes.pod.namespace"] = ns }
+}
+
+local function from(selector: Dynamic, portSpecs: Listing<String>): Dynamic = new Dynamic {
+  fromEndpoints = new Listing<Dynamic> { selector }
+  toPorts = ports(portSpecs)
+}
+
+local function to(selector: Dynamic, portSpecs: Listing<String>): Dynamic = new Dynamic {
+  toEndpoints = new Listing<Dynamic> { selector }
+  toPorts = ports(portSpecs)
+}
+
+local function fromEntity(entity: String, portSpecs: Listing<String>): Dynamic = new Dynamic {
+  fromEntities = new Listing<String> { entity }
+  toPorts = ports(portSpecs)
+}
+
+local function toEntity(entity: String, portSpecs: Listing<String>): Dynamic = new Dynamic {
+  toEntities = new Listing<String> { entity }
+  toPorts = ports(portSpecs)
+}
+
+local function toFqdns(names: Listing<String>, portSpecs: Listing<String>): Dynamic = new Dynamic {
+  toFQDNs = new Listing<Dynamic> {
+    for (n in names) {
+      if (n.contains("*")) new Dynamic { matchPattern = n } else new Dynamic { matchName = n }
+    }
+  }
+  toPorts = ports(portSpecs)
+}
+
+/// Game servers from components/MinecraftServer.pkl; they carry no shared label.
+local mcServers = new Dynamic {
+  matchExpressions = new Listing<Dynamic> {
+    new Dynamic { key = "k8s:io.kubernetes.pod.namespace"; operator = "In"; values = new Listing<String> { "minecraft" } }
+    new Dynamic { key = "app.kubernetes.io/name"; operator = "In"; values = new Listing<String> { "main"; "atm10"; "craftoria"; "vanilla-create" } }
+  }
+}
+local traefik = pods("traefik-system", "app.kubernetes.io/name", "traefik")
+local vmagent = pods("monitoring", "app.kubernetes.io/name", "vmagent")
+local api = toEntity("kube-apiserver", new Listing<String> { "6443/TCP" })
+local https = toEntity("world", new Listing<String> { "443/TCP" })
+local web = new Listing<String> { "80/TCP"; "443/TCP" }
+local dns = new Listing<String> { "53/UDP"; "53/TCP" }
+
+local function policy(
+  ns: String,
+  policyName: String,
+  selector: Dynamic,
+  ingressRules: Listing<Dynamic>,
+  egressRules: Listing<Dynamic>,
+) = new CiliumNetworkPolicy {
+  metadata {
+    name = policyName
+    namespace = ns
+  }
+  spec = new Dynamic {
+    endpointSelector = selector
+    when (!ingressRules.isEmpty) { ingress = ingressRules }
+    when (!egressRules.isEmpty) { egress = egressRules }
+  }
+}
+
+/// Pods of one namespace talk freely with each other; used where the namespace is one product (ArgoCD, Fission, the monitoring stack).
+local function sameNamespace(ns: String) = policy(
+  ns,
+  "allow-same-namespace",
+  new Dynamic {},
+  new Listing<Dynamic> { new Dynamic { fromEndpoints = new Listing<Dynamic> { namespace(ns) } } },
+  new Listing<Dynamic> { new Dynamic { toEndpoints = new Listing<Dynamic> { namespace(ns) } } },
+)
+
+local none = new Listing<Dynamic> {}
+
 resources {
+  // Selects every pod (but not Cilium's own health/host endpoints) and allows nothing, which turns on deny in both directions.
   new CiliumClusterwideNetworkPolicy {
-    metadata { name = "default-deny-world-ingress" }
-    spec {
-      endpointSelector {}
-      ingress {
-        new { fromEntities { "cluster" } }
+    metadata { name = "default-deny" }
+    spec = new Dynamic {
+      endpointSelector = new Dynamic {
+        matchExpressions = new Listing<Dynamic> {
+          new Dynamic {
+            key = "k8s:io.kubernetes.pod.namespace"
+            operator = "Exists"
+          }
+        }
+      }
+      ingress = new Listing<Dynamic> { new Dynamic {} }
+      egress = new Listing<Dynamic> { new Dynamic {} }
+    }
+  }
+  // Every pod resolves names; the DNS rule routes lookups through Cilium's proxy, which toFQDNs and Hubble need.
+  new CiliumClusterwideNetworkPolicy {
+    metadata { name = "allow-dns" }
+    spec = new Dynamic {
+      endpointSelector = new Dynamic {}
+      egress = new Listing<Dynamic> {
+        new Dynamic {
+          toEndpoints = new Listing<Dynamic> { pods("kube-system", "k8s-app", "kube-dns") }
+          toPorts = new Listing<Dynamic> {
+            new Dynamic {
+              ports = new Listing<Dynamic> { new Dynamic { port = "53"; protocol = "ANY" } }
+              rules = new Dynamic { dns = new Listing<Dynamic> { new Dynamic { matchPattern = "*" } } }
+            }
+          }
+        }
       }
     }
   }
-  allowWorld("http", "traefik-system", "traefik", new Listing<Port> {
-    new Port { port = 80; protocol = "TCP" }
-    new Port { port = 443; protocol = "TCP" }
-    new Port { port = 443; protocol = "UDP" }
-  })
-  allowWorld("java", "minecraft", "minecraft-router", new Listing<Port> {
-    new Port { port = 25565; protocol = "TCP" }
-    new Port { port = 24454; protocol = "UDP" }
-  })
-  allowWorld("bedrock", "minecraft", "geyser", new Listing<Port> {
-    new Port { port = 19132; protocol = "UDP" }
-  })
+  // Our public hostnames resolve to the node, which the load balancer turns into Traefik; reaching them is like reaching the internet.
+  new CiliumClusterwideNetworkPolicy {
+    metadata { name = "allow-public-ingress" }
+    spec = new Dynamic {
+      endpointSelector = new Dynamic {}
+      egress = new Listing<Dynamic> { to(traefik, web) }
+    }
+  }
+  // cert-manager's HTTP-01 solver pods appear in whichever namespace issues a certificate.
+  new CiliumClusterwideNetworkPolicy {
+    metadata { name = "allow-acme-http01-solver" }
+    spec = new Dynamic {
+      endpointSelector = new Dynamic { matchLabels = new Dynamic { ["acme.cert-manager.io/http01-solver"] = "true" } }
+      ingress = new Listing<Dynamic> { from(traefik, new Listing<String> { "8089/TCP" }) }
+    }
+  }
+
+  // kube-system: only the non-host-network pods.
+  policy("kube-system", "coredns", pods("kube-system", "k8s-app", "kube-dns"),
+    new Listing<Dynamic> {
+      new Dynamic { fromEntities = new Listing<String> { "cluster" }; toPorts = ports(dns) }
+      from(vmagent, new Listing<String> { "9153/TCP" })
+    },
+    new Listing<Dynamic> {
+      api
+      // Talos' host DNS forwarder lives on a link-local address Cilium counts as world.
+      toEntity("host", dns)
+      toEntity("world", dns)
+    },
+  )
+  // Resolves through the host (dnsPolicy Default, it has to run before CoreDNS), so Cilium never sees its lookups and toFQDNs can't apply.
+  policy("kube-system", "hcloud-cloud-controller-manager", pods("kube-system", "app.kubernetes.io/name", "hcloud-cloud-controller-manager"),
+    none,
+    new Listing<Dynamic> { api; toEntity("host", dns); toEntity("world", dns); https },
+  )
+  policy("kube-system", "cluster-autoscaler", pods("kube-system", "app.kubernetes.io/name", "hetzner-cluster-autoscaler"),
+    none,
+    new Listing<Dynamic> { api; toFqdns(new Listing<String> { "api.hetzner.cloud" }, new Listing<String> { "443/TCP" }) },
+  )
+
+  // traefik-system: the only door from the internet for HTTP; may reach any pod, the backends decide what they accept.
+  policy("traefik-system", "traefik", traefik,
+    new Listing<Dynamic> {
+      new Dynamic {
+        fromEntities = new Listing<String> { "world"; "cluster" }
+        toPorts = ports(new Listing<String> { "80/TCP"; "443/TCP"; "443/UDP" })
+      }
+    },
+    new Listing<Dynamic> { api; new Dynamic { toEntities = new Listing<String> { "cluster" } } },
+  )
+
+  // minecraft
+  policy("minecraft", "minecraft-router", pods("minecraft", "app.kubernetes.io/name", "minecraft-router"),
+    new Listing<Dynamic> {
+      new Dynamic {
+        fromEntities = new Listing<String> { "world" }
+        toPorts = ports(new Listing<String> { "25565/TCP"; "24454/UDP" })
+      }
+      from(pods("minecraft", "app.kubernetes.io/name", "geyser"), new Listing<String> { "25565/TCP" })
+    },
+    new Listing<Dynamic> {
+      to(mcServers, new Listing<String> { "25665/TCP"; "24454/UDP" })
+      to(pods("minecraft", "app.kubernetes.io/name", "mc-router-scaler"), new Listing<String> { "8080/TCP" })
+    },
+  )
+  policy("minecraft", "geyser", pods("minecraft", "app.kubernetes.io/name", "geyser"),
+    new Listing<Dynamic> { fromEntity("world", new Listing<String> { "19132/UDP" }) },
+    new Listing<Dynamic> {
+      to(pods("minecraft", "app.kubernetes.io/name", "minecraft-router"), new Listing<String> { "25565/TCP" })
+      // Xbox Live auth plus STUN for the Bedrock friends list.
+      toEntity("world", new Listing<String> { "443/TCP"; "3478/UDP"; "19302/UDP" })
+    },
+  )
+  policy("minecraft", "mc-router-scaler", pods("minecraft", "app.kubernetes.io/name", "mc-router-scaler"),
+    new Listing<Dynamic> { from(pods("minecraft", "app.kubernetes.io/name", "minecraft-router"), new Listing<String> { "8080/TCP" }) },
+    new Listing<Dynamic> { api },
+  )
+  policy("minecraft", "servers", mcServers,
+    new Listing<Dynamic> {
+      from(pods("minecraft", "app.kubernetes.io/name", "minecraft-router"), new Listing<String> { "25665/TCP"; "24454/UDP" })
+    },
+    // Mojang session servers and mod/pack downloads at startup.
+    new Listing<Dynamic> { toEntity("world", web) },
+  )
+
+  // emqx: devices come in through Traefik, mqtt2prometheus reads from inside.
+  policy("emqx", "emqx", pods("emqx", "app.kubernetes.io/name", "emqx"),
+    new Listing<Dynamic> {
+      from(traefik, new Listing<String> { "1883/TCP"; "8083/TCP"; "18083/TCP" })
+      from(pods("monitoring", "app.kubernetes.io/name", "mqtt2prometheus"), new Listing<String> { "1883/TCP" })
+    },
+    none,
+  )
+
+  // argocd
+  sameNamespace("argocd")
+  policy("argocd", "egress", new Dynamic {}, none, new Listing<Dynamic> { api; https })
+
+  // cert-manager
+  policy("cert-manager", "controllers", new Dynamic {},
+    new Listing<Dynamic> { fromEntity("kube-apiserver", new Listing<String> { "10250/TCP" }) },
+    new Listing<Dynamic> {
+      api
+      // ACME directory plus the DNS-01 self-check against authoritative nameservers.
+      toEntity("world", new Listing<String> { "443/TCP"; "53/UDP"; "53/TCP" })
+    },
+  )
+  policy("default", "cert-manager-lego-webhook", pods("default", "app", "cert-manager-lego-webhook"),
+    new Listing<Dynamic> { fromEntity("kube-apiserver", new Listing<String> { "8443/TCP" }) },
+    new Listing<Dynamic> { api; toEntity("world", new Listing<String> { "443/TCP"; "53/UDP"; "53/TCP" }) },
+  )
+
+  // default: websites behind Traefik; the ones on 8000 are Deno servers that fetch from GitHub.
+  for (app in List("hmsys-demo-page", "lucsoft-de", "webgen-material-web")) {
+    policy("default", app, pods("default", "app", app), new Listing<Dynamic> { from(traefik, new Listing<String> { "80/TCP" }) }, none)
+  }
+  policy("default", "a-game", pods("default", "app.kubernetes.io/name", "a-game"),
+    new Listing<Dynamic> { from(traefik, new Listing<String> { "80/TCP" }) },
+    none,
+  )
+  for (app in List("asset-pipeline", "pkl-helmchart", "pkl-packages")) {
+    policy("default", app, pods("default", "app.kubernetes.io/name", app),
+      new Listing<Dynamic> { from(traefik, new Listing<String> { "8000/TCP" }) },
+      new Listing<Dynamic> { https },
+    )
+  }
+  policy("default", "github-proxy", pods("default", "app", "github-proxy"),
+    new Listing<Dynamic> { from(traefik, new Listing<String> { "8001/TCP" }) },
+    new Listing<Dynamic> { toFqdns(new Listing<String> { "raw.githubusercontent.com" }, new Listing<String> { "443/TCP" }) },
+  )
+
+  // fission
+  sameNamespace("fission")
+  policy("fission", "router", pods("fission", "svc", "router"),
+    new Listing<Dynamic> { from(traefik, new Listing<String> { "8888/TCP" }) },
+    none,
+  )
+  policy("fission", "webhook", pods("fission", "svc", "webhook-service"),
+    new Listing<Dynamic> { fromEntity("kube-apiserver", new Listing<String> { "9443/TCP" }) },
+    none,
+  )
+  policy("fission", "egress", new Dynamic {}, none, new Listing<Dynamic> { api; https })
+
+  // monitoring
+  sameNamespace("monitoring")
+  policy("monitoring", "egress", new Dynamic {}, none, new Listing<Dynamic> { api })
+  policy("monitoring", "grafana", pods("monitoring", "app.kubernetes.io/name", "grafana"),
+    new Listing<Dynamic> { from(traefik, new Listing<String> { "3000/TCP" }) },
+    // Plugin and dashboard downloads from grafana.com.
+    new Listing<Dynamic> { https },
+  )
+  // The chart's sync job pulls its dashboard and rule sources from GitHub.
+  policy("monitoring", "sync-job", pods("monitoring", "app.kubernetes.io/component", "syncJob"),
+    none,
+    new Listing<Dynamic> { toFqdns(new Listing<String> { "raw.githubusercontent.com" }, new Listing<String> { "443/TCP" }) },
+  )
+  policy("monitoring", "vmauth-vm-push", pods("monitoring", "app.kubernetes.io/name", "vmauth"),
+    new Listing<Dynamic> { from(traefik, new Listing<String> { "8427/TCP" }) },
+    none,
+  )
+  policy("monitoring", "victoria-metrics-operator", pods("monitoring", "app.kubernetes.io/name", "victoria-metrics-operator"),
+    new Listing<Dynamic> { fromEntity("kube-apiserver", new Listing<String> { "9443/TCP" }) },
+    none,
+  )
+  policy("monitoring", "vmagent", vmagent,
+    none,
+    new Listing<Dynamic> {
+      // kubelet and node-exporter on every node.
+      new Dynamic {
+        toEntities = new Listing<String> { "host"; "remote-node" }
+        toPorts = ports(new Listing<String> { "10250/TCP"; "9100/TCP" })
+      }
+      to(pods("kube-system", "k8s-app", "kube-dns"), new Listing<String> { "9153/TCP" })
+    },
+  )
+  policy("monitoring", "mqtt2prometheus", pods("monitoring", "app.kubernetes.io/name", "mqtt2prometheus"),
+    none,
+    new Listing<Dynamic> { to(pods("emqx", "app.kubernetes.io/name", "emqx"), new Listing<String> { "1883/TCP" }) },
+  )
+
+  // sops: decrypts with Google Cloud KMS.
+  policy("sops", "sops-secrets-operator", new Dynamic {},
+    none,
+    new Listing<Dynamic> { api; toFqdns(new Listing<String> { "*.googleapis.com" }, new Listing<String> { "443/TCP" }) },
+  )
+
+  // local-path-storage: the provisioner only talks to the API; its helper pods need no network.
+  policy("local-path-storage", "local-path-provisioner", new Dynamic {}, none, new Listing<Dynamic> { api })
+
+  // trusted: the Payback check, three times a week.
+  policy("trusted", "payback", new Dynamic {}, none, new Listing<Dynamic> { toEntity("world", web) })
 }
