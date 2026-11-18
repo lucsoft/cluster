@@ -24,7 +24,7 @@ local function allowWorld(policyName: String, ns: String, appName: String, openP
           new {
             ports {
               for (p in openPorts) {
-                new { port = p.port.toString(); protocol = p.protocol }
+                new Dynamic { port = p.port.toString(); protocol = p.protocol }
               }
             }
           }
@@ -44,16 +44,16 @@ resources {
       }
     }
   }
-  allowWorld("http", "traefik-system", "traefik", new {
-    new { port = 80; protocol = "TCP" }
-    new { port = 443; protocol = "TCP" }
-    new { port = 443; protocol = "UDP" }
+  allowWorld("http", "traefik-system", "traefik", new Listing<Port> {
+    new Port { port = 80; protocol = "TCP" }
+    new Port { port = 443; protocol = "TCP" }
+    new Port { port = 443; protocol = "UDP" }
   })
-  allowWorld("java", "minecraft", "minecraft-router", new {
-    new { port = 25565; protocol = "TCP" }
-    new { port = 24454; protocol = "UDP" }
+  allowWorld("java", "minecraft", "minecraft-router", new Listing<Port> {
+    new Port { port = 25565; protocol = "TCP" }
+    new Port { port = 24454; protocol = "UDP" }
   })
-  allowWorld("bedrock", "minecraft", "geyser", new {
-    new { port = 19132; protocol = "UDP" }
+  allowWorld("bedrock", "minecraft", "geyser", new Listing<Port> {
+    new Port { port = 19132; protocol = "UDP" }
   })
 }
