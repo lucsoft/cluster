@@ -24,11 +24,10 @@ sources {
       releaseName = "cluster-autoscaler"
       valuesObject = new Values {
         cloudProvider = "hetzner"
-        // The chart's default tag tracks the newest minor (1.35), which would run ahead of this
-        // cluster's 1.34.2 API server. Cluster Autoscaler is only supported on a matching minor.
+        // Cluster Autoscaler is only supported on the cluster's minor, and the chart's default tag tracks the newest one.
         image {
           // renovate: datasource=github-releases packageName=kubernetes/autoscaler versioning=loose
-          tag = "v1.34.5"
+          tag = "v1.36.2"
         }
         // Only the sizing half of each pool; labels, taints and the Talos patch are the sealing
         // tool's business, and the chart has nowhere to put them.
