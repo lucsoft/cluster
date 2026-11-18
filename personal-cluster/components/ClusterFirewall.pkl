@@ -1,0 +1,59 @@
+/// Pods have public IPv6 addresses, so nothing is reachable from outside the cluster unless a policy here opens it.
+/// The Hetzner Cloud Firewall is the coarse filter in front; these decide which pod actually gets the traffic.
+amends "@Resource/Entrypoint.pkl"
+
+import "./cilium/CiliumClusterwideNetworkPolicy.pkl"
+import "./cilium/CiliumNetworkPolicy.pkl"
+
+local class Port {
+  port: Int
+  protocol: "TCP" | "UDP"
+}
+
+local function allowWorld(policyName: String, ns: String, appName: String, openPorts: Listing<Port>) = new CiliumNetworkPolicy {
+  metadata {
+    name = "allow-world-\(policyName)"
+    namespace = ns
+  }
+  spec {
+    endpointSelector { matchLabels { ["app.kubernetes.io/name"] = appName } }
+    ingress {
+      new {
+        fromEntities { "world" }
+        toPorts {
+          new {
+            ports {
+              for (p in openPorts) {
+                new { port = p.port.toString(); protocol = p.protocol }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+resources {
+  new CiliumClusterwideNetworkPolicy {
+    metadata { name = "default-deny-world-ingress" }
+    spec {
+      endpointSelector {}
+      ingress {
+        new { fromEntities { "cluster" } }
+      }
+    }
+  }
+  allowWorld("http", "traefik-system", "traefik", new {
+    new { port = 80; protocol = "TCP" }
+    new { port = 443; protocol = "TCP" }
+    new { port = 443; protocol = "UDP" }
+  })
+  allowWorld("java", "minecraft", "minecraft-router", new {
+    new { port = 25565; protocol = "TCP" }
+    new { port = 24454; protocol = "UDP" }
+  })
+  allowWorld("bedrock", "minecraft", "geyser", new {
+    new { port = 19132; protocol = "UDP" }
+  })
+}

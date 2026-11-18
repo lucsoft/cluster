@@ -48,8 +48,7 @@ local secretsText = read?("../../.out/secrets.yaml")?.text ??
 local secrets = parser.parse(secretsText) as Dynamic
 
 // ---- Talos worker machine config ----------------------------------------
-/// Documents appended after the v1alpha1 one. `talosctl gen config --with-kubespan` emits the first
-/// two; ZswapConfig matches talos/all/40-zswap.yaml, UnattendedInstallConfig is the control plane's.
+/// Documents appended after the v1alpha1 one. ZswapConfig matches talos/all/40-zswap.yaml, UnattendedInstallConfig is the control plane's.
 local extraDocuments: Listing<Dynamic> = new {
   new {
     apiVersion = "v1alpha1"
@@ -57,11 +56,6 @@ local extraDocuments: Listing<Dynamic> = new {
     // Talos still prefers the hcloud platform's hostname (the server name), which is what lets the
     // autoscaler match a Node to its server; `stable` is only the fallback.
     auto = "stable"
-  }
-  new {
-    apiVersion = "v1alpha1"
-    kind = "KubeSpanConfig"
-    enabled = true
   }
   new {
     apiVersion = "v1alpha1"
@@ -89,6 +83,10 @@ local function machineConfig(pool: ClusterAutoscalerPools.Pool) = new Dynamic {
       extraConfig = pool.kubeletExtraConfig
       defaultRuntimeSeccompProfileEnabled = true
       disableManifestsDirectory = true
+      // Both public addresses; the Talos CCM takes the node's /64 from the v6 one (matches talos/all/10-network.yaml).
+      nodeIP {
+        validSubnets { "0.0.0.0/0"; "::/0" }
+      }
     }
     features {
       diskQuotaSupport = true
@@ -112,16 +110,17 @@ local function machineConfig(pool: ClusterAutoscalerPools.Pool) = new Dynamic {
     clusterName = topf.clusterName
     network {
       dnsDomain = "cluster.local"
-      podSubnets = new Listing { "10.244.0.0/16" }
-      serviceSubnets = new Listing { "10.96.0.0/12" }
+      podSubnets = new Listing { "10.244.0.0/16"; "fd00:10:244::/64" }
+      serviceSubnets = new Listing { "10.96.0.0/12"; "fd00:10:96::/112" }
+      // Cilium (apps/InfraCilium.pkl) is the CNI.
+      cni { name = "none" }
     }
     token = secrets.secrets.bootstraptoken
     ca {
       crt = secrets.certs.k8s.crt
       key = ""
     }
-    // Only the Service registry distributes KubeSpan peers; the Kubernetes one is disabled to match
-    // what `talosctl gen config --with-kubespan` produces.
+    // Kept from the KubeSpan days; harmless and lets talosctl list cluster members.
     discovery {
       enabled = true
       registries {
@@ -131,11 +130,7 @@ local function machineConfig(pool: ClusterAutoscalerPools.Pool) = new Dynamic {
         service {}
       }
     }
-    // Deliberately the opposite of the control plane's patch in talos/all/10-external-cloud-provider.yaml. `true` makes the
-    // kubelet register with --cloud-provider=external, which taints the node
-    // node.cloudprovider.kubernetes.io/uninitialized:NoSchedule until a CCM clears it. No hcloud CCM
-    // runs here, so the taint would never lift: the autoscaler would boot nodes, watch the pods stay
-    // Pending, and boot more. Flip this the day CCM is deployed.
+    // Off like on the control plane: no CCM initialises nodes, the kubelet sets its addresses itself.
     externalCloudProvider {
       enabled = false
     }

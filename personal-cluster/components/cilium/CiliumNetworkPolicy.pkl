@@ -1,0 +1,14 @@
+/// Minimal typing for cilium.io/v2 CiliumNetworkPolicy; the rule schema stays Dynamic.
+module io.cilium.v2.CiliumNetworkPolicy
+
+extends "@k8s/K8sResource.pkl"
+
+import "@k8s/apimachinery/pkg/apis/meta/v1/ObjectMeta.pkl"
+
+fixed apiVersion: "cilium.io/v2"
+
+fixed kind: "CiliumNetworkPolicy"
+
+metadata: ObjectMeta?
+
+spec: Dynamic?

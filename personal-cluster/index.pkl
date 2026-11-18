@@ -6,12 +6,14 @@ import "./apps/Andromeda.pkl"
 import "./apps/ArgoCD.pkl"
 import "./apps/Emqx.pkl"
 import "./apps/InfraCertManager.pkl"
+import "./apps/InfraCilium.pkl"
 import "./apps/InfraClusterAutoscaler.pkl"
 import "./apps/InfraEnvoyGateway.pkl"
 import "./apps/InfraFission.pkl"
 import "./apps/InfraHetznerCCM.pkl"
 import "./apps/InfraIngressController.pkl"
 import "./apps/InfraSopsOperator.pkl"
+import "./apps/InfraTalosCCM.pkl"
 import "./apps/MinecraftBedrockRelay.pkl"
 import "./apps/MinecraftServer.pkl"
 import "./apps/Monitoring.pkl"
@@ -42,6 +44,8 @@ local apps: Listing<App> = new {
   }
   ArgoCD
   InfraCertManager
+  InfraCilium
+  InfraTalosCCM
   InfraClusterAutoscaler
   InfraHetznerCCM
   InfraIngressController

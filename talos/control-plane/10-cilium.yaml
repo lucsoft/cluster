@@ -1,0 +1,17 @@
+# Cilium does kube-proxy's job, and the Talos CCM (not KCM) hands out pod CIDRs.
+apiVersion: v1alpha1
+kind: KubeProxyConfig
+enabled: false
+---
+apiVersion: v1alpha1
+kind: KubeControllerManagerConfig
+extraArgs:
+  controllers: "*,tokencleaner,-node-ipam-controller"
+---
+# The Talos CCM asks the Talos API which /64 a node's v6 address lives in.
+machine:
+  features:
+    kubernetesTalosAPIAccess:
+      enabled: true
+      allowedRoles: [os:reader]
+      allowedKubernetesNamespaces: [kube-system]

@@ -1,0 +1,15 @@
+# Cilium replaces flannel; pods get a v4 from 10.244/16 and a v6 /80 from the node's Hetzner /64 (fd00 is only the Talos CCM fallback).
+apiVersion: v1alpha1
+kind: KubeNetworkConfig
+podSubnets: [10.244.0.0/16, fd00:10:244::/64]
+serviceSubnets: [10.96.0.0/12, fd00:10:96::/112]
+---
+# Without a cloud-node controller the kubelet sets both public addresses itself; the Talos CCM reads the v6 from there.
+apiVersion: v1alpha1
+kind: KubeNodeConfig
+nodeIP:
+  validSubnets: [0.0.0.0/0, "::/0"]
+---
+apiVersion: v1alpha1
+kind: KubeFlannelCNIConfig
+$patch: delete

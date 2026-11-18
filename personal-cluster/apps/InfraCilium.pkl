@@ -1,0 +1,67 @@
+/// Cilium as CNI and kube-proxy replacement: native routing with pod IPv6s from each node's Hetzner /64 (no NAT), IPv4 masqueraded.
+/// Node-to-node traffic goes through WireGuard since autoscaled workers only share the public internet with the control plane.
+amends "@ArgoCD/App.pkl"
+
+name = "infra-cilium"
+namespace = "kube-system"
+
+sources {
+  new {
+    repoURL = "https://helm.cilium.io"
+    chart = "cilium"
+    targetRevision = "1.20.5"
+    helm {
+      releaseName = "cilium"
+      valuesObject = new Dynamic {
+        ipam { mode = "kubernetes" }
+        ipv4 { enabled = true }
+        ipv6 { enabled = true }
+        routingMode = "native"
+        ipv4NativeRoutingCIDR = "10.244.0.0/16"
+        enableIPv4Masquerade = true
+        enableIPv6Masquerade = false
+        bpf { masquerade = true }
+        encryption {
+          enabled = true
+          type = "wireguard"
+          nodeEncryption = true
+        }
+        kubeProxyReplacement = true
+        // KubePrism: there is no kube-proxy to reach the API through the Service IP.
+        k8sServiceHost = "localhost"
+        k8sServicePort = 7445
+        operator { replicas = 1 }
+        // Talos mounts cgroupv2 itself and doesn't allow SYS_MODULE.
+        securityContext {
+          capabilities {
+            ciliumAgent { "CHOWN"; "KILL"; "NET_ADMIN"; "NET_RAW"; "IPC_LOCK"; "SYS_ADMIN"; "SYS_RESOURCE"; "DAC_OVERRIDE"; "FOWNER"; "SETGID"; "SETUID" }
+            cleanCiliumState { "NET_ADMIN"; "SYS_ADMIN"; "SYS_RESOURCE" }
+          }
+        }
+        cgroup {
+          autoMount { enabled = false }
+          hostRoot = "/sys/fs/cgroup"
+        }
+        extraConfig {
+          // Pod IPv4s aren't routable between Hetzner nodes, so SNAT pod traffic to other nodes' host IPs too.
+          ["enable-remote-node-masquerade"] = "true"
+          // Default opts the control plane out of node encryption, but it runs workloads; an empty value would opt out every node.
+          ["node-encryption-opt-out-labels"] = "hmsys.de/wireguard-opt-out"
+        }
+      }
+    }
+  }
+  new {
+    repoURL = "https://github.com/lucsoft/cluster"
+    targetRevision = "main"
+    path = "personal-cluster"
+    plugin {
+      parameters {
+        new {
+          name = "path"
+          string = "components/ClusterFirewall.pkl"
+        }
+      }
+    }
+  }
+}

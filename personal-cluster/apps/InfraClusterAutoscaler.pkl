@@ -51,10 +51,11 @@ sources {
           // Minutes to wait for a server to come up. The default 5 is tight for a Talos boot
           // that has to pull the kubelet image before it can register.
           ["HCLOUD_SERVER_CREATION_TIMEOUT"] = "10"
-          // No hcloud private network on this cluster, so nodes talk over their public IPs and
-          // KubeSpan (WireGuard) encrypts everything between them.
+          // No hcloud private network: nodes talk over their public IPs, Cilium's WireGuard encrypts it, and the /64 feeds pod IPv6s.
           ["HCLOUD_PUBLIC_IPV4"] = "true"
           ["HCLOUD_PUBLIC_IPV6"] = "true"
+          // Same perimeter as the control plane; without it a new worker exposes the Talos API and kubelet to the internet.
+          ["HCLOUD_FIREWALL"] = "firewall-1"
         }
         extraEnvSecrets {
           ["HCLOUD_TOKEN"] {

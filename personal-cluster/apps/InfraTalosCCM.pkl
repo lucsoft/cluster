@@ -1,0 +1,37 @@
+/// Talos CCM reduced to node IPAM: carves each node's pod CIDR from its own Hetzner /64 (a /80) plus a v4 /24.
+/// Runs as a hostNetwork DaemonSet on the control plane because Cilium can't start before the CIDR exists.
+amends "@ArgoCD/App.pkl"
+
+name = "infra-talos-ccm"
+namespace = "kube-system"
+
+source {
+  repoURL = "ghcr.io/siderolabs/charts"
+  chart = "talos-cloud-controller-manager"
+  targetRevision = "0.5.8"
+  helm {
+    releaseName = "talos-ccm"
+    valuesObject = new Dynamic {
+      enabledControllers { "node-ipam-controller" }
+      extraArgs {
+        "--allocate-node-cidrs"
+        "--cidr-allocator-type=CloudAllocator"
+        // Must match KubeNetworkConfig in talos/all/10-network.yaml; v6 is only the fallback and at most 16 bits wider than the /80.
+        "--cluster-cidr=10.244.0.0/16,fd00:10:244::/64"
+        "--node-cidr-mask-size-ipv4=24"
+        "--node-cidr-mask-size-ipv6=80"
+      }
+      // Must run before any CNI is ready, including through Cilium's agent-not-ready taint, or nothing ever gets a pod CIDR.
+      tolerations {
+        new { operator = "Exists" }
+      }
+      daemonSet {
+        enabled = true
+        k8s {
+          serviceHost = "127.0.0.1"
+          servicePort = 7445
+        }
+      }
+    }
+  }
+}
