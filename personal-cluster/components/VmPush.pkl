@@ -99,6 +99,26 @@ resources {
       }
     }
   }
+  new VMUser {
+    metadata {
+      name = "\(appName)-esp-lcd"
+      namespace = appNamespace
+      labels {
+        ["app.kubernetes.io/name"] = appName
+      }
+    }
+    spec {
+      name = "esp-lcd"
+      // ESPHome on the ESP32-C6 with the ST7920 LCD: room thermometers it hears over BLE.
+      tokenRef {
+        name = authSecret
+        key = "esp-lcd-token"
+      }
+      targetRefs {
+        vmsingleRef
+      }
+    }
+  }
   new Ingress {
     metadata {
       name = appName
