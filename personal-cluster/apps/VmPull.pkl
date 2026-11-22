@@ -1,0 +1,31 @@
+/// vmauth query endpoint for clients outside the cluster that read metrics. Separate from the
+/// `monitoring` app so a broken query token can't block a sync of the whole stack.
+amends "@ArgoCD/App.pkl"
+
+name = "vm-pull"
+namespace = "monitoring"
+
+sources {
+  new {
+    repoURL = "https://github.com/lucsoft/cluster"
+    targetRevision = "main"
+    path = "personal-cluster"
+    plugin {
+      parameters {
+        new {
+          name = "path"
+          string = "components/VmPull.pkl"
+        }
+      }
+    }
+  }
+  // Per-device query tokens; decrypted in-cluster by sops-secrets-operator.
+  new {
+    repoURL = "https://github.com/lucsoft/cluster"
+    targetRevision = "main"
+    path = "personal-cluster/secrets"
+    directory {
+      include = "vm-pull-auth.sops.yaml"
+    }
+  }
+}

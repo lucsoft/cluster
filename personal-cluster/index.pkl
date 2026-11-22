@@ -22,6 +22,7 @@ import "./apps/PklHelmchart.pkl"
 import "./apps/PklPackages.pkl"
 import "./apps/Porffor.pkl"
 import "./apps/Satisfactory.pkl"
+import "./apps/VmPull.pkl"
 import "./apps/VmPush.pkl"
 
 local apps: Listing<App> = new {
@@ -63,6 +64,7 @@ local apps: Listing<App> = new {
   Monitoring
   Mqtt2Prometheus
   VmPush
+  VmPull
 }
 
 resources {

@@ -1,0 +1,133 @@
+/// Public read-only metrics endpoint: vmauth in front of the VMSingle that
+/// apps/Monitoring.pkl deploys, so devices outside the cluster can show values from
+/// VictoriaMetrics without a tunnel. The read-side twin of components/VmPush.pkl.
+///
+/// Each VMUser is scoped to the instant query path, so a leaked token can read current
+/// values and nothing else — no range queries, no series or label enumeration, no
+/// writes, no admin endpoints.
+///
+/// A separate vmauth from vm-push rather than a second route on it, so read and write
+/// tokens never share a config and either side can be torn down alone.
+///
+/// Tokens come from the `vm-pull-auth` Secret sealed in secrets/vm-pull-auth.sops.yaml,
+/// applied by the second source of apps/VmPull.pkl.
+amends "@Resource/Entrypoint.pkl"
+
+import "@VictoriaMetrics/VMAuth.pkl"
+import "@VictoriaMetrics/VMUser.pkl"
+import "@k8s/api/networking/v1/Ingress.pkl"
+
+local appName = "vm-pull"
+local appNamespace = "monitoring"
+
+local hostName = "vm-pull.lucsoft.de"
+
+// Same port as vm-push, so the vmauth policy in ClusterFirewall.pkl covers both.
+local vmauthPort = 8427
+
+// Instant queries only: enough to put a current value on a display.
+local queryPath = "/api/v1/query"
+
+local authSecret = "vm-pull-auth"
+
+// `<release>-<chart>`, the name victoria-metrics-k8s-stack gives its VMSingle CR under the
+// `monitoring` release name set in apps/Monitoring.pkl.
+local vmsingle = "monitoring-victoria-metrics-k8s-stack"
+
+local vmsingleRef: VMUser.TargetRef = new {
+  crd {
+    kind = "VMSingle"
+    name = vmsingle
+    namespace = appNamespace
+  }
+  paths {
+    queryPath
+  }
+}
+
+resources {
+  new VMAuth {
+    metadata {
+      name = appName
+      namespace = appNamespace
+    }
+    spec {
+      port = vmauthPort.toString()
+      replicaCount = 1
+      // Only the VMUsers below; see components/VmPush.pkl for why not selectAllByDefault.
+      userSelector {
+        matchLabels {
+          ["app.kubernetes.io/name"] = appName
+        }
+      }
+      useStrictSecurity = true
+      resources {
+        requests {
+          ["memory"] = "64Mi"
+          ["cpu"] = "10m"
+        }
+      }
+    }
+  }
+  new VMUser {
+    metadata {
+      name = "\(appName)-esp-lcd"
+      namespace = appNamespace
+      labels {
+        ["app.kubernetes.io/name"] = appName
+      }
+    }
+    spec {
+      name = "esp-lcd"
+      // ESPHome on the ESP32-C6 with the ST7920 LCD; sends `Authorization: Bearer <token>`.
+      tokenRef {
+        name = authSecret
+        key = "esp-lcd-token"
+      }
+      targetRefs {
+        vmsingleRef
+      }
+    }
+  }
+  new Ingress {
+    metadata {
+      name = appName
+      namespace = appNamespace
+    }
+    spec {
+      ingressClassName = "traefik"
+      // The wildcard minted by the Grafana Ingress; see components/VmPush.pkl.
+      tls {
+        new {
+          hosts {
+            "*.lucsoft.de"
+            "lucsoft.de"
+          }
+          secretName = "lucsoft-tls"
+        }
+      }
+      rules {
+        new {
+          host = hostName
+          http {
+            paths {
+              // Exact, so not even /api/v1/query_range reaches vmauth.
+              new {
+                path = queryPath
+                pathType = "Exact"
+                backend {
+                  service {
+                    name = "vmauth-\(appName)"
+                    port {
+                      number = vmauthPort
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

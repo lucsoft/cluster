@@ -296,7 +296,8 @@ resources {
     none,
     new Listing<Dynamic> { toFqdns(new Listing<String> { "raw.githubusercontent.com" }, new Listing<String> { "443/TCP" }) },
   )
-  policy("monitoring", "vmauth-vm-push", pods("monitoring", "app.kubernetes.io/name", "vmauth"),
+  // vm-push and vm-pull both listen on 8427.
+  policy("monitoring", "vmauth", pods("monitoring", "app.kubernetes.io/name", "vmauth"),
     new Listing<Dynamic> { from(traefik, new Listing<String> { "8427/TCP" }) },
     none,
   )
